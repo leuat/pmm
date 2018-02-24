@@ -117,6 +117,10 @@ public:
 
     float Execute() override {
         QString varName = ((Var*)m_left)->value;
+        if (!Syntax::s.globals.contains(varName)) {
+            qDebug() << "Error assigning undeclared variable: " << varName;
+            exit(1);
+        }
         Syntax::s.globals[varName] = m_right->Execute();
     }
 

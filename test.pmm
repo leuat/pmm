@@ -1,7 +1,7 @@
 PROGRAM Part10AST;
 VAR
    a, b : INTEGER;
-   y    : REAL;
+   y,x,k,z    : REAL;
 
 BEGIN {Part10AST}
    a := 2;
@@ -9,4 +9,6 @@ BEGIN {Part10AST}
    y := 20 / 7 + 3;
    x := 10;
    k := x;
+   z := k*x;
+
 END.  {Part10AST}

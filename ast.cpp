@@ -178,10 +178,12 @@ QVector<Node*> Parser::Declarations()
 QVector<Node *> Parser::VariableDeclarations()
 {
     QVector<Node*> vars;
+    vars.append(new Var(m_currentToken));
     Eat(TokenType::ID);
 
     while (m_currentToken.m_type == TokenType::COMMA) {
         Eat(TokenType::COMMA);
+        //qDebug() << "Adding new " << m_currentToken.m_value;
         vars.append(new Var(m_currentToken));
         Eat(TokenType::ID);
     }
@@ -201,7 +203,6 @@ Node *Parser::TypeSpec()
     Token t = m_currentToken;
     if (m_currentToken.m_type == TokenType::INTEGER) {
         Eat(TokenType::INTEGER);
-        qDebug() << "OM NOM INTEGER " << t.m_value;
     }
     else
         Eat(TokenType::REAL);

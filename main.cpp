@@ -57,7 +57,9 @@ void ParseFile(QString fileName) {
     qDebug() << result;
     qDebug() <<" a: " << Syntax::s.globals["a"];
     qDebug() <<" b: " << Syntax::s.globals["b"];
-    qDebug() <<" c: " << Syntax::s.globals["y"];
+    qDebug() <<" y: " << Syntax::s.globals["y"];
+    qDebug() <<" k: " << Syntax::s.globals["k"];
+    qDebug() <<" z: " << Syntax::s.globals["z"];
 
 }
 
