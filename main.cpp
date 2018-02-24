@@ -13,8 +13,8 @@ void TestSingleLine() {
     QString text = "";
     while (text!="q") {
         text = s.readLine();
-
-        Lexer lexer = Lexer(text);
+        QStringList lst;
+        Lexer lexer = Lexer(text, lst);
         Parser parser = Parser(lexer);
 
         Interpreter interpreter = Interpreter(parser);
@@ -25,7 +25,7 @@ void TestSingleLine() {
 
 }
 
-QString ReadFile(QString fileName) {
+QString ReadFile(QString fileName, QStringList& lst) {
     if (!QFile::exists(fileName)) {
         qDebug() << "Cannot open file: " << fileName;
         exit(1);
@@ -36,7 +36,9 @@ QString ReadFile(QString fileName) {
 
     QString text = "";
     while(!in.atEnd()) {
-        text += in.readLine() + "\n";
+        QString t = in.readLine();
+        text += t;
+        lst<<t;
     }
 
     file.close();
@@ -46,15 +48,16 @@ QString ReadFile(QString fileName) {
 
 
 void ParseFile(QString fileName) {
-    QString text = ReadFile(fileName);
-    Lexer lexer = Lexer(text);
+    QStringList lst;
+    QString text = ReadFile(fileName, lst);
+    Lexer lexer = Lexer(text, lst);
     Parser parser = Parser(lexer);
     Interpreter interpreter = Interpreter(parser);
     float result = interpreter.Interpret();
     qDebug() << result;
     qDebug() <<" a: " << Syntax::s.globals["a"];
     qDebug() <<" b: " << Syntax::s.globals["b"];
-    qDebug() <<" c: " << Syntax::s.globals["c"];
+    qDebug() <<" c: " << Syntax::s.globals["y"];
 
 }
 

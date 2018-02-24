@@ -6,7 +6,11 @@
 
 class TokenType {
 public:
-    enum Type {INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, TEOF, ID, ASSIGN, BEGIN, END, SEMI, DOT};
+    enum Type {
+        INTEGER, PLUS, MINUS, MUL, DIV, LPAREN,
+        RPAREN, TEOF, ID, ASSIGN, BEGIN,
+        END, SEMI, DOT, VAR, REAL,
+        PROGRAM, COLON, COMMA, INTEGER_CONST, REAL_CONST};
     QString m_value;
     Type m_type;
     TokenType() {}

@@ -16,7 +16,7 @@ void Parser::Eat(TokenType::Type t)
         m_currentToken = m_lexer.GetNextToken();
     }
     else
-        Error("Parser::Eat : Could not find token type '" + QString::number(t) + "'");
+        Error("Parser::Eat : Could not find token type '" + QString::number(t) + "'" + "with current "+QString::number(m_currentToken.m_type));
 }
 
 Node *Parser::Variable()
@@ -93,9 +93,17 @@ Node *Parser::CompoundStatement()
 
 Node *Parser::Program()
 {
-    Node* n = CompoundStatement();
+//    Node* n = CompoundStatement();
+    Eat(TokenType::PROGRAM);
+    Var* varNode = (Var*)Variable();
+    QString progName = varNode->value;
+    qDebug() << "Program name" << progName;
+    Eat(TokenType::SEMI);
+    BlockNode* block = (BlockNode*)Block();
+    ProgramNode* program = new ProgramNode(progName, block);
     Eat(TokenType::DOT);
-    return n;
+
+    return program;
 }
 
 
@@ -103,8 +111,8 @@ Node *Parser::Program()
 Node* Parser::Factor()
 {
     Token t = m_currentToken;
-    if (t.m_type == TokenType::INTEGER) {
-        Eat(TokenType::INTEGER);
+    if (t.m_type == TokenType::INTEGER_CONST || t.m_type ==TokenType::REAL_CONST) {
+        Eat(t.m_type);
         return new NodeNumber(t, t.m_intVal);
     }
 
@@ -145,6 +153,61 @@ Node* Parser::Parse()
         Error("End of file error");
 
     return root;
+}
+
+Node *Parser::Block()
+{
+    return new BlockNode(Declarations(), CompoundStatement());
+}
+
+QVector<Node*> Parser::Declarations()
+{
+    QVector<Node*> decl;
+    if (m_currentToken.m_type==TokenType::VAR) {
+        Eat(TokenType::VAR);
+        while (m_currentToken.m_type==TokenType::ID) {
+            QVector<Node*> ns = VariableDeclarations();
+            for (Node* n: ns)
+                decl.append(n);
+            Eat(TokenType::SEMI);
+        }
+    }
+    return decl;
+}
+
+QVector<Node *> Parser::VariableDeclarations()
+{
+    QVector<Node*> vars;
+    Eat(TokenType::ID);
+
+    while (m_currentToken.m_type == TokenType::COMMA) {
+        Eat(TokenType::COMMA);
+        vars.append(new Var(m_currentToken));
+        Eat(TokenType::ID);
+    }
+    Eat(TokenType::COLON);
+
+    for (Node* v: vars) {
+        Syntax::s.globals[((Var*)v)->value] = 0;
+    }
+
+    vars.insert(0, TypeSpec());
+
+    return vars;
+}
+
+Node *Parser::TypeSpec()
+{
+    Token t = m_currentToken;
+    if (m_currentToken.m_type == TokenType::INTEGER) {
+        Eat(TokenType::INTEGER);
+        qDebug() << "OM NOM INTEGER " << t.m_value;
+    }
+    else
+        Eat(TokenType::REAL);
+
+    return new VarType(t);
+
 }
 
 Node* Parser::Expr()

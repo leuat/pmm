@@ -8,21 +8,28 @@ Lexer::Lexer()
 
 void Lexer::Error(QString text)
 {
-    qDebug() << "Error parsing: " << text;
+    qDebug() << "Error parsing: " << text << " on line " << m_lineNumber;
+    qDebug() << m_lines[m_lineNumber];
     exit(1);
 }
 
 void Lexer::Advance()
 {
     m_pos++;
+    m_localPos++;
     if (m_pos>m_text.length()-1) {
         m_finished = true;
     }
     else {
         m_currentChar = m_text[m_pos];
-        if (m_currentChar=="\n") {
-            m_lineNumber++;
+        if (m_localPos>=m_lines[m_lineNumber].length()) {
+            m_lineNumber ++;
+            m_localPos = 0;
         }
+
+        //if (m_currentChar=="\n") {
+        //    m_lineNumber++;
+        //}
 
     }
 
@@ -34,14 +41,30 @@ void Lexer::SkipWhiteSpace()
         Advance();
 }
 
-int Lexer::Integer()
+void Lexer::SkipComment()
+{
+    while (m_currentChar!= "}")
+        Advance();
+    Advance();
+}
+
+Token Lexer::Number()
 {
     QString res="";
     while (!m_finished && Syntax::s.digit.contains(m_currentChar)) {
         res+=m_currentChar;
         Advance();
     }
-    return res.toInt();
+    if (m_currentChar==".") {
+        res+=m_currentChar;
+        Advance();
+        while (!m_finished && Syntax::s.digit.contains(m_currentChar)) {
+            res+=m_currentChar;
+            Advance();
+        }
+        return Token(TokenType::REAL_CONST, res.toFloat());
+    }
+    return Token(TokenType::INTEGER_CONST, res.toFloat());
 
 }
 
@@ -66,21 +89,44 @@ QString Lexer::peek()
 Token Lexer::GetNextToken()
 {
     while (!m_finished) {
-        if (m_currentChar==" " || m_currentChar=="\n")
+
+
+        if (m_currentChar==" " || m_currentChar=="\n") {
             SkipWhiteSpace();
+            continue;
+        }
+
+        if (m_currentChar=="{") {
+            Advance();
+            SkipComment();
+            continue;
+
+        }
+
+
+        if (m_currentChar==",") {
+            Advance();
+            return Token(TokenType::COMMA, ":");
+        }
+
 
         if (Syntax::s.isAlpha(m_currentChar)) {
             return _Id();
         }
 
         if (Syntax::s.isDigit(m_currentChar))
-            return Token(TokenType::INTEGER, Integer());
+            return Number();
 
         if (m_currentChar==":" && peek()=="=") {
             Advance();
             Advance();
             return Token(TokenType::ASSIGN,":=");
         }
+        if (m_currentChar==":") {
+            Advance();
+            return Token(TokenType::COLON, ":");
+        }
+
         if (m_currentChar==";") {
             Advance();
             return Token(TokenType::SEMI,";");
@@ -113,8 +159,10 @@ Token Lexer::GetNextToken()
         if (m_currentChar==".") {
             Advance();
             Advance();
+            m_text = m_text.replace("\n", "");
             return Token(TokenType::DOT, ".");
         }
+
         Error(m_currentChar);
 
 

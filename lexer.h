@@ -14,17 +14,21 @@ class Lexer
 
 public:
     uint m_lineNumber = 0;
+    uint m_localPos = 0;
+    QStringList m_lines;
     Lexer();
-    Lexer(QString text) {
+    Lexer(QString text, QStringList lines) {
         m_text = text;
         m_pos = 0;
         m_currentChar = m_text[m_pos];
+        m_lines = lines;
     }
 
     void Error(QString text);
     void Advance();
     void SkipWhiteSpace();
-    int Integer();
+    void SkipComment();
+    Token Number();
     Token _Id();
     QString peek();
 

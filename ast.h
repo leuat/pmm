@@ -123,6 +123,60 @@ public:
 };
 
 
+class BlockNode : public Node {
+public:
+    QVector<Node*> m_decl;
+    Node* m_compoundStatement;
+    BlockNode(QVector<Node*> decl, Node* comp) {
+        m_compoundStatement = comp;
+        m_decl = decl;
+    }
+    float Execute() override {
+        for (Node* n: m_decl)
+            n->Execute();
+        m_compoundStatement->Execute();
+    }
+
+};
+
+class ProgramNode : public Node {
+public:
+    QString m_name;
+    BlockNode* m_BlockNode;
+    ProgramNode(QString n, BlockNode* b) {
+        m_BlockNode = b;
+        m_name = n;
+    }
+
+    float Execute() override {
+        m_BlockNode->Execute();
+    }
+};
+
+class VarDecl : public Node {
+public:
+    Node* m_varNode;
+    Node* m_typeNode;
+    VarDecl(Node* varNode, Node* typeNode) {
+        m_varNode = varNode;
+        m_typeNode = typeNode;
+    }
+    float Execute() override {
+    }
+
+};
+
+class VarType : public Node {
+public:
+    QString value;
+    VarType(Token t) {
+        m_op = t;
+        value = t.m_intVal;
+    }
+    float Execute() override {
+    }
+
+};
 
 class Parser {
 public:
@@ -135,6 +189,7 @@ public:
     }
     void Error(QString s) {
         qDebug() << "Invalid syntax on line " << m_lexer.m_lineNumber << " : " <<s;
+        m_lexer.Error("Parser error: ");
         exit(1);
     }
 
@@ -151,6 +206,10 @@ public:
     Node* Expr();
     Node* Term();
     Node* Parse();
+    Node* Block();
+    QVector<Node*> Declarations();
+    QVector<Node*> VariableDeclarations();
+    Node* TypeSpec();
 
 };
 
