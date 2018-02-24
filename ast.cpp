@@ -10,6 +10,8 @@ Parser::Parser()
 
 }
 
+SymbolTable Node::m_symTab;
+
 void Parser::Eat(TokenType::Type t)
 {
     if (m_currentToken.m_type == t) {
@@ -152,6 +154,7 @@ Node* Parser::Parse()
     if (m_currentToken.m_type!=TokenType::TEOF)
         Error("End of file error");
 
+    root->ExecuteSym();
     return root;
 }
 
@@ -179,23 +182,35 @@ QVector<Node *> Parser::VariableDeclarations()
 {
     QVector<Node*> vars;
     vars.append(new Var(m_currentToken));
+    qDebug() << "   Adding new " << m_currentToken.m_value;
     Eat(TokenType::ID);
 
     while (m_currentToken.m_type == TokenType::COMMA) {
         Eat(TokenType::COMMA);
-        //qDebug() << "Adding new " << m_currentToken.m_value;
+        qDebug() << "   Adding new " << m_currentToken.m_value;
         vars.append(new Var(m_currentToken));
         Eat(TokenType::ID);
     }
     Eat(TokenType::COLON);
 
-    for (Node* v: vars) {
+    Node* typeNode = TypeSpec();
+
+
+
+/*    for (Node* v: vars) {
         Syntax::s.globals[((Var*)v)->value] = 0;
+    }*/
+
+    QVector<Node*> var_decleratons;
+
+//    vars.insert(0, VarDecl(varN));
+    for (Node* n : vars) {
+        qDebug() << "Value: " << ((Var*)n)->value;
+        var_decleratons.append(new VarDecl(n, typeNode));
     }
 
-    vars.insert(0, TypeSpec());
-
-    return vars;
+//    return vars;
+    return var_decleratons;
 }
 
 Node *Parser::TypeSpec()
@@ -206,6 +221,8 @@ Node *Parser::TypeSpec()
     }
     else
         Eat(TokenType::REAL);
+
+    qDebug() << "Returning crap";
 
     return new VarType(t);
 

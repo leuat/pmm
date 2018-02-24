@@ -95,6 +95,10 @@ Token Lexer::GetNextToken()
             SkipWhiteSpace();
             continue;
         }
+        if (m_currentChar == "\t" ) {
+            Advance();
+            continue;
+        }
 
         if (m_currentChar=="{") {
             Advance();

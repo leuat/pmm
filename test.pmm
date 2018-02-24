@@ -1,14 +1,8 @@
-PROGRAM Part10AST;
+PROGRAM NameError1;
 VAR
-   a, b : INTEGER;
-   y,x,k,z    : REAL;
-
-BEGIN {Part10AST}
-   a := 2;
-   b := 10 * a + 10 * a DIV 4;
-   y := 20 / 7 + 3;
-   x := 10;
-   k := x;
-   z := k*x;
-
-END.  {Part10AST}
+   a,b : INTEGER;
+BEGIN
+	b := 10;
+   a := 2 + 12*2; { 26 }
+	a := a + b+2; { 38  }
+END.

@@ -3,6 +3,7 @@
 
 #include "token.h"
 #include "lexer.h"
+#include "symboltable.h"
 #include <QDebug>
 
 class Node {
@@ -10,8 +11,9 @@ public:
     Token m_op;
     bool m_isLeaf = false;
     Node* m_left = nullptr, *m_right = nullptr;
-
+    static SymbolTable m_symTab;
     virtual float Execute() = 0;
+    virtual void ExecuteSym() = 0;
 };
 
 
@@ -36,6 +38,10 @@ public:
         if (m_op.m_type==TokenType::MUL)
             return m_left->Execute() * m_right->Execute();
     }
+    void ExecuteSym() override {
+        m_left->ExecuteSym();
+        m_right->ExecuteSym();
+    }
 
 };
 
@@ -45,10 +51,12 @@ public:
     NodeNumber(Token op, int val) {
         m_op = op;
         m_val = val;
-        m_isLeaf = true;
+        m_isLeaf = true ;
     }
     float Execute() override {
         return m_val;
+    }
+    void ExecuteSym() override {
     }
 
 
@@ -67,6 +75,9 @@ public:
         if (m_op.m_type==TokenType::MINUS)
             return -m_right->Execute();
     }
+    void ExecuteSym() override {
+        m_right->ExecuteSym();
+    }
 
 };
 
@@ -79,6 +90,14 @@ public:
         for (Node* n: children)
             n->Execute();
     }
+    void ExecuteSym() override {
+        for (Node* n:children) {
+            qDebug() << "Execute compound";
+            n->ExecuteSym();
+            qDebug() << "Done Execute compound";
+        }
+    }
+
 
 };
 class Var : public Node {
@@ -98,12 +117,24 @@ public:
        return Syntax::s.globals[value];
 
     }
+    void ExecuteSym() override {
+        qDebug() << "Variable";
+        QString varName = m_op.m_value;
+        qDebug() << "Varname " << varName;
+        Symbol* varSymbol = m_symTab.Lookup(varName);
+        qDebug() << "Done var";
+
+    }
+
 };
 
 class NoOp : public Node {
     public:
     float Execute() override {
         return 0;
+    }
+    void ExecuteSym() override {
+
     }
 };
 
@@ -117,12 +148,16 @@ public:
 
     float Execute() override {
         QString varName = ((Var*)m_left)->value;
-        if (!Syntax::s.globals.contains(varName)) {
-            qDebug() << "Error assigning undeclared variable: " << varName;
-            exit(1);
-        }
         Syntax::s.globals[varName] = m_right->Execute();
     }
+    void ExecuteSym() override {
+        qDebug() << "Symbolic";
+        QString varName = ((Var*)m_left)->value;
+        Symbol* varSymbol = m_symTab.Lookup(varName);
+        m_right->ExecuteSym();
+
+    }
+
 
 };
 
@@ -140,6 +175,23 @@ public:
             n->Execute();
         m_compoundStatement->Execute();
     }
+    void ExecuteSym() override {
+        for (Node* n: m_decl)
+        //for (int i=m_decl.count()-1;i>=0;i--)
+        {
+            //Node* n = m_decl[i];
+            qDebug() << "Executing BlockNode::nodes " << n->m_op.m_value;
+            if (dynamic_cast<const Var*>(n) != nullptr)
+                qDebug() << "Is Var!";
+            if (dynamic_cast<const BlockNode*>(n) != nullptr)
+                qDebug() << "Is BlockNode!";
+            n->ExecuteSym();
+            qDebug() << "Done";
+
+        }
+        m_compoundStatement->ExecuteSym();
+    }
+
 
 };
 
@@ -155,6 +207,25 @@ public:
     float Execute() override {
         m_BlockNode->Execute();
     }
+    void ExecuteSym() override {
+        qDebug() << "Executing program sym";
+        m_BlockNode->ExecuteSym();
+    }
+
+};
+class VarType : public Node {
+public:
+    QString value;
+    VarType(Token t) {
+        m_op = t;
+        value = t.m_value;
+    }
+    float Execute() override {
+    }
+    void ExecuteSym() override {
+
+    }
+
 };
 
 class VarDecl : public Node {
@@ -167,20 +238,29 @@ public:
     }
     float Execute() override {
     }
+    void ExecuteSym() override {
+        qDebug() << "WHOO" << rand()%100;
+        QString typeName = ((Var*)m_typeNode)->value;
+        qDebug() << "Looking up typename " << typeName;
+        Symbol* typeSymbol = m_symTab.Lookup(typeName);
+        QString varName = ((Var*)m_varNode)->value;
+        qDebug() << "varname is " << varName;
+        Symbol* varSymbol = new VarSymbol(varName, typeSymbol->m_name);
+        m_symTab.Define(varSymbol);
+        qDebug() << "Done defining variable " << varSymbol->m_name;
+    }
+
 
 };
 
-class VarType : public Node {
+
+
+class SymbolTableBuilder {
 public:
-    QString value;
-    VarType(Token t) {
-        m_op = t;
-        value = t.m_intVal;
-    }
-    float Execute() override {
-    }
+    SymbolTable m_symTab;
 
 };
+
 
 class Parser {
 public:
