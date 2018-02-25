@@ -4,6 +4,7 @@
 #include <QString>
 #include "syntax.h"
 #include "token.h"
+#include "data.h"
 
 #include "errorhandler.h"
 
@@ -15,7 +16,6 @@ class Lexer
     bool m_finished = false;
 
 public:
-    uint m_lineNumber = 0;
     uint m_localPos = 0;
     QStringList m_lines;
     Lexer();

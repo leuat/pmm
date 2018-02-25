@@ -4,6 +4,9 @@
 
 #include <QString>
 #include <QDebug>
+#include "data.h"
+#include <stdio.h>
+#include <iostream>
 
 class ErrorHandler
 {
@@ -22,7 +25,7 @@ public:
         for (int i=0;i<lvl;i++)
             s+=" ";
 
-        qDebug() << s << str;
+        std::cout << (s + str).toStdString() << std::endl;
 
     }
 
@@ -37,8 +40,9 @@ public:
     }
 
     void Error(QString str) {
-
-        Message("*** FATAL ERROR: " +str);
+        Message("\n**** FATAL ERROR on line: " + QString::number(Data::d.lineNumber+1));
+        Message("Source: " + Data::d.currentLineText);
+        Message(str);
         exit(1);
     }
 

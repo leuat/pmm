@@ -2,22 +2,20 @@ PROGRAM Part12;
 VAR
    a : INTEGER;
 
-PROCEDURE P1;
+PROCEDURE P1(x,y,bbb:INTEGER);
 VAR
-   a : REAL;
-   k : INTEGER;
-
-   PROCEDURE P2;
-   VAR
-      a, z : INTEGER;
-   BEGIN {P2}
-      z := 777;
-      a := 20;
-   END;  {P2}
+   z : INTEGER;
+   a : INTEGER;
 
 BEGIN {P1}
+   bbb := 100;
+   z := 777;
+   a := 20;
+   writeln("Hello from procedure p2 with a:",a);
+   writeln("What is passed value b: ", bbb);
 
 END;  {P1}
+
 
 BEGIN {Part12}
    a := 10;
@@ -29,13 +27,14 @@ BEGIN {Part12}
    if a <> 5 then begin
       writeln("A er naa ",a);
    end;
-
    for a:= 3 to 10 do begin
       writeln("a: ",a);
       if a=5 then begin
          writeln("A er fem! WHOOO");
       end;
    end;
-      	
+   writeln("Afterwards is a:",a);
+   P1();   	
+
 
 END.  {Part12}

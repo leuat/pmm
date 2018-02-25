@@ -7,7 +7,7 @@ Interpreter::Interpreter(Parser p)
 
 float Interpreter::Visit(Node* n)
 {
-    n->Execute(0);
+    n->Execute(nullptr, 0);
 }
 
 float Interpreter::Interpret()

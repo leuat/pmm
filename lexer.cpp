@@ -1,16 +1,10 @@
 #include "lexer.h"
 #include <QDebug>
 
+
 Lexer::Lexer()
 {
 
-}
-
-void Lexer::Error(QString text)
-{
-    qDebug() << "Error parsing: " << text << " on line " << m_lineNumber;
-    qDebug() << m_lines[m_lineNumber];
-    exit(1);
 }
 
 void Lexer::Advance()
@@ -22,8 +16,9 @@ void Lexer::Advance()
     }
     else {
         m_currentChar = m_text[m_pos];
-        if (m_localPos>=m_lines[m_lineNumber].length()) {
-            m_lineNumber ++;
+        if (m_localPos>=m_lines[Data::d.lineNumber].length()) {
+            Data::d.lineNumber ++;
+            Data::d.currentLineText = m_lines[Data::d.lineNumber];
             m_localPos = 0;
         }
 
@@ -202,8 +197,8 @@ Token Lexer::GetNextToken()
             m_text = m_text.replace("\n", "");
             return Token(TokenType::DOT, ".");
         }
+        ErrorHandler::e.Error( "Error parsing: " + m_currentChar );
 
-        Error(m_currentChar);
 
 
     }
