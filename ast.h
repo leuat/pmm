@@ -210,7 +210,7 @@ public:
         QString typeName = ((Var*)m_typeNode)->value;
         Symbol* typeSymbol = symTab->Lookup(typeName);
         QString varName = ((Var*)m_varNode)->value;
-        qDebug() << "Typename: " << typeName << "  variable " << varName;
+        ErrorHandler::e.DebugLow("Typename define : " + typeName + "  variable " + varName);
 
         Symbol* varSymbol = new VarSymbol(varName, typeSymbol->m_name);
         symTab->Define(varSymbol);
@@ -232,6 +232,13 @@ public:
         m_decl = decl;
         m_useOwnSymTab = useOwnSymTab;
     }
+
+    void SetParameter(QString name, PVar var) {
+        Symbol* s = m_symTab->Lookup(name);
+        s->m_value = new PVar(var);
+    }
+
+
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling BlockNode",level);
@@ -316,12 +323,32 @@ public:
             b->m_decl.append(m_paramDecl[i]);
 
     }
+
+
+    void SetParametersValue(QVector<Node*>& lst, SymbolTable* symTab) {
+        if (lst.count()!=m_paramDecl.count())
+            ErrorHandler::e.Error("Incorrect number of parameters calling procedure '" + m_procName +"'");
+
+        for (int i=0;i<m_paramDecl.count();i++) {
+            VarDecl* vd = (VarDecl*)m_paramDecl[i];
+            Var* v= ((Var*)vd->m_varNode);
+            QString name = v->value;
+            PVar val = lst[i]->Execute(symTab,level);
+            qDebug() << "Setting : " << name << " with value " << val.toString();
+            ((BlockNode*)m_block)->SetParameter(name, val);
+
+        }
+//        ((BlockNode*)m_block)->SetParameters(lst, names);
+    }
+
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling ProcedureDecl Node",level);
 
-        if (m_block!=nullptr)
+        if (m_block!=nullptr) {
+            SetParametersValue(m_paramDecl, symTab);
             return m_block->Execute(symTab, level);
+        }
         return PVar();
 
     }

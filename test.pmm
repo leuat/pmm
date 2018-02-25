@@ -1,4 +1,4 @@
-PROGRAM Part12;
+PROGRAM Hallaballa;
 VAR
    a : INTEGER;
 
@@ -14,10 +14,10 @@ BEGIN {P1}
    writeln("Hello from procedure p2 with a:",a);
    writeln("What is passed value b: ", bbb);
 
-END;  {P1}
+END;  
 
 
-BEGIN {Part12}
+BEGIN {WHOO}
    a := 10;
    writeln("Verdien er altså: ", a + 2*5 );
    a := a*a;
@@ -34,7 +34,7 @@ BEGIN {Part12}
       end;
    end;
    writeln("Afterwards is a:",a);
-   P1();   	
+   P1(1,2,a);   	
 
 
 END.  {Part12}
