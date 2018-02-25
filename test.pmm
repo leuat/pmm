@@ -1,4 +1,4 @@
-PROGRAM Hallaballa;
+PROGRAM Whooo;
 VAR
    a : INTEGER;
 
@@ -22,20 +22,20 @@ var
   begin
 
    a := 10*x;
-   writeln("Verdien er altså: ", a  );
+   writeln("Value is curently: ", a  );
 
    if a = 100 then begin
-      writeln("HEIA A er naa ",a);
+      writeln("A should now be 100");
    end;
    writeln("a: ", a);
    b:=a;
    for a:=1 to 2*b do begin
       writeln("IN Loop: ",a);
       if a=5 then begin
-         writeln("A er fem! WHOOO");
+         writeln("A is five! WHOOO");
       end;
    end;
-   writeln("Afterwards is a:",a);
+   writeln("Afterwards a:",a);
 
 
   end;
@@ -44,8 +44,7 @@ var
 BEGIN {WHOO}
    a:=5;
    NumberTest(2);
-   writeln("Etter kall er a :",a);
+   writeln("After call a: ",a); { still 5! } 
    TestProcedure(1,2,2*a);
    writeln("pi:", 2*PI);
-
-END.  {Part12}
+END. 

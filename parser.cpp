@@ -12,7 +12,7 @@ void Parser::Eat(TokenType::Type t)
     }
     else {
         QString warning = "\nDid you forget a semicolon (;) ?";
-        ErrorHandler::e.Error("Could not find token type '" + TokenType::getType(t) + "'" + " with current "+m_currentToken.getType() + warning);
+        ErrorHandler::e.Error("Expected '" + TokenType::getType(t) + "' but found '" +m_currentToken.m_value+"'" + warning);
     }
 }
 
