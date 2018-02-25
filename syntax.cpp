@@ -19,4 +19,6 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::REAL,"REAL"));
     reservedWords.append(Token(TokenType::PROCEDURE,"PROCEDURE"));
     reservedWords.append(Token(TokenType::WRITELN,"WRITELN"));
+    reservedWords.append(Token(TokenType::IF,"IF"));
+    reservedWords.append(Token(TokenType::THEN,"THEN"));
 }

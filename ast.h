@@ -11,7 +11,6 @@ class Node {
 public:
     Token m_op;
     uint level = 0;
-    bool m_isLeaf = false;
     Node* m_left = nullptr, *m_right = nullptr;
     static SymbolTable m_symTab;
     virtual PVar Execute(uint lvl) = 0;
@@ -27,7 +26,6 @@ public:
         m_right = right;
         m_left = left;
         m_op = op;
-        m_isLeaf = false;
     }
     PVar Execute(uint lvl) override {
         level = lvl+1;
@@ -58,7 +56,6 @@ public:
     NodeNumber(Token op, int val) {
         m_op = op;
         m_val = val;
-        m_isLeaf = true ;
     }
     PVar  Execute(uint lvl) override {
         level = lvl +1;
@@ -66,8 +63,20 @@ public:
     }
     void ExecuteSym() override {
     }
-
-
+};
+class NodeString : public Node {
+public:
+    QString m_val;
+    NodeString(Token op, QString val) {
+        m_op = op;
+        m_val = val;
+    }
+    PVar  Execute(uint lvl) override {
+        level = lvl +1;
+        return PVar(m_val);
+    }
+    void ExecuteSym() override {
+    }
 };
 
 class UnaryOpNode : public Node {
@@ -305,24 +314,76 @@ public:
     }
 };
 
+class ConditionalNode : public Node {
+public:
+
+    Node* m_a, *m_b;
+    Node* m_block;
+
+
+    ConditionalNode(Token op, Node* a, Node* b, Node* block) {
+        m_a = a;
+        m_b = b;
+        m_block = block;
+        m_op = op;
+    }
+    PVar Execute(uint lvl) override {
+        level = lvl+1;
+        ErrorHandler::e.DebugLow("Calling Conditional Node",level);
+        PVar a = m_a->Execute(level);
+        PVar b = m_b->Execute(level);
+        ErrorHandler::e.DebugHigh("Comparing " + a.toString() + " to " + b.toString() + " with comparator " +m_op.m_value ,level);
+
+        if (m_op.m_type==TokenType::EQUALS)
+            if (a==b)
+                m_block->Execute(level);
+
+        if (m_op.m_type==TokenType::NOTEQUALS)
+            if (!(a==b))
+                m_block->Execute(level);
+
+        if (m_op.m_type==TokenType::GREATER)
+            if ((a>b))
+                m_block->Execute(level);
+
+        if (m_op.m_type==TokenType::LESS)
+            if ((a<b))
+                m_block->Execute(level);
+
+        return PVar();
+
+    }
+
+    void ExecuteSym() override {
+
+    }
+
+
+};
+
 
 class BuiltinMethod : public Node {
 public:
     QString m_procName;
     Node* m_block = nullptr;
-    BuiltinMethod(QString m, Node* block) {
+    Node* m_text = nullptr;
+    BuiltinMethod(QString m, Node* text, Node* block) {
         m_procName = m;
         m_block = block;
+        m_text = text;
     }
     PVar Execute(uint lvl) override {
         ErrorHandler::e.DebugLow("Calling Builtin",level);
         level = lvl+1;
 
         if (m_procName.toLower()=="writeln") {
-            QString s = "** Writeln: ";
+            QString s = "";
+            if (m_text!=nullptr)
+                s+=m_text->Execute(level).toString();
             if (m_block!=nullptr)
                 s+=m_block->Execute(level).toString();
-            qDebug() << s;
+            QTextStream out(stdout);
+            out << s << endl;
         }
         return PVar();
 
@@ -368,10 +429,12 @@ public:
     Node* Term();
     Node* Parse();
     Node* Block();
+    Node* String();
+    Node* Conditional();
 //    QVector<Node*> Procedure();
     QVector<Node*> Declarations();
     QVector<Node*> VariableDeclarations();
-    Node* ExecuteInternalFunction(TokenType::Type t, Node* block);
+    Node* ExecuteInternalFunction(TokenType::Type t, Node* text, Node* block);
     Node* TypeSpec();
 
 

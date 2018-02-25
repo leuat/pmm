@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QMap>
 
+#include "errorhandler.h"
 
 
 class PVar {
@@ -33,6 +34,36 @@ public:
         m_strVal = f;
         m_type = TokenType::STRING;
     }
+
+    bool operator==(const PVar& b) {
+        if (m_type==TokenType::REAL && b.m_type==TokenType::REAL)
+            return m_fVal == b.m_fVal;
+        if (m_type==TokenType::STRING && b.m_type==TokenType::STRING)
+            return m_strVal == b.m_strVal;
+        ErrorHandler::e.Error("PVar::== - unknown type comparison");
+        return false;
+   }
+
+    bool operator>(const PVar& b) {
+        if (m_type==TokenType::REAL && b.m_type==TokenType::REAL)
+            return m_fVal > b.m_fVal;
+        if (m_type==TokenType::STRING || b.m_type==TokenType::STRING)
+            ErrorHandler::e.Error("PVar::> cannot compare strings");
+
+        ErrorHandler::e.Error("PVar::> - unknown type comparison");
+        return false;
+   }
+
+    bool operator<(const PVar& b) {
+        if (m_type==TokenType::REAL && b.m_type==TokenType::REAL)
+            return m_fVal < b.m_fVal;
+        if (m_type==TokenType::STRING || b.m_type==TokenType::STRING)
+            ErrorHandler::e.Error("PVar::< cannot compare strings");
+
+        ErrorHandler::e.Error("PVar::< - unknown type comparison");
+        return false;
+   }
+
     PVar operator+(const PVar& b)  {
         if (m_type==TokenType::REAL)
             return PVar(m_fVal +b.m_fVal);
@@ -95,6 +126,7 @@ public:
     QString digit = "0123456789";
     QString alpha = "abcdefghijklmnopqrstuvwxyz";
     QString alnum =alpha+digit;
+    QString alnumString =alpha+digit+ " ;:æøå!#¤%&/()=.,-+*";
 
     QMap<QString, PVar*> globals;
 
@@ -107,6 +139,10 @@ public:
     bool isAlnum(QString s) {
         return alnum.contains(s.toLower());
     }
+    bool isString(QString s) {
+        return alnumString.contains(s.toLower());
+    }
+
     bool isAlpha(QString s) {
         return alpha.contains(s.toLower());
     }

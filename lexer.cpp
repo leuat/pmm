@@ -79,6 +79,20 @@ Token Lexer::_Id()
 
 }
 
+Token Lexer::String()
+{
+    QString result="";
+    while (!m_finished && m_currentChar!="\"") {
+        result +=m_currentChar;
+        Advance();
+    }
+    Advance();
+    ErrorHandler::e.DebugLow("Calling Lexer::String with string: " + result);
+
+    return Token(TokenType::STRING, result);
+
+}
+
 QString Lexer::peek()
 {
     if (m_pos+1>=m_text.length())
@@ -109,7 +123,7 @@ Token Lexer::GetNextToken()
 
         if (m_currentChar=="\"") {
             Advance();
-            return Token(TokenType::QUOTATION, "\"");
+            return String();
         }
 
 
@@ -134,6 +148,23 @@ Token Lexer::GetNextToken()
         if (m_currentChar==":") {
             Advance();
             return Token(TokenType::COLON, ":");
+        }
+
+        if (m_currentChar=="=") {
+            Advance();
+            return Token(TokenType::EQUALS, "=");
+        }
+        if (m_currentChar==">") {
+            Advance();
+            return Token(TokenType::GREATER, ">");
+        }
+        if (m_currentChar=="<") {
+            Advance();
+            if (m_currentChar==">") {
+                Advance();
+                return Token(TokenType::NOTEQUALS, "<>");
+            }
+            return Token(TokenType::LESS, "<");
         }
 
         if (m_currentChar==";") {

@@ -11,7 +11,8 @@ public:
         RPAREN, TEOF, ID, ASSIGN, BEGIN,
         END, SEMI, DOT, VAR, REAL,
         PROGRAM, COLON, COMMA, INTEGER_CONST,
-        REAL_CONST, PROCEDURE, WRITELN, STRING, QUOTATION};
+        REAL_CONST, PROCEDURE, WRITELN, STRING,
+        IF, THEN, EQUALS,NOTEQUALS, GREATER, LESS};
 
     static QString types[];
     static QString getType(Type t) {

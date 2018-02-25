@@ -21,5 +21,14 @@ END;  {P1}
 
 BEGIN {Part12}
    a := 10;
-   writeln(a + 2*5 );
+   writeln("Verdien er altså: ", a + 2*5 );
+   a := a*a;
+   writeln("Heisann! WHOO! ", a);
+   writeln("Jeg er så kul at det er vanskelig å forstå");
+
+   if a <> 5 then begin
+      writeln("A er naa ",a);
+   end;
+      	
+
 END.  {Part12}

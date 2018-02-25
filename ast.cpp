@@ -16,7 +16,7 @@ void Parser::Eat(TokenType::Type t)
 {
     if (m_currentToken.m_type == t) {
         m_currentToken = m_lexer.GetNextToken();
-//        qDebug() << "Next token: " << m_currentToken.m_value;
+        //qDebug() << "Next token: " << m_currentToken.getType();
     }
     else
         Error("Parser::Eat : Could not find token type '" + TokenType::getType(t) + "'" + " with current "+m_currentToken.getType());
@@ -57,11 +57,21 @@ Node *Parser::Statement()
     else if (m_currentToken.m_type==TokenType::WRITELN) {
         Eat(TokenType::WRITELN);
         Eat(TokenType::LPAREN);
-        Node* block = Expr();
+        NodeString* text = (NodeString*)String();
+        Eat(TokenType::STRING);
+        Node* block = nullptr;
+
+        if (m_currentToken.m_type==TokenType::COMMA) {
+            Eat(TokenType::COMMA);
+            block = Expr();
+        }
 
         Eat(TokenType::RPAREN);
-        Eat(TokenType::SEMI);
-        node = ExecuteInternalFunction(TokenType::WRITELN, block);
+        //Eat(TokenType::SEMI);
+        node = ExecuteInternalFunction(TokenType::WRITELN, text, block);
+    }
+    else if (m_currentToken.m_type == TokenType::IF) {
+        node = Conditional();
     }
     else node = Empty();
 
@@ -71,6 +81,23 @@ Node *Parser::Statement()
 
 
 }
+Node *Parser::Conditional()
+{
+    Eat(TokenType::IF);
+    Node* a = Expr();
+
+    Token compareToken = m_currentToken;
+    Eat(compareToken.m_type);
+
+    Node* b= Expr();
+
+    Eat(m_currentToken.m_type);
+
+    Node* block = Block();
+
+    return new ConditionalNode(compareToken, a,b,block);
+}
+
 
 QVector<Node*> Parser::StatementList()
 {
@@ -174,6 +201,13 @@ Node *Parser::Block()
     return new BlockNode(Declarations(), CompoundStatement());
 }
 
+Node *Parser::String()
+{
+    NodeString* node = new NodeString(m_currentToken, m_currentToken.m_value);
+    return node;
+}
+
+
 QVector<Node*> Parser::Declarations()
 {
     QVector<Node*> decl;
@@ -232,10 +266,9 @@ QVector<Node *> Parser::VariableDeclarations()
     return var_decleratons;
 }
 
-Node *Parser::ExecuteInternalFunction(TokenType::Type t, Node* block)
+Node *Parser::ExecuteInternalFunction(TokenType::Type t,  Node* text,Node* block)
 {
-
-    return new BuiltinMethod("writeln", block);
+    return new BuiltinMethod("writeln", text, block);
 }
 
 Node *Parser::TypeSpec()

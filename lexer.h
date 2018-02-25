@@ -5,6 +5,8 @@
 #include "syntax.h"
 #include "token.h"
 
+#include "errorhandler.h"
+
 class Lexer
 {
     QString m_text;
@@ -30,6 +32,7 @@ public:
     void SkipComment();
     Token Number();
     Token _Id();
+    Token String();
     QString peek();
 
     Token GetNextToken();

@@ -60,7 +60,7 @@ void ParseFile(QString fileName) {
 
 int main(int argc, char *argv[])
 {
+    ErrorHandler::e.m_level = ErrorHandler::e.DEBUG_HIGH;
     ErrorHandler::e.m_level = ErrorHandler::e.ERROR_ONLY;
     ParseFile("..\\test.pmm");
-
 }
