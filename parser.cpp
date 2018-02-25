@@ -10,8 +10,10 @@ void Parser::Eat(TokenType::Type t)
         m_currentToken = m_lexer.GetNextToken();
         //qDebug() << "Next token: " << m_currentToken.getType();
     }
-    else
-        ErrorHandler::e.Error("Parser::Eat : Could not find token type '" + TokenType::getType(t) + "'" + " with current "+m_currentToken.getType());
+    else {
+        QString warning = "\nDid you forget a semicolon (;) ?";
+        ErrorHandler::e.Error("Could not find token type '" + TokenType::getType(t) + "'" + " with current "+m_currentToken.getType() + warning);
+    }
 }
 
 void Parser::VerifyToken(Token t)
@@ -225,7 +227,7 @@ Node *Parser::FindProcedure()
         ProcedureDecl* p = (ProcedureDecl*)m_procedures[procName];
         //p->SetParameters(paramList);
 
-        return p;
+        return new ProcedureNode(p, paramList);
     }
     //qDebug() << m_currentToken.getType() << " with value " << m_currentToken.m_value;
     return nullptr;
@@ -298,6 +300,11 @@ QVector<Node*> Parser::Declarations()
         QVector<Node*> paramDecl;
         if (m_currentToken.m_type==TokenType::LPAREN)
             paramDecl = Parameters();
+        //qDebug()<< "current : " << m_currentToken.getType();
+        // If no parameters
+        if (m_currentToken.m_type==TokenType::RPAREN)
+            Eat(TokenType::RPAREN);
+
         Eat(TokenType::SEMI);
         Node* block = Block(true);
         Node* procDecl = new ProcedureDecl(procName, paramDecl, block);

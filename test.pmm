@@ -2,39 +2,50 @@ PROGRAM Hallaballa;
 VAR
    a : INTEGER;
 
-PROCEDURE P1(x,y,bbb:INTEGER);
+PROCEDURE TestProcedure(x,y,w:INTEGER);
 VAR
    z : INTEGER;
    a : INTEGER;
 
 BEGIN {P1}
-   bbb := 100;
    z := 777;
-   a := 20;
+   a := 20*y;
    writeln("Hello from procedure p2 with a:",a);
-   writeln("What is passed value b: ", bbb);
+   writeln("What is passed value b: ", w);
 
 END;  
 
+procedure NumberTest(x : integer);
+var
+  a,b : REAL;
 
-BEGIN {WHOO}
-   a := 10;
-   writeln("Verdien er altså: ", a + 2*5 );
-   a := a*a;
-   writeln("Heisann! WHOO! ", a);
-   writeln("Jeg er så kul at det er vanskelig å forstå");
+  begin
 
-   if a <> 5 then begin
-      writeln("A er naa ",a);
+   a := 10*x;
+   writeln("Verdien er altså: ", a  );
+
+   if a = 100 then begin
+      writeln("HEIA A er naa ",a);
    end;
-   for a:= 3 to 10 do begin
-      writeln("a: ",a);
+   writeln("a: ", a);
+   b:=a;
+   for a:=1 to 2*b do begin
+      writeln("IN Loop: ",a);
       if a=5 then begin
          writeln("A er fem! WHOOO");
       end;
    end;
    writeln("Afterwards is a:",a);
-   P1(1,2,a);   	
 
+
+  end;
+
+
+BEGIN {WHOO}
+   a:=5;
+   NumberTest(2);
+   writeln("Etter kall er a :",a);
+   TestProcedure(1,2,2*a);
+   writeln("pi:", 2*PI);
 
 END.  {Part12}

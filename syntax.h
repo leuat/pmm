@@ -23,7 +23,7 @@ public:
     QString alnum =alpha+digit;
     QString alnumString =alpha+digit+ " ;:æøå!#¤%&/()=.,-+*";
     uint lineNumber = 0;
-
+    void SetupConstants();
 
     static Syntax s;
 

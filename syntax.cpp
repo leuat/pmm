@@ -1,4 +1,5 @@
 #include "syntax.h"
+#include <QtMath>
 
 Syntax Syntax::s;
 
@@ -24,4 +25,6 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::FOR,"FOR"));
     reservedWords.append(Token(TokenType::TO,"TO"));
     reservedWords.append(Token(TokenType::DO,"DO"));
+
 }
+

@@ -10,7 +10,10 @@ public:
     static Data d;
     int lineNumber = 0;
     QString currentLineText;
-
+    void Set(int ln, QString txt) {
+        lineNumber = ln;
+        currentLineText = txt;
+    }
 };
 
 #endif // DATA_H

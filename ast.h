@@ -10,6 +10,7 @@
 class Node {
 public:
     Token m_op;
+    int m_lineNumber;
     uint level = 0;
     Node* m_left = nullptr, *m_right = nullptr;
     virtual PVar Execute(SymbolTable* symTab, uint lvl) = 0;
@@ -28,7 +29,7 @@ public:
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         level = lvl+1;
-
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         ErrorHandler::e.DebugLow("Calling BinOP",level);
 
         if (m_op.m_type==TokenType::PLUS)
@@ -57,6 +58,7 @@ public:
         m_val = val;
     }
     PVar  Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl +1;
         return PVar(m_val);
     }
@@ -71,6 +73,7 @@ public:
         m_val = val;
     }
     PVar  Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl +1;
         return PVar(m_val);
     }
@@ -86,6 +89,7 @@ public:
         m_left = nullptr;
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling Unary Op Node",level);
 
@@ -108,6 +112,8 @@ public:
     Compound() {
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+
         level = lvl+1;
         for (Node* n: children)
             n->Execute(symTab, level);
@@ -115,6 +121,7 @@ public:
 
     }
     void ExecuteSym(SymbolTable* symTab) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         for (Node* n:children) {
             ErrorHandler::e.DebugLow("Calling Compound Node",level);
             n->ExecuteSym(symTab);
@@ -133,11 +140,16 @@ public:
 
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         level = lvl+1;
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         ErrorHandler::e.DebugLow("Calling Var Node",level);
 
         if (symTab->Lookup(value)==nullptr) {
-            ErrorHandler::e.Error("Error: Could not find variable '" +value +"'");
+            ErrorHandler::e.Error("Could not find variable '" +value +"'");
         }
+        if (symTab->Lookup(value)->m_value==nullptr)
+            ErrorHandler::e.Error("Variable '" +value +"' not initialized before use.");
+
+
         PVar v = *symTab->Lookup(value)->m_value;
        return v;
 
@@ -170,6 +182,7 @@ public:
     }
 
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         ErrorHandler::e.DebugLow("Calling Assign",level);
         level = lvl+1;
 
@@ -180,7 +193,7 @@ public:
 
         //Syntax::s.globals[varName] = new PVar(m_right->Execute(symTab, level));
         //symTab->Define(new Symbol new PVar(m_right->Execute(symTab, level));
-        return PVar();
+        return *s->m_value;
 
     }
     void ExecuteSym(SymbolTable* symTab) override {
@@ -201,6 +214,7 @@ public:
         m_typeNode = typeNode;
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling VarDecl",level);
         return PVar();
@@ -240,6 +254,7 @@ public:
 
 
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling BlockNode",level);
 
@@ -277,6 +292,7 @@ public:
     }
 
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling Program Node",level);
 
@@ -297,6 +313,7 @@ public:
         value = t.m_value;
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling Vartype",level);
         return PVar();
@@ -325,16 +342,17 @@ public:
     }
 
 
-    void SetParametersValue(QVector<Node*>& lst, SymbolTable* symTab) {
+    void SetParametersValue(QVector<PVar>& lst) {
         if (lst.count()!=m_paramDecl.count())
-            ErrorHandler::e.Error("Incorrect number of parameters calling procedure '" + m_procName +"'");
+            ErrorHandler::e.Error("Incorrect number of parameters calling procedure '" +
+                                  m_procName +"'. Requires "+QString::number(m_paramDecl.count()) +
+                                  " parameters but is called with "+QString::number(lst.count()));
 
         for (int i=0;i<m_paramDecl.count();i++) {
             VarDecl* vd = (VarDecl*)m_paramDecl[i];
             Var* v= ((Var*)vd->m_varNode);
             QString name = v->value;
-            PVar val = lst[i]->Execute(symTab,level);
-            qDebug() << "Setting : " << name << " with value " << val.toString();
+            PVar val = lst[i];
             ((BlockNode*)m_block)->SetParameter(name, val);
 
         }
@@ -342,11 +360,12 @@ public:
     }
 
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling ProcedureDecl Node",level);
 
         if (m_block!=nullptr) {
-            SetParametersValue(m_paramDecl, symTab);
             return m_block->Execute(symTab, level);
         }
         return PVar();
@@ -355,6 +374,31 @@ public:
     void ExecuteSym(SymbolTable* symTab) override {
         m_block->ExecuteSym(symTab);
     }
+};
+
+class ProcedureNode : public Node {
+public:
+    ProcedureDecl* m_procedure;
+    QVector<Node*> m_parameters;
+
+    ProcedureNode(ProcedureDecl* proc, QVector<Node*> params ) {
+        m_parameters = params;
+        m_procedure = proc;
+    }
+
+    PVar Execute(SymbolTable *symTab, uint lvl) {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+        QVector<PVar> vars;
+        for (Node* n: m_parameters) {
+            vars.append(n->Execute(symTab, lvl));
+        }
+        m_procedure->SetParametersValue(vars);
+        return m_procedure->Execute(symTab, lvl);
+    }
+    void ExecuteSym(SymbolTable* symTab) override {
+        m_procedure ->ExecuteSym(symTab);
+    }
+
 };
 
 class ConditionalNode : public Node {
@@ -371,6 +415,7 @@ public:
         m_op = op;
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling Conditional Node",level);
         PVar a = m_a->Execute(symTab, level);
@@ -418,17 +463,17 @@ public:
 //        m_op = op;
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
+        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling Forloop Node",level);
         PVar a = m_a->Execute(symTab, level);
         PVar b = m_b->Execute(symTab, level);
-
         Assign* avar = (Assign*)m_a;
         Var* var = (Var*)avar->m_left;
 
-        float val = symTab->Lookup(var->value)->m_value->m_fVal;
+        //float val = symTab->Lookup(var->value)->m_value->m_fVal;
 
-        for (float i = val;i<=b.m_fVal;i++) {
+        for (float i = a.m_fVal;i<=b.m_fVal;i++) {
             symTab->Lookup(var->value)->m_value->m_fVal = i;
             m_block->Execute(symTab, level);
         }

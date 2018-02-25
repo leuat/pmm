@@ -2,7 +2,7 @@
 #define TOKEN_H
 
 #include <QString>
-
+#include "data.h"
 
 class TokenType {
 public:
@@ -37,6 +37,8 @@ public:
     TokenType::Type m_type;
     QString m_value;
     int m_intVal;
+    int m_lineNumber;
+    QString m_currentLineText;
     QString getType() {
         return TokenType::types[m_type];
     }
@@ -47,10 +49,15 @@ public:
     Token(TokenType::Type t, QString val) {
         m_value = val;
         m_type = t;
+        m_lineNumber = Data::d.lineNumber;
+        m_currentLineText = Data::d.currentLineText;
     }
     Token(TokenType::Type t, int val) {
         m_intVal = val;
         m_type = t;
+        m_lineNumber = Data::d.lineNumber;
+        m_currentLineText = Data::d.currentLineText;
+
     }
 
 };

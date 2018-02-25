@@ -17,6 +17,16 @@ public:
         m_type = type;
 
     }
+    Symbol(QString name, QString type, float var) {
+        m_name = name;
+        m_type = type;
+        m_value = new PVar(var);
+    }
+    Symbol(QString name, QString type, QString var) {
+        m_name = name;
+        m_type = type;
+        m_value = new PVar(var);
+    }
 
 };
 
@@ -38,8 +48,13 @@ class SymbolTable
 {
 public:
     QMap<QString, Symbol*> m_symbols;
+    static QMap<QString, Symbol*> m_constants;
     QString m_name;
     SymbolTable();
+
+    static bool isInitialized;
+    static void Initialize();
+
     void Define(Symbol* s) {
         m_symbols[s->m_name] = s;
     }
@@ -51,6 +66,9 @@ public:
     void InitBuiltins();
 
     Symbol* Lookup(QString name) {
+        if (m_constants.contains(name)) {
+            return m_constants[name];
+        }
         if (!m_symbols.contains(name)) {
             ErrorHandler::e.Error("Symbol '" + name + "' does not exist in the current scope");
         }
