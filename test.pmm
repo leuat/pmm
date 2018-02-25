@@ -29,6 +29,13 @@ BEGIN {Part12}
    if a <> 5 then begin
       writeln("A er naa ",a);
    end;
+
+   for a:= 3 to 10 do begin
+      writeln("a: ",a);
+      if a=5 then begin
+         writeln("A er fem! WHOOO");
+      end;
+   end;
       	
 
 END.  {Part12}

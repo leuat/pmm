@@ -21,4 +21,7 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::WRITELN,"WRITELN"));
     reservedWords.append(Token(TokenType::IF,"IF"));
     reservedWords.append(Token(TokenType::THEN,"THEN"));
+    reservedWords.append(Token(TokenType::FOR,"FOR"));
+    reservedWords.append(Token(TokenType::TO,"TO"));
+    reservedWords.append(Token(TokenType::DO,"DO"));
 }

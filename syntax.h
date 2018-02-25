@@ -150,7 +150,7 @@ public:
     Token GetID(QString val) {
         for (Token& t: reservedWords)
             if (val.toUpper()==t.m_value) {
-              //  qDebug() << "Found token " <<  val;
+                //qDebug() << "Found token " <<  val;
 
                 return t;
             }

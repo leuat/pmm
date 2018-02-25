@@ -73,6 +73,9 @@ Node *Parser::Statement()
     else if (m_currentToken.m_type == TokenType::IF) {
         node = Conditional();
     }
+    else if (m_currentToken.m_type == TokenType::FOR) {
+        node = ForLoop();
+    }
     else node = Empty();
 
 
@@ -199,6 +202,23 @@ Node* Parser::Parse()
 Node *Parser::Block()
 {
     return new BlockNode(Declarations(), CompoundStatement());
+}
+
+Node *Parser::ForLoop()
+{
+    Eat(TokenType::FOR);
+    Node* a = AssignStatement();
+    Eat(TokenType::TO);
+    Node* b = Expr();
+    Eat(m_currentToken.m_type);
+//    qDebug() << "Current: " << m_currentToken.getType();
+//    Eat(TokenType::DO);
+    Node* block = Block();
+
+//    qDebug() << m_currentToken.getType();
+  //  exit(1);
+    return new ForLoopNode(a,b,block);
+
 }
 
 Node *Parser::String()

@@ -361,6 +361,47 @@ public:
 
 };
 
+class ForLoopNode : public Node {
+public:
+
+    Node* m_a, *m_b;
+    Node* m_block;
+
+
+    ForLoopNode(Node* a, Node* b, Node* block) {
+        m_a = a;
+        m_b = b;
+        m_block = block;
+//        m_op = op;
+    }
+    PVar Execute(uint lvl) override {
+        level = lvl+1;
+        ErrorHandler::e.DebugLow("Calling Forloop Node",level);
+        PVar a = m_a->Execute(level);
+        PVar b = m_b->Execute(level);
+
+        Assign* avar = (Assign*)m_a;
+        Var* var = (Var*)avar->m_left;
+
+        float val = Syntax::s.globals[var->value]->m_fVal;
+
+        for (float i = val;i<=b.m_fVal;i++) {
+            Syntax::s.globals[var->value]->m_fVal = i;
+            m_block->Execute(level);
+        }
+
+        return PVar();
+
+    }
+
+    void ExecuteSym() override {
+
+    }
+
+
+};
+
+
 
 class BuiltinMethod : public Node {
 public:
@@ -429,6 +470,7 @@ public:
     Node* Term();
     Node* Parse();
     Node* Block();
+    Node* ForLoop();
     Node* String();
     Node* Conditional();
 //    QVector<Node*> Procedure();
