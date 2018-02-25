@@ -7,6 +7,85 @@
 #include <QDebug>
 #include <QMap>
 
+
+
+class PVar {
+public:
+    TokenType::Type m_type;
+    float m_fVal;
+    bool m_isError = false;
+    QString m_strVal;
+    PVar() {
+        m_isError = true;
+    }
+    PVar(const PVar& o) {
+        m_type = o.m_type;
+        m_fVal = o.m_fVal;
+        m_strVal = o.m_strVal;
+        m_isError = o.m_isError;
+    }
+
+    PVar(float f) {
+        m_fVal = f;
+        m_type = TokenType::REAL;
+    }
+    PVar(QString f) {
+        m_strVal = f;
+        m_type = TokenType::STRING;
+    }
+    PVar operator+(const PVar& b)  {
+        if (m_type==TokenType::REAL)
+            return PVar(m_fVal +b.m_fVal);
+        if (m_type==TokenType::STRING)
+            return PVar(m_strVal + b.m_strVal);
+        return PVar();
+    }
+    PVar operator-(const PVar& b)  {
+        if (m_type==TokenType::REAL)
+            return PVar(m_fVal -b.m_fVal);
+        if (m_type==TokenType::STRING) {
+            qDebug() << "Error: cannot subtract strings";
+        }
+        return PVar();
+    }
+    PVar operator/(const PVar& b)  {
+        if (m_type==TokenType::REAL)
+            return PVar(m_fVal /b.m_fVal);
+        if (m_type==TokenType::STRING) {
+            qDebug() << "Error: cannot divide strings";
+        }
+        return PVar();
+    }
+    PVar operator*(const PVar& b)   {
+        if (m_type==TokenType::REAL)
+            return PVar(m_fVal *b.m_fVal);
+        if (m_type==TokenType::STRING) {
+            qDebug() << "Error: cannot mul strings";
+        }
+        return PVar();
+    }
+    PVar operator*(const float& b)  {
+        if (m_type==TokenType::REAL)
+            return PVar(m_fVal *b);
+        if (m_type==TokenType::STRING) {
+            qDebug() << "Error: cannot mul strings";
+        }
+        return PVar();
+    }
+
+    QString toString() {
+        if (m_type==TokenType::STRING)
+            return m_strVal;
+        if (m_type==TokenType::REAL)
+            return QString::number(m_fVal);
+        return "PVar not defined(!)";
+    }
+
+};
+
+
+
+
 class Syntax
 {
 public:
@@ -17,7 +96,7 @@ public:
     QString alpha = "abcdefghijklmnopqrstuvwxyz";
     QString alnum =alpha+digit;
 
-    QMap<QString, float> globals;
+    QMap<QString, PVar*> globals;
 
 
     static Syntax s;
@@ -34,10 +113,12 @@ public:
 
     Token GetID(QString val) {
         for (Token& t: reservedWords)
-            if (val==t.m_value)
-                return t;
+            if (val.toUpper()==t.m_value) {
+              //  qDebug() << "Found token " <<  val;
 
-        //qDebug() << "Error: could not find token " <<  val;
+                return t;
+            }
+
         //exit(1);
         return Token(TokenType::ID, val);
     }

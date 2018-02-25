@@ -17,4 +17,6 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::DIV,"DIV"));
     reservedWords.append(Token(TokenType::INTEGER,"INTEGER"));
     reservedWords.append(Token(TokenType::REAL,"REAL"));
+    reservedWords.append(Token(TokenType::PROCEDURE,"PROCEDURE"));
+    reservedWords.append(Token(TokenType::WRITELN,"WRITELN"));
 }

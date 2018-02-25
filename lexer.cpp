@@ -107,6 +107,11 @@ Token Lexer::GetNextToken()
 
         }
 
+        if (m_currentChar=="\"") {
+            Advance();
+            return Token(TokenType::QUOTATION, "\"");
+        }
+
 
         if (m_currentChar==",") {
             Advance();

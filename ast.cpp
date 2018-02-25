@@ -16,9 +16,10 @@ void Parser::Eat(TokenType::Type t)
 {
     if (m_currentToken.m_type == t) {
         m_currentToken = m_lexer.GetNextToken();
+//        qDebug() << "Next token: " << m_currentToken.m_value;
     }
     else
-        Error("Parser::Eat : Could not find token type '" + QString::number(t) + "'" + "with current "+QString::number(m_currentToken.m_type));
+        Error("Parser::Eat : Could not find token type '" + TokenType::getType(t) + "'" + " with current "+m_currentToken.getType());
 }
 
 Node *Parser::Variable()
@@ -47,12 +48,24 @@ Node *Parser::AssignStatement()
 Node *Parser::Statement()
 {
     Node *node = nullptr;
-
-    if (m_currentToken.m_type == TokenType::BEGIN)
+    if (m_currentToken.m_type == TokenType::BEGIN) {
         node = CompoundStatement();
-    else if (m_currentToken.m_type == TokenType::ID)
+    }
+    else if (m_currentToken.m_type == TokenType::ID) {
         node = AssignStatement();
+    }
+    else if (m_currentToken.m_type==TokenType::WRITELN) {
+        Eat(TokenType::WRITELN);
+        Eat(TokenType::LPAREN);
+        Node* block = Expr();
+
+        Eat(TokenType::RPAREN);
+        Eat(TokenType::SEMI);
+        node = ExecuteInternalFunction(TokenType::WRITELN, block);
+    }
     else node = Empty();
+
+
 
     return node;
 
@@ -64,7 +77,6 @@ QVector<Node*> Parser::StatementList()
     Node* node = Statement();
     QVector<Node*> results;
     results.append(node);
-
     while (m_currentToken.m_type == TokenType::SEMI) {
         Eat(TokenType::SEMI);
         Node* n = Statement();
@@ -99,7 +111,6 @@ Node *Parser::Program()
     Eat(TokenType::PROGRAM);
     Var* varNode = (Var*)Variable();
     QString progName = varNode->value;
-    qDebug() << "Program name" << progName;
     Eat(TokenType::SEMI);
     BlockNode* block = (BlockNode*)Block();
     ProgramNode* program = new ProgramNode(progName, block);
@@ -175,6 +186,17 @@ QVector<Node*> Parser::Declarations()
             Eat(TokenType::SEMI);
         }
     }
+    while (m_currentToken.m_type==TokenType::PROCEDURE) {
+        Eat(TokenType::PROCEDURE);
+        QString procName = m_currentToken.m_value;
+        Eat(TokenType::ID);
+        Eat(TokenType::SEMI);
+        Node* block = Block();
+        Node* procDecl = new ProcedureDecl(procName, block);
+        decl.append(procDecl);
+        Eat(TokenType::SEMI);
+    }
+
     return decl;
 }
 
@@ -182,12 +204,10 @@ QVector<Node *> Parser::VariableDeclarations()
 {
     QVector<Node*> vars;
     vars.append(new Var(m_currentToken));
-    qDebug() << "   Adding new " << m_currentToken.m_value;
     Eat(TokenType::ID);
 
     while (m_currentToken.m_type == TokenType::COMMA) {
         Eat(TokenType::COMMA);
-        qDebug() << "   Adding new " << m_currentToken.m_value;
         vars.append(new Var(m_currentToken));
         Eat(TokenType::ID);
     }
@@ -205,12 +225,17 @@ QVector<Node *> Parser::VariableDeclarations()
 
 //    vars.insert(0, VarDecl(varN));
     for (Node* n : vars) {
-        qDebug() << "Value: " << ((Var*)n)->value;
         var_decleratons.append(new VarDecl(n, typeNode));
     }
 
 //    return vars;
     return var_decleratons;
+}
+
+Node *Parser::ExecuteInternalFunction(TokenType::Type t, Node* block)
+{
+
+    return new BuiltinMethod("writeln", block);
 }
 
 Node *Parser::TypeSpec()
@@ -222,7 +247,6 @@ Node *Parser::TypeSpec()
     else
         Eat(TokenType::REAL);
 
-    qDebug() << "Returning crap";
 
     return new VarType(t);
 
@@ -234,6 +258,7 @@ Node* Parser::Expr()
 
     while (m_currentToken.m_type == TokenType::Type::PLUS || m_currentToken.m_type == TokenType::Type::MINUS) {
         Token t = m_currentToken;
+
         Eat(m_currentToken.m_type);
 
         node = new NodeBinOP(node, t, Term());

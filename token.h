@@ -10,9 +10,17 @@ public:
         INTEGER, PLUS, MINUS, MUL, DIV, LPAREN,
         RPAREN, TEOF, ID, ASSIGN, BEGIN,
         END, SEMI, DOT, VAR, REAL,
-        PROGRAM, COLON, COMMA, INTEGER_CONST, REAL_CONST};
+        PROGRAM, COLON, COMMA, INTEGER_CONST,
+        REAL_CONST, PROCEDURE, WRITELN, STRING, QUOTATION};
+
+    static QString types[];
+    static QString getType(Type t) {
+        return types[t];
+    }
+
     QString m_value;
     Type m_type;
+
     TokenType() {}
     TokenType (Type t, QString v) {
         m_type = t;
@@ -27,6 +35,9 @@ public:
     TokenType::Type m_type;
     QString m_value;
     int m_intVal;
+    QString getType() {
+        return TokenType::types[m_type];
+    }
 
     Token();
 

@@ -1,8 +1,25 @@
-PROGRAM NameError1;
+PROGRAM Part12;
 VAR
-   a,b : INTEGER;
-BEGIN
-	b := 10;
-   a := 2 + 12*2; { 26 }
-	a := a + b+2; { 38  }
-END.
+   a : INTEGER;
+
+PROCEDURE P1;
+VAR
+   a : REAL;
+   k : INTEGER;
+
+   PROCEDURE P2;
+   VAR
+      a, z : INTEGER;
+   BEGIN {P2}
+      z := 777;
+      a := 20;
+   END;  {P2}
+
+BEGIN {P1}
+
+END;  {P1}
+
+BEGIN {Part12}
+   a := 10;
+   writeln(a + 2*5 );
+END.  {Part12}

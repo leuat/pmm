@@ -7,6 +7,7 @@
 #include "ast.h"
 #include <QFile>
 #include <QTextStream>
+#include "errorhandler.h"
 
 void TestSingleLine() {
     QTextStream s(stdin);
@@ -54,17 +55,12 @@ void ParseFile(QString fileName) {
     Parser parser = Parser(lexer);
     Interpreter interpreter = Interpreter(parser);
     float result = interpreter.Interpret();
-    qDebug() << result;
-    qDebug() <<" a: " << Syntax::s.globals["a"];
-    qDebug() <<" b: " << Syntax::s.globals["b"];
-    qDebug() <<" y: " << Syntax::s.globals["y"];
-    qDebug() <<" k: " << Syntax::s.globals["k"];
-    qDebug() <<" z: " << Syntax::s.globals["z"];
 
 }
 
 int main(int argc, char *argv[])
 {
+    ErrorHandler::e.m_level = ErrorHandler::e.ERROR_ONLY;
     ParseFile("..\\test.pmm");
 
 }
