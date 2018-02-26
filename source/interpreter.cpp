@@ -15,6 +15,8 @@ float Interpreter::Interpret()
 {
     Node* tree = m_parser.Parse();
     Visit(tree);
-    tree->Delete();
+ //   qDebug() << "\n\nDeleting...";
+//    tree->Delete();
+  //  qDebug() << "Done deleting";
 
 }

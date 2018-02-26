@@ -34,8 +34,9 @@ void Parser::VerifyToken(Token t)
     //if (Syntax::s.globals.contains(t.m_value))
     //    return;
 
-   // ErrorHandler::e.Error("Does not recognize '"+t.m_value + "'");
+    // ErrorHandler::e.Error("Does not recognize '"+t.m_value + "'");
 }
+
 
 Node *Parser::Variable()
 {
@@ -189,6 +190,8 @@ Node* Parser::Factor()
     }
 
 
+
+
     if (t.m_type == TokenType::LPAREN) {
         Eat(TokenType::LPAREN);
         Node* node = Expr();
@@ -196,7 +199,12 @@ Node* Parser::Factor()
         return node;
 
     }
-    //if (t.m_type == TokenType::ID)
+    if (t.m_type == TokenType::ID) {
+        Node* node = FindProcedure();
+        if (node!=nullptr)
+            return node;
+
+    }
        return Variable();
 }
 

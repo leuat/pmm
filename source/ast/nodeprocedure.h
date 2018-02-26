@@ -20,6 +20,7 @@ public:
     }
 
     void Delete() {
+        ErrorHandler::e.DebugLow("Memory: Deleting in NodeProcedure", level);
         if (m_procedure) {
             //m_procedure->Delete();
             //delete m_procedure;
@@ -30,6 +31,7 @@ public:
             delete n;
         }
         m_parameters.clear();
+        ErrorHandler::e.DebugLow("Memory DONE: Deleting in NodeProcedure", level);
     }
 
     PVar Execute(SymbolTable *symTab, uint lvl) override;

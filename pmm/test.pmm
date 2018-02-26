@@ -1,8 +1,15 @@
 PROGRAM Whooo;
 VAR
-   a : INTEGER;
+   a,b : INTEGER;
 
-PROCEDURE TestProcedure(x,y,w:INTEGER);
+
+procedure calcSquare(x:integer);
+begin
+  return:=x*x;
+end;
+
+
+PROCEDURE TestScope(x,y,w:INTEGER);
 VAR
    z : INTEGER;
    a : INTEGER;
@@ -10,22 +17,30 @@ VAR
 BEGIN {P1}
    z := 777;
    a := 20*y;
-   writeln("Hello from procedure p2 with a:",a);
-   writeln("What is passed value b: ", w);
-
+   writeln("What is passed value w: ", w);
 END;  
 
-procedure NumberTest(x : integer);
+procedure ForLoopConditional(x : integer);
 var
   a,b : REAL;
 
   begin
 
-   a := 10*x;
-   writeln("Value is curently: ", a  );
+   a := 2*x;
+   writeln(" ************ ForLoopConditional Test Procedure");
+   writeln("Value is for Acurently: ", a  );
 
-   if a = 100 then begin
-      writeln("A should now be 100");
+   if a = 20 then begin
+      writeln("A should now be 20");
+   end;
+   if a > 10 then begin
+      writeln("A is greater than 10");
+   end;
+   if a < 11 then begin
+      writeln("A is less than 10");
+   end;
+   if a <> 1 then begin
+      writeln("A is less not 1");
    end;
    writeln("a: ", a);
    b:=a;
@@ -36,15 +51,20 @@ var
       end;
    end;
    writeln("Afterwards a:",a);
-
-
   end;
 
 
+
 BEGIN {WHOO}
+   writeln("Setting a to 5");
    a:=5;
-   NumberTest(2);
-   writeln("After call a: ",a); { still 5! } 
-   TestProcedure(1,2,2*a);
-   writeln("pi:", 2*PI);
+   TestScope(0,0,2);
+   ForLoopConditional(a);   
+   writeln("\nAfter call local varible is a: ",a); { still 5! } 
+   writeln("Internal symbol 2*PI:", 2*PI);
+   writeln("Testing 1+sqr(a)");
+   a := 1+ calcSquare(a);
+
+   writeln("a is : ", a);
+   writeln("End of unittest");
 END. 

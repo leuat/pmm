@@ -22,5 +22,7 @@ void SymbolTable::InitBuiltins()
     Define(new BuiltInTypeSymbol("INTEGER",""));
     Define(new BuiltInTypeSymbol("REAL",""));
     Define(new BuiltInTypeSymbol("STRING",""));
+
+    Define(new Symbol("return",""));
 }
 

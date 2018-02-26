@@ -18,6 +18,8 @@ public:
     NodeProcedureDecl(QString m, QVector<Node*> paramDecl, Node* block);
 
     void Delete() override {
+        ErrorHandler::e.DebugLow("Memory: Deleting in NodeProcedureDecl", level);
+
         for (Node* n: m_paramDecl) {
             n->Delete();
             delete n;
@@ -28,6 +30,7 @@ public:
             delete m_block;
             m_block = nullptr;
         }
+        ErrorHandler::e.DebugLow("Memory DONE: Deleting in NodeProcedureDecl", level);
     }
 
     void SetParametersValue(QVector<PVar>& lst);
