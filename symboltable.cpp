@@ -1,5 +1,5 @@
 #include "symboltable.h"
-
+#include <qmath.h>
 bool SymbolTable::isInitialized = false;
 QMap<QString, Symbol*> SymbolTable::m_constants;
 
