@@ -4,5 +4,4 @@ ErrorHandler ErrorHandler::e;
 
 ErrorHandler::ErrorHandler()
 {
-
 }

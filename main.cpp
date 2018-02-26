@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QTextStream>
 
+
 void TestSingleLine() {
     QTextStream s(stdin);
     QString text = "";
@@ -62,5 +63,5 @@ int main(int argc, char *argv[])
 {
     ErrorHandler::e.m_level = ErrorHandler::e.DEBUG_LOW;
     ErrorHandler::e.m_level = ErrorHandler::e.ERROR_ONLY;
-    ParseFile("..\\pmm\\test.pmm");
+    ParseFile("..\\pmm\\pmm\\test.pmm");
 }

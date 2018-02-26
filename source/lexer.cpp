@@ -38,7 +38,7 @@ void Lexer::SkipWhiteSpace()
 
 void Lexer::SkipComment()
 {
-    while (m_currentChar!= "}")
+    while (m_currentChar!= "}" && !m_finished)
         Advance();
     Advance();
 }

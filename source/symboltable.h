@@ -15,6 +15,7 @@ public:
     Symbol(QString name, QString type="") {
         m_name = name;
         m_type = type;
+        m_value = new PVar();
 
     }
     Symbol(QString name, QString type, float var) {

@@ -1,4 +1,4 @@
-QT       += core gui
+#QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
@@ -10,6 +10,7 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
+    source\data_pmm.cpp \
     source\token.cpp \
     source\lexer.cpp \
     source\syntax.cpp \
@@ -18,7 +19,6 @@ SOURCES += main.cpp \
     source\symboltable.cpp \
     source\errorhandler.cpp \
     source\pvar.cpp \
-    source\data_pmm.cpp \
     source\parser.cpp \
     source/ast/node.cpp \
     source/ast/nodebinop.cpp \
@@ -50,6 +50,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 HEADERS += \
+    source\data_pmm.h \
     source\token.h \
     source\lexer.h \
     source\syntax.h \
@@ -58,7 +59,6 @@ HEADERS += \
     source\symboltable.h \
     source\errorhandler.h \
     source\pvar.h \
-    source\data_pmm.h \
     source\parser.h \
     source/ast/node.h \
     source/ast/nodebinop.h \

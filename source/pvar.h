@@ -105,7 +105,7 @@ public:
             return m_strVal;
         if (m_type==TokenType::REAL)
             return QString::number(m_fVal);
-        return "PVar not defined(!)";
+        return "Variable not initialized";
     }
 
 };

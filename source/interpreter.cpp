@@ -18,5 +18,5 @@ float Interpreter::Interpret()
  //   qDebug() << "\n\nDeleting...";
 //    tree->Delete();
   //  qDebug() << "Done deleting";
-
+    return 0;
 }
