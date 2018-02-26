@@ -26,7 +26,7 @@ void Parser::VerifyToken(Token t)
 
 Node *Parser::Variable()
 {
-    Node* n = new Var(m_currentToken);
+    Node* n = new NodeVar(m_currentToken);
     Eat(TokenType::ID);
     return n;
 }
@@ -45,7 +45,7 @@ Node *Parser::AssignStatement()
         ErrorHandler::e.Error("Could not find variable or procedure '" + t.m_value+  "'");
     Eat(TokenType::ASSIGN);
     Node* right = Expr();
-    Node* node = new Assign(left, token, right);
+    Node* node = new NodeAssign(left, token, right);
     return node;
 
 }
@@ -108,7 +108,7 @@ Node *Parser::Conditional()
 
     Node* block = Block(false);
 
-    return new ConditionalNode(compareToken, a,b,block);
+    return new NodeConditional(compareToken, a,b,block);
 }
 
 
@@ -137,7 +137,7 @@ Node *Parser::CompoundStatement()
     Eat(TokenType::BEGIN);
     QVector<Node*> nodes = StatementList();
     Eat(TokenType::END);
-    Compound* root = new Compound();
+    NodeCompound* root = new NodeCompound();
     for (Node* n: nodes)
         root->children.append(n);
 
@@ -150,11 +150,11 @@ Node *Parser::Program()
 {
 //    Node* n = CompoundStatement();
     Eat(TokenType::PROGRAM);
-    Var* varNode = (Var*)Variable();
+    NodeVar* varNode = (NodeVar*)Variable();
     QString progName = varNode->value;
     Eat(TokenType::SEMI);
-    BlockNode* block = (BlockNode*)Block(true);
-    ProgramNode* program = new ProgramNode(progName, block);
+    NodeBlock* block = (NodeBlock*)Block(true);
+    NodeProgram* program = new NodeProgram(progName, block);
     Eat(TokenType::DOT);
 
     return program;
@@ -172,7 +172,7 @@ Node* Parser::Factor()
 
     if (t.m_type == TokenType::PLUS || t.m_type==TokenType::MINUS) {
         Eat(t.m_type);
-        return new UnaryOpNode(t, Factor());
+        return new NodeUnaryOp(t, Factor());
     }
 
 
@@ -224,10 +224,10 @@ Node *Parser::FindProcedure()
         }
 
         Eat(TokenType::RPAREN);
-        ProcedureDecl* p = (ProcedureDecl*)m_procedures[procName];
+        NodeProcedureDecl* p = (NodeProcedureDecl*)m_procedures[procName];
         //p->SetParameters(paramList);
 
-        return new ProcedureNode(p, paramList);
+        return new NodeProcedure(p, paramList);
     }
     //qDebug() << m_currentToken.getType() << " with value " << m_currentToken.m_value;
     return nullptr;
@@ -235,7 +235,7 @@ Node *Parser::FindProcedure()
 
 Node *Parser::Block(bool useOwnSymTab)
 {
-    return new BlockNode(Declarations(), CompoundStatement(), useOwnSymTab);
+    return new NodeBlock(Declarations(), CompoundStatement(), useOwnSymTab);
 }
 
 QVector<Node *> Parser::Parameters()
@@ -268,7 +268,7 @@ Node *Parser::ForLoop()
 
 //    qDebug() << m_currentToken.getType();
   //  exit(1);
-    return new ForLoopNode(a,b,block);
+    return new NodeForLoop(a,b,block);
 
 }
 
@@ -307,7 +307,7 @@ QVector<Node*> Parser::Declarations()
 
         Eat(TokenType::SEMI);
         Node* block = Block(true);
-        Node* procDecl = new ProcedureDecl(procName, paramDecl, block);
+        Node* procDecl = new NodeProcedureDecl(procName, paramDecl, block);
         //decl.append(procDecl);
         Eat(TokenType::SEMI);
 
@@ -321,12 +321,12 @@ QVector<Node*> Parser::Declarations()
 QVector<Node *> Parser::VariableDeclarations()
 {
     QVector<Node*> vars;
-    vars.append(new Var(m_currentToken));
+    vars.append(new NodeVar(m_currentToken));
     Eat(TokenType::ID);
 
     while (m_currentToken.m_type == TokenType::COMMA) {
         Eat(TokenType::COMMA);
-        vars.append(new Var(m_currentToken));
+        vars.append(new NodeVar(m_currentToken));
         Eat(TokenType::ID);
     }
     Eat(TokenType::COLON);
@@ -343,7 +343,7 @@ QVector<Node *> Parser::VariableDeclarations()
 
 //    vars.insert(0, VarDecl(varN));
     for (Node* n : vars) {
-        var_decleratons.append(new VarDecl(n, typeNode));
+        var_decleratons.append(new NodeVarDecl(n, typeNode));
     }
 
 //    return vars;
@@ -352,7 +352,7 @@ QVector<Node *> Parser::VariableDeclarations()
 
 Node *Parser::ExecuteInternalFunction(TokenType::Type t,  Node* text,Node* block)
 {
-    return new BuiltinMethod("writeln", text, block);
+    return new NodeBuiltinMethod("writeln", text, block);
 }
 
 Node *Parser::TypeSpec()
@@ -365,7 +365,7 @@ Node *Parser::TypeSpec()
         Eat(TokenType::REAL);
 
 
-    return new VarType(t);
+    return new NodeVarType(t);
 
 }
 

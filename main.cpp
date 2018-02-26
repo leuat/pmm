@@ -2,12 +2,12 @@
 #include <QDebug>
 #include <QTextStream>
 
-#include "interpreter.h"
-#include "lexer.h"
-#include "ast.h"
+#include "source/interpreter.h"
+#include "source/lexer.h"
+#include "source/ast/ast.h"
+#include "source/errorhandler.h"
 #include <QFile>
 #include <QTextStream>
-#include "errorhandler.h"
 
 void TestSingleLine() {
     QTextStream s(stdin);
@@ -62,5 +62,5 @@ int main(int argc, char *argv[])
 {
     ErrorHandler::e.m_level = ErrorHandler::e.DEBUG_HIGH;
     ErrorHandler::e.m_level = ErrorHandler::e.ERROR_ONLY;
-    ParseFile("..\\test.pmm");
+    ParseFile("..\\pmm\\test.pmm");
 }

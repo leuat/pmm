@@ -1,16 +1,27 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "ast.h"
+#include "source/ast/ast.h"
+#include "source/lexer.h"
+
+#include "source/ast/nodebinop.h"
+#include "source/ast/nodenumber.h"
+#include "source/ast/nodestring.h"
+#include "source/ast/nodeunaryop.h"
+#include "source/ast/nodecompound.h"
+#include "source/ast/nodevar.h"
+#include "source/ast/nodeassign.h"
+#include "source/ast/nodevardecl.h"
+#include "source/ast/nodeblock.h"
+#include "source/ast/nodeprogram.h"
+#include "source/ast/nodevartype.h"
+#include "source/ast/nodeproceduredecl.h"
+#include "source/ast/nodeprocedure.h"
+#include "source/ast/nodeconditional.h"
+#include "source/ast/nodeforloop.h"
+#include "source/ast/nodebuiltinmethod.h"
 
 
-/*class Procedure {
-public:
-    QString m_name;
-    Node* m_block;
-
-};
-*/
 class Parser {
 public:
 

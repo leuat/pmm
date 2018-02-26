@@ -1,0 +1,31 @@
+#ifndef NODE_H
+#define NODE_H
+
+#include "source/token.h"
+#include "source/symboltable.h"
+#include "source/errorhandler.h"
+
+
+class Node {
+public:
+    Token m_op;
+    int m_lineNumber;
+    uint level = 0;
+    Node* m_left = nullptr, *m_right = nullptr;
+    virtual PVar Execute(SymbolTable* symTab, uint lvl) = 0;
+    virtual void ExecuteSym(SymbolTable* symTab) = 0;
+};
+
+
+class NoOp : public Node {
+    public:
+    PVar Execute(SymbolTable* symTab, uint lvl) override {
+        level = lvl+1;
+        return PVar();
+    }
+    void ExecuteSym(SymbolTable* symTab) override {
+
+    }
+};
+
+#endif // NODE_H
