@@ -58,6 +58,33 @@ public:
     void Define(Symbol* s) {
         m_symbols[s->m_name] = s;
     }
+    void Delete() {
+        for (QString val : m_symbols.keys()) {
+            Symbol* s = m_symbols[val];
+            if (s!=nullptr) {
+                if (s->m_value)
+                    delete s->m_value;
+
+            }
+            delete s;
+        }
+
+        // Delete static constants as well
+        if (isInitialized) {
+            for (QString val : m_constants.keys()) {
+                Symbol* s = m_symbols[val];
+
+                if (s!=nullptr) {
+                    if (s->m_value)
+                        delete s->m_value;
+
+                }
+                delete s;
+            }
+            isInitialized = false;
+
+        }
+    }
 
     void setName(QString s) {
         m_name = s;

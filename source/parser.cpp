@@ -4,6 +4,19 @@ Parser::Parser()
 
 }
 
+void Parser::Delete()
+{
+    for (QString val : m_procedures.keys()) {
+        Node* s = m_procedures[val];
+           // if (s!=nullptr) {
+            //s->Delete();
+            delete s;
+//        }
+    }
+    m_procedures.clear();
+
+}
+
 void Parser::Eat(TokenType::Type t)
 {
     if (m_currentToken.m_type == t) {

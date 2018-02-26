@@ -19,6 +19,14 @@ public:
         m_name = n;
     }
 
+    void Delete() override {
+        if (m_NodeBlock) {
+            m_NodeBlock->Delete();
+            delete m_NodeBlock;
+            m_NodeBlock = nullptr;
+        }
+    }
+
     PVar Execute(SymbolTable* symTab, uint lvl) override;
     void ExecuteSym(SymbolTable* symTab) override {
         m_NodeBlock->ExecuteSym(symTab);

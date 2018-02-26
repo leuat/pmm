@@ -17,6 +17,18 @@ public:
 
     NodeProcedureDecl(QString m, QVector<Node*> paramDecl, Node* block);
 
+    void Delete() override {
+        for (Node* n: m_paramDecl) {
+            n->Delete();
+            delete n;
+        }
+        m_paramDecl.clear();
+        if (m_block) {
+            m_block->Delete();
+            delete m_block;
+            m_block = nullptr;
+        }
+    }
 
     void SetParametersValue(QVector<PVar>& lst);
 

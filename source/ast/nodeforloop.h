@@ -24,7 +24,25 @@ public:
 //        m_op = op;
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override;
+    void Delete() override {
+        if (m_a) {
+            m_a->Delete();
+            delete m_a;
+            m_a = nullptr;
+        }
+        if (m_b) {
+            m_b->Delete();
+            delete m_b;
+            m_b = nullptr;
+        }
+        if (m_block) {
+            m_block->Delete();
+            delete m_block;
+            m_block = nullptr;
+        }
 
+
+    }
     void ExecuteSym(SymbolTable* symTab) override {
         m_block->ExecuteSym(symTab);
     }

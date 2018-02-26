@@ -19,6 +19,19 @@ public:
         m_procedure = proc;
     }
 
+    void Delete() {
+        if (m_procedure) {
+            //m_procedure->Delete();
+            //delete m_procedure;
+            //m_procedure = nullptr;
+        }
+        for (Node* n : m_parameters) {
+            n->Delete();
+            delete n;
+        }
+        m_parameters.clear();
+    }
+
     PVar Execute(SymbolTable *symTab, uint lvl) override;
     void ExecuteSym(SymbolTable* symTab) override {
         m_procedure ->ExecuteSym(symTab);

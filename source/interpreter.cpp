@@ -14,6 +14,7 @@ float Interpreter::Visit(Node* n)
 float Interpreter::Interpret()
 {
     Node* tree = m_parser.Parse();
-    return Visit(tree);
+    Visit(tree);
+    tree->Delete();
 
 }

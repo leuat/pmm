@@ -17,6 +17,19 @@ public:
         m_varNode = varNode;
         m_typeNode = typeNode;
     }
+
+    void Delete() override {
+        if (m_varNode) {
+            m_varNode->Delete();
+            delete m_varNode;
+        }
+        if (m_typeNode) {
+            m_typeNode->Delete();
+            delete m_typeNode;
+        }
+
+    }
+
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl+1;

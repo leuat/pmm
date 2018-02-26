@@ -14,6 +14,20 @@ public:
     Node* m_left = nullptr, *m_right = nullptr;
     virtual PVar Execute(SymbolTable* symTab, uint lvl) = 0;
     virtual void ExecuteSym(SymbolTable* symTab) = 0;
+    virtual void Delete() {
+        if (m_left!=nullptr) {
+            m_left->Delete();
+            delete m_left;
+            m_left = nullptr;
+        }
+        if (m_right!=nullptr) {
+            m_right->Delete();
+            delete m_right;
+            m_left = nullptr;
+
+        }
+
+    }
 };
 
 

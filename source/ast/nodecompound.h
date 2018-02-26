@@ -22,6 +22,13 @@ public:
         return PVar();
 
     }
+    void Delete() override {
+        for (Node* n: children) {
+            n->Delete();
+            delete n;
+        }
+        children.clear();
+    }
     void ExecuteSym(SymbolTable* symTab) override {
         Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         for (Node* n:children) {

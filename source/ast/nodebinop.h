@@ -10,6 +10,7 @@
 
 class NodeBinOP : public Node {
 public:
+
     NodeBinOP(Node* left, Token op, Node* right) {
         m_right = right;
         m_left = left;

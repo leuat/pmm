@@ -18,6 +18,20 @@ public:
         m_block = block;
         m_text = text;
     }
+
+    void Delete() override {
+        if (m_block) {
+            m_block->Delete();
+            delete m_block;
+            m_block = nullptr;
+        }
+        if (m_text) {
+            m_text->Delete();
+            delete m_text;
+            m_text = nullptr;
+        }
+    }
+
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         ErrorHandler::e.DebugLow("Calling Builtin",level);
         level = lvl+1;

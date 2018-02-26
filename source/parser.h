@@ -34,6 +34,11 @@ public:
         m_lexer = l;
         m_currentToken = m_lexer.GetNextToken();
     }
+    ~Parser() {
+        Delete();
+    }
+
+    void Delete();
 
     void Eat(TokenType::Type t);
 
