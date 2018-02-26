@@ -14,7 +14,7 @@ public:
     NodeCompound() {
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
-        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+        Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
 
         level = lvl+1;
         for (Node* n: children)
@@ -30,7 +30,7 @@ public:
         children.clear();
     }
     void ExecuteSym(SymbolTable* symTab) override {
-        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+        Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         for (Node* n:children) {
             ErrorHandler::e.DebugLow("Calling Compound Node",level);
             n->ExecuteSym(symTab);

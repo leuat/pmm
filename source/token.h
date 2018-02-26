@@ -2,7 +2,7 @@
 #define TOKEN_H
 
 #include <QString>
-#include "data.h"
+#include "data_pmm.h"
 
 class TokenType {
 public:
@@ -49,14 +49,14 @@ public:
     Token(TokenType::Type t, QString val) {
         m_value = val;
         m_type = t;
-        m_lineNumber = Data::d.lineNumber;
-        m_currentLineText = Data::d.currentLineText;
+        m_lineNumber = Pmm::Data::d.lineNumber;
+        m_currentLineText = Pmm::Data::d.currentLineText;
     }
     Token(TokenType::Type t, int val) {
         m_intVal = val;
         m_type = t;
-        m_lineNumber = Data::d.lineNumber;
-        m_currentLineText = Data::d.currentLineText;
+        m_lineNumber = Pmm::Data::d.lineNumber;
+        m_currentLineText = Pmm::Data::d.currentLineText;
 
     }
 

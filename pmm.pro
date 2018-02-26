@@ -1,6 +1,6 @@
-QT += core
-QT -= gui
+QT       += core gui
 
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 
 TARGET = pmm
@@ -18,7 +18,7 @@ SOURCES += main.cpp \
     source\symboltable.cpp \
     source\errorhandler.cpp \
     source\pvar.cpp \
-    source\data.cpp \
+    source\data_pmm.cpp \
     source\parser.cpp \
     source/ast/node.cpp \
     source/ast/nodebinop.cpp \
@@ -58,7 +58,7 @@ HEADERS += \
     source\symboltable.h \
     source\errorhandler.h \
     source\pvar.h \
-    source\data.h \
+    source\data_pmm.h \
     source\parser.h \
     source/ast/node.h \
     source/ast/nodebinop.h \

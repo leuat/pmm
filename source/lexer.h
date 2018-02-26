@@ -4,7 +4,7 @@
 #include <QString>
 #include "syntax.h"
 #include "token.h"
-#include "data.h"
+#include "data_pmm.h"
 
 #include "errorhandler.h"
 
@@ -24,6 +24,7 @@ public:
         m_pos = 0;
         m_currentChar = m_text[m_pos];
         m_lines = lines;
+        Pmm::Data::d.Init();
     }
 
     void Error(QString text);

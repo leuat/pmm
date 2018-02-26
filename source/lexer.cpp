@@ -16,9 +16,9 @@ void Lexer::Advance()
     }
     else {
         m_currentChar = m_text[m_pos];
-        if (m_localPos>=m_lines[Data::d.lineNumber].length()) {
-            Data::d.lineNumber ++;
-            Data::d.currentLineText = m_lines[Data::d.lineNumber];
+        if (m_localPos>=m_lines[Pmm::Data::d.lineNumber].length()) {
+            Pmm::Data::d.lineNumber ++;
+            Pmm::Data::d.currentLineText = m_lines[Pmm::Data::d.lineNumber];
             m_localPos = 0;
         }
 

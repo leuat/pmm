@@ -16,7 +16,7 @@ public:
         m_val = val;
     }
     PVar  Execute(SymbolTable* symTab, uint lvl) override {
-        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+        Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl +1;
         return PVar(m_val);
     }

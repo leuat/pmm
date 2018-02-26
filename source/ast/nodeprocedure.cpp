@@ -2,7 +2,7 @@
 
 
 PVar NodeProcedure::Execute(SymbolTable *symTab, uint lvl) {
-    Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+    Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
     QVector<PVar> vars;
     for (Node* n: m_parameters) {
         vars.append(n->Execute(symTab, lvl));

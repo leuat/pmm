@@ -42,8 +42,8 @@ public:
                 s+=m_text->Execute(symTab, level).toString();
             if (m_block!=nullptr)
                 s+=m_block->Execute(symTab, level).toString();
-            QTextStream out(stdout);
-            out << s << endl;
+
+            ErrorHandler::e.OutputText(s);
         }
         return PVar();
 

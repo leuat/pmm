@@ -16,7 +16,7 @@ public:
         m_left = nullptr;
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
-        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+        Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl+1;
         ErrorHandler::e.DebugLow("Calling Unary Op Node",level);
 

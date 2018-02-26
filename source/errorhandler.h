@@ -4,9 +4,10 @@
 
 #include <QString>
 #include <QDebug>
-#include "data.h"
+#include "source/data_pmm.h"
 #include <stdio.h>
 #include <iostream>
+#include <QTextEdit>
 
 class ErrorHandler
 {
@@ -19,13 +20,22 @@ public:
     int DEBUG_HIGH = 1;
     int DEBUG_LOW = 0;
 
+    QString m_teOut;
+
+
+    void OutputText(QString str) {
+        std::cout << str.toStdString() << std::endl;
+        m_teOut = m_teOut + str + "\n";
+    }
 
     void Message(QString str, int lvl=0) {
         QString s ="";
         for (int i=0;i<lvl;i++)
             s+=" ";
 
-        std::cout << (s + str).toStdString() << std::endl;
+        s = s + str + "\n";
+        std::cout << s.toStdString();
+        m_teOut = m_teOut + s;
 
     }
 
@@ -38,12 +48,13 @@ public:
         if (m_level<=DEBUG_LOW)
             Message(str, lvl);
     }
-
+    bool exitOnError= true;
     void Error(QString str) {
-        Message("\n**** FATAL ERROR on line: " + QString::number(Data::d.lineNumber+1));
-        Message("Source: " + Data::d.currentLineText);
+        Message("\n**** FATAL ERROR on line: " + QString::number(Pmm::Data::d.lineNumber+1));
+        Message("Source: " + Pmm::Data::d.currentLineText);
         Message(str);
-        exit(1);
+        if (exitOnError)
+            exit(1);
     }
 
 

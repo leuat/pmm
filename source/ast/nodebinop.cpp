@@ -3,7 +3,7 @@
 
 PVar NodeBinOP::Execute(SymbolTable *symTab, uint lvl) {
     level = lvl+1;
-    Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+    Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
     ErrorHandler::e.DebugLow("Calling BinOP",level);
 
     if (m_op.m_type==TokenType::PLUS)

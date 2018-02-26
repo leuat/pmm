@@ -19,7 +19,7 @@ public:
     }
 
     PVar Execute(SymbolTable* symTab, uint lvl) override {
-        Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+        Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         ErrorHandler::e.DebugLow("Calling Assign",level);
         level = lvl+1;
 
