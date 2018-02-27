@@ -71,6 +71,7 @@ Node *Parser::Statement()
         node = CompoundStatement();
     }
     else if (m_currentToken.m_type == TokenType::ID) {
+
         node = FindProcedure();
         if (node==nullptr)
             node = AssignStatement();

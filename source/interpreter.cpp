@@ -13,8 +13,19 @@ float Interpreter::Visit(Node* n)
 
 float Interpreter::Interpret()
 {
-    Node* tree = m_parser.Parse();
-    Visit(tree);
+    Node* tree = nullptr;
+    try {
+        tree = m_parser.Parse();
+    } catch (FatalErrorException e) {
+        ErrorHandler::e.CatchError(e, "Error during parsing:");
+    }
+    if (tree!=nullptr)
+        try {
+        Visit(tree);
+    } catch (FatalErrorException e) {
+        ErrorHandler::e.CatchError(e, "Error during interpreting");
+    }
+
  //   qDebug() << "\n\nDeleting...";
 //    tree->Delete();
   //  qDebug() << "Done deleting";

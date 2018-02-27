@@ -20,7 +20,6 @@ public:
         level = lvl+1;
         Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         ErrorHandler::e.DebugLow("Calling Var Node",level);
-
         if (symTab->Lookup(value)==nullptr) {
             ErrorHandler::e.Error("Could not find variable '" +value +"'");
         }

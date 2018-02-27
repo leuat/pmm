@@ -8,6 +8,18 @@
 #include <stdio.h>
 #include <iostream>
 #include <QTextEdit>
+#include <exception>
+using namespace std;
+
+class FatalErrorException: public exception
+{
+public:
+    QString message;
+    FatalErrorException(QString msg)
+    {
+        message = msg;
+    }
+};
 
 class ErrorHandler
 {
@@ -49,10 +61,23 @@ public:
             Message(str, lvl);
     }
     bool exitOnError= true;
+
     void Error(QString str) {
-        Message("\n**** FATAL ERROR on line: " + QString::number(Pmm::Data::d.lineNumber+1));
-        Message("Source: " + Pmm::Data::d.currentLineText);
-        Message(str);
+        QString msg = "";
+        msg +="\n**** FATAL ERROR on line: " + QString::number(Pmm::Data::d.lineNumber+1);
+        msg+="\nSource: " + Pmm::Data::d.currentLineText;
+        msg+="\nMessage: " + str;
+//        Message("\n**** FATAL ERROR on line: " + QString::number(Pmm::Data::d.lineNumber+1));
+  //      Message("Source: " + Pmm::Data::d.currentLineText);
+        throw FatalErrorException(msg);
+        //Message(str);
+
+        //if (exitOnError)
+        //    exit(1);
+    }
+
+    void CatchError(FatalErrorException e, QString extraMessage="") {
+        Message(extraMessage + e.message);
         if (exitOnError)
             exit(1);
     }
