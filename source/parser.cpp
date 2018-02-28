@@ -98,10 +98,15 @@ Node *Parser::Statement()
         node = ExecuteInternalFunction(TokenType::WRITELN, text, block);
     }*/
     else if (m_currentToken.m_type == TokenType::IF) {
+        Eat(TokenType::IF);
         node = Conditional();
     }
     else if (m_currentToken.m_type == TokenType::FOR) {
         node = ForLoop();
+    }
+    else if (m_currentToken.m_type == TokenType::WHILE) {
+        Eat(TokenType::WHILE);
+        node = Conditional(true);
     }
     else {
         //ErrorHandler::e.Error("Unknown method " + m_currentToken.getType());
@@ -114,9 +119,8 @@ Node *Parser::Statement()
 
 
 }
-Node *Parser::Conditional()
+Node *Parser::Conditional(bool isWhileLoop)
 {
-    Eat(TokenType::IF);
     Node* a = Expr();
 
     Token compareToken = m_currentToken;
@@ -128,7 +132,7 @@ Node *Parser::Conditional()
 
     Node* block = Block(false);
 
-    return new NodeConditional(compareToken, a,b,block);
+    return new NodeConditional(compareToken, a,b,block, isWhileLoop);
 }
 
 

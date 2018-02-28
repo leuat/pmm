@@ -21,8 +21,8 @@ void TestSingleLine() {
 
         Interpreter interpreter = Interpreter(parser);
 
-        int result = interpreter.Interpret();
-        qDebug() << result;
+        interpreter.Interpret();
+        //qDebug() << result;
     }
 
 }
@@ -55,7 +55,7 @@ void ParseFile(QString fileName) {
     Lexer lexer = Lexer(text, lst);
     Parser parser = Parser(lexer);
     Interpreter interpreter = Interpreter(parser);
-    float result = interpreter.Interpret();
+    interpreter.Interpret();
 
 }
 

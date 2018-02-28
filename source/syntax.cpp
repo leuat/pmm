@@ -26,6 +26,7 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::FOR,"FOR"));
     reservedWords.append(Token(TokenType::TO,"TO"));
     reservedWords.append(Token(TokenType::DO,"DO"));
+    reservedWords.append(Token(TokenType::WHILE,"WHILE"));
 
 }
 

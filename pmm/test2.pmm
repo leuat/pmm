@@ -1,34 +1,42 @@
 PROGRAM FirstC64;
 VAR
-   a, b, c, i, j : INTEGER;
+   a, b, c, i, j : byte;
+   data: array [4096] of byte;
 
 BEGIN
-   {b := #1;
-   c:= #10;
-   poke(SCREEN_BACKGROUND_COLOR,b, c);
+
+{	i:=#0;
+	a:=#0;
+	b:=#0;
+
+    	poke($C202, #0,#13);
+    	poke(SPRITE_DATA_LOC,#0, #3); 
+    	poke(SPRITE_BITMASK,#0, #255);
+    	poke(SPRITE_COLOR,#0, #2);
+    	poke(SPRITE_COLOR,#0, #3);
+
+
+	while i<#10 do begin
+		while a<>#100 do begin
+			peek(RASTERLINE_POS, #0, a);
+		end;
+		
+		poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
+		while a<>#0 do begin
+			peek(RASTERLINE_POS, #0, a);
+		end;
+		
+		poke(SCREEN_BACKGROUND_COLOR, #0, RED);
+		b:=b+#1;
+		c:=#255-b;
+    		poke(SPRITE_POS,#0, b);
+    		poke(SPRITE_POS,#1, b);
+    		poke(SPRITE_POS,#2, c);
+    		poke(SPRITE_POS,#3, b);
+
+
+       end;
+
 }
-   for i:=#1 to #255 do begin
-    peek($d012,#0,a);
-   	poke(SCREEN_BACKGROUND_COLOR,#0, a);
-	writeln("Heisann",0);
-   
-   end;
-
-    poke(SCREEN_BACKGROUND_COLOR,#0,RED);
-
-    poke( $C202, #0,#13);
-    poke($7F8,#0, #3);
-    poke($D015,#0, #255);
-    poke($D027,#0, #2);
-    poke($D000,#0, #100);
-    poke($D001,#0, #100);
-    b := #255;
-   for i:=#1 to b do begin
-     poke(SPRITE_LOC,#0,i);
-     poke(SPRITE_LOC,#1,i);
-     writeln("heisann",0);
-     peek(RASTERLINE_POS,#0,a);
-     {poke(53280,#0,a);}
-   end;
 
 END.

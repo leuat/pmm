@@ -20,6 +20,7 @@
 #include "source/ast/nodeconditional.h"
 #include "source/ast/nodeforloop.h"
 #include "source/ast/nodebuiltinmethod.h"
+#include "source/ast/nodewhileloop.h"
 
 
 class Parser {
@@ -59,8 +60,9 @@ public:
     Node* Block(bool useOwnSymTab);
     QVector<Node*> Parameters();
     Node* ForLoop();
+//    Node* WhileLoop();
     Node* String();
-    Node* Conditional();
+    Node* Conditional(bool isWhileLoop=false);
 //    QVector<Node*> Procedure();
     QVector<Node*> Declarations();
     QVector<Node*> VariableDeclarations();

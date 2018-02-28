@@ -17,7 +17,6 @@ void SymbolTable::Initialize()
     m_constants["SCREEN_BACKGROUND_COLOR"] = new Symbol("53280","ADDRESS", 53280);
     m_constants["SCREEN_FOREGROUND_COLOR"] = new Symbol("53281","ADDRESS", 53281);
     m_constants["RASTERLINE_POS"] = new Symbol("$D012","ADDRESS", 0xd012);
-    m_constants["SPRITE_LOC"] = new Symbol("$D000","ADDRESS", 0xD000);
     m_constants["BLACK"] = new Symbol("#0","INTEGER", 0);
     m_constants["WHITE"] = new Symbol("#1","INTEGER", 1);
     m_constants["RED"] = new Symbol("#2","INTEGER", 2);
@@ -34,6 +33,11 @@ void SymbolTable::Initialize()
     m_constants["LIGHT_GREEN"] = new Symbol("#13","INTEGER", 13);
     m_constants["LIGHT_BLUE"] = new Symbol("#14","INTEGER", 14);
     m_constants["LIGHT_GREY"] = new Symbol("#15","INTEGER", 15);
+
+    m_constants["SPRITE_POS"] = new Symbol("$D000","ADDRESS", 0xD000);
+    m_constants["SPRITE_DATA_LOC"] = new Symbol("$07f8", "ADDRESS", 0x07f8);
+    m_constants["SPRITE_BITMASK"] = new Symbol("$d015", "ADDRESS", 0xd015);
+    m_constants["SPRITE_COLOR"] = new Symbol("53287","ADDRESS", 0xD027);
 
     isInitialized = true;
 
