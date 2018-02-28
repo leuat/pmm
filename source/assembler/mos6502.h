@@ -35,7 +35,7 @@ public:
     void AssignVariable(QString v) override;
     void EndAssignVariable(QString variable) override;
     void BinOP(TokenType::Type t) override;
-    void Poke(QString addr, QString val) override;
+    void Poke(bool start) override;
     void Writeln() override;
     void EndWriteln() override;
     void LoadVariable(QString var) override;

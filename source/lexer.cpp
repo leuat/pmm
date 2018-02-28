@@ -57,9 +57,22 @@ Token Lexer::Number()
             res+=m_currentChar;
             Advance();
         }
+
+
         return Token(TokenType::REAL_CONST, res.toFloat());
     }
-    return Token(TokenType::INTEGER_CONST, res.toFloat());
+    bool ok;
+    float val = 0;
+//    qDebug() << res;
+    if (res.contains("$")) {
+        res.remove("$");
+        val = res.toInt(&ok, 16);
+  //      qDebug() << ok << "  "  << val;
+    }
+    else
+        val = res.toFloat();
+
+    return Token(TokenType::INTEGER_CONST, val);
 
 }
 

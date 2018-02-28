@@ -76,7 +76,8 @@ public:
     virtual void Number(float f) = 0;
     virtual void String(QString s) = 0;
     virtual void BinOP(TokenType::Type t)=0;
-    virtual void Poke(QString a, QString b) = 0;
+    virtual void Poke(bool start) = 0;
+
     virtual void Writeln() = 0;
     virtual void EndWriteln() = 0;
     virtual void WriteBuiltinWriteln() {}

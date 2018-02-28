@@ -4,19 +4,30 @@ VAR
 
 BEGIN
    a := 2;
-   a := 5+5;
-   b:= 10 +a;
+   b:= 5;
+   a:= a + a +1;
+   poke(53280,10);
 
+   writeln("starting",a);
+   b := 1;
    for i:=0 to b do begin
       writeln("halla",a);
-      poke(53280,i);
-{      a:=1+a;}
 
-      for j:=0 to 200 do begin
+      poke(53280,i);
+      for j:=0 to 20 do begin
       	poke(53281,j);
-		writeln("balla",0);
+      	writeln("/\\",0);
 
       end;
+
+   end;
+    poke( $C202, 13);
+	poke($7F8, 13);
+	poke($D015, 255);
+    poke($D027, 2);
+    poke($D000,100);
+    poke($D001,100);
+   for i:=1 to 10 do begin
 
    end;
 END.

@@ -77,7 +77,10 @@ void AsmMOS6502::Number(float f)
     //Asm(m_term +"\#" + n);
     if (m_term=="")
         m_term = "lda ";
-    m_term+="\#" + n;
+    if (m_term.contains("sta"))
+        m_term +=n;
+    else
+        m_term+="\#" + n;
     if (endTerm()) {
         Asm(m_term);
         ClearTerm();
@@ -113,12 +116,15 @@ void AsmMOS6502::BinOP(TokenType::Type t)
         m_term = "sbc ";
 }
 
-void AsmMOS6502::Poke(QString addr, QString val)
+void AsmMOS6502::Poke(bool start)
 {
-    if (Syntax::s.isDigit(val))
+    if (start)
+        m_term = "lda ";
+   else m_term = "sta ";
+/*    if (Syntax::s.isDigit(val))
       val = "\#" + val;
     Asm("lda "+val);
-    Asm("sta "+addr);
+    Asm("sta "+addr);*/
 }
 
 void AsmMOS6502::Writeln()
@@ -153,6 +159,8 @@ void AsmMOS6502::LoadVariable(QString var)
 
 void AsmMOS6502::Variable(QString v)
 {
+    if (m_term=="")
+        m_term = "lda ";
     m_term+=v;
     if (endTerm()) {
         Asm(m_term);

@@ -35,7 +35,8 @@ public:
     Syntax();
     void SetupReservedWords();
     void SetupBuiltinFunctions();
-    QString digit = "0123456789";
+    QString puredigit = "0123456789";
+    QString digit = "0123456789$ABCDEF";
     QString alpha = "abcdefghijklmnopqrstuvwxyz";
     QString alnum =alpha+digit;
     QString alnumString =alpha+digit+ " ;:æøå!#¤%&/()=.,-+*";

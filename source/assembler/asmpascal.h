@@ -19,7 +19,7 @@ public:
     void Number(float f) override;
     void String(QString s) override;
     void BinOP(TokenType::Type t) override;
-    void Poke(QString a, QString b) override  { }
+    void Poke(bool b) override  { }
     void Writeln() override;
     void EndWriteln() override;
 

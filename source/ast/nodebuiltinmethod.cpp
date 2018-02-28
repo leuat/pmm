@@ -15,11 +15,12 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
             ErrorHandler::e.Error("Poke requires 2 parameters");
 
         as->ClearTerm();
-        QString varb = m_params[1]->Build(as);
-        QString vara = m_params[0]->Build(as);
+        as->Poke(true);
+        m_params[1]->Build(as);
+        as->Poke(false);
+        m_params[0]->Build(as);
         as->ClearTerm();
 
-        as->Poke(vara, varb);
 
     }
 
