@@ -150,6 +150,14 @@ Token Lexer::GetNextToken()
             return String();
         }
 
+        if (m_currentChar=="[") {
+            Advance();
+            return Token(TokenType::LBRACKET,"[");
+        }
+        if (m_currentChar=="]") {
+            Advance();
+            return Token(TokenType::RBRACKET,"]");
+        }
 
         if (m_currentChar==",") {
             Advance();

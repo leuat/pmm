@@ -27,6 +27,10 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::TO,"TO"));
     reservedWords.append(Token(TokenType::DO,"DO"));
     reservedWords.append(Token(TokenType::WHILE,"WHILE"));
+    reservedWords.append(Token(TokenType::ARRAY,"ARRAY"));
+    reservedWords.append(Token(TokenType::OF,"OF"));
+    reservedWords.append(Token(TokenType::BYTE,"BYTE"));
+    reservedWords.append(Token(TokenType::INCBIN,"INCBIN"));
 
 }
 
@@ -60,6 +64,27 @@ void Syntax::SetupBuiltinFunctions()
     peek.append(BuiltInFunction::INTEGER);
     builtInFunctions["peek"] = (BuiltInFunction(
                                 "peek",  peek));
+
+    QVector<BuiltInFunction::Type> memcpy;
+    memcpy.append(BuiltInFunction::INTEGER);
+    memcpy.append(BuiltInFunction::INTEGER);
+    memcpy.append(BuiltInFunction::INTEGER);
+    builtInFunctions["memcpy"] = (BuiltInFunction(
+                                "memcpy",  memcpy));
+
+
+    QVector<BuiltInFunction::Type> initRandom;
+    builtInFunctions["initrandom"] = (BuiltInFunction(
+                                "initrandom",  initRandom));
+
+    QVector<BuiltInFunction::Type> rand;
+    rand.append(BuiltInFunction::INTEGER);
+    rand.append(BuiltInFunction::INTEGER);
+    rand.append(BuiltInFunction::INTEGER);
+    builtInFunctions["rand"] = (BuiltInFunction(
+                                "rand",  rand));
+
+
 
 }
 

@@ -26,8 +26,9 @@ public:
             val = "#"+QString::number((int)m_val);
         if (m_op.m_type==TokenType::INTEGER_CONST)
             val = "#"+QString::number((int)m_val);
-        if (m_op.m_type==TokenType::ADDRESS)
-            val = QString::number((int)m_val);
+        if (m_op.m_type==TokenType::ADDRESS) {
+            val = "$" + QString::number((int)m_val,16);
+        }
         as->Number(val);
         return val;
     }

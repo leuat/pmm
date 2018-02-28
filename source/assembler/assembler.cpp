@@ -58,6 +58,22 @@ void Assembler::Term()
     ClearTerm();
 }
 
+void Assembler::Appendix(QString str, int level)
+{
+    QString s ="";
+    for (int i=0;i<level;i++)
+        s+="\t";
+    s+=str;
+    m_appendix.append(s);
+
+}
+
+void Assembler::Connect()
+{
+    m_source<<m_appendix;
+    m_appendix.clear();
+}
+
 
 
 QString Stack::current() const

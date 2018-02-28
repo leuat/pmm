@@ -36,7 +36,7 @@ public:
         QString  val = value;
         Symbol* s= as->m_symTab->LookupConstants(value);
         if (s!=nullptr) {
-            val = QString::number(s->m_value->m_fVal);
+            val = "$" + QString::number((int)s->m_value->m_fVal,16);
             if (!(s->m_type.toLower()=="address"))
                 val = "#" + val;
         }

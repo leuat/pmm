@@ -51,6 +51,7 @@ class Assembler
 {
 public:
     QStringList m_source;
+    QStringList m_appendix;
     QString m_term;
     QMap<QString, Stack> m_stack;
     QMap<QString, LabelStack> m_labelStack;
@@ -69,6 +70,7 @@ public:
     virtual void EndProgram() = 0;
     virtual void VarDeclHeader() = 0;
     virtual void DeclareVariable(QString name, QString type)=0;
+    virtual void DeclareArray(QString name, QString type, int count, QStringList lst) {}
     virtual void BeginBlock() = 0;
     virtual void EndBlock() = 0;
     virtual void AssignVariable(QString var) = 0;
@@ -86,9 +88,9 @@ public:
     virtual void WriteBuiltinWriteln() {}
     virtual void StartPrint() {}
     virtual void Variable(QString s) {}
-
+    void Appendix(QString s, int l);
     virtual void LoadVariable(QString var) {}
-
+    void Connect();
 
     virtual void StartForLoop(QString a, QString b) {}
     virtual void EndForLoop(QString endVal) {}

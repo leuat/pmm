@@ -14,7 +14,9 @@ public:
         PROGRAM, COLON, COMMA, INTEGER_CONST,
         REAL_CONST, PROCEDURE, STRING,
         IF, THEN, EQUALS,NOTEQUALS, GREATER, LESS,
-        FOR, TO, DO, NADA, ADDRESS, WHILE};
+        FOR, TO, DO, NADA, ADDRESS, WHILE,
+        ARRAY, OF, BYTE, LBRACKET, RBRACKET, INCBIN
+    };
 
     static QString types[];
     static QString getType(Type t) {

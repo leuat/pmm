@@ -40,6 +40,65 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         as->Term();
     }
 
+    if (m_procName.toLower()=="memcpy") {
+        //as->ClearTerm();
+        as->m_labelStack["memcpy"].push();
+        QString lbl = as->getLabel("memcpy");
+        as->Asm("ldx #0");
+        as->Label(lbl);
+        as->Term("lda ");
+        m_params[0]->Build(as);
+        as->Term(",x",true);
+        as->Term("sta ");
+        m_params[1]->Build(as);
+        as->Term(",x",true);
+        as->Asm("inx");
+        as->Term("cpx ");
+        m_params[2]->Build(as);
+        as->Term();
+        as->Asm("bne " + lbl);
+
+        as->m_labelStack["memcpy"].pop();
+
+    }
+    if (m_procName.toLower()=="rand") {
+        as->Term("lda ");
+        m_params[0]->Build(as);
+        as->Term();
+        as->Asm("sta lowerRandom");
+        as->Term("lda ");
+        m_params[1]->Build(as);
+        as->Term();
+        as->Asm("sta upperRandom");
+        as->Asm("jsr callRandom");
+        as->Term("sta ");
+        m_params[2]->Build(as);
+        as->Term();
+
+    }
+    if (m_procName.toLower()=="initrandom") {
+        as->Asm ("; init random");
+        as->Asm("LDA #$FF");
+        as->Asm("STA $D40E");
+        as->Asm("STA $D40F");
+        as->Asm("LDA #$80");
+        as->Asm("STA $D412");
+        as->Asm("jmp continueRandom");
+        as->DeclareVariable("upperRandom", "byte");
+        as->DeclareVariable("lowerRandom", "byte");
+        as->Label("callRandom");
+        as->Asm("lda upperRandom");
+        as->Asm("sbc lowerRandom");
+        as->Asm("sta upperRandom");
+        as->Label("RandomLoop");
+        as->Asm("LDA $D41B ; get random value");
+        as->Asm("CMP upperRandom  ; compare to");
+        as->Asm("BCS RandomLoop   ; branch if value >");
+        as->Asm("ADC lowerRandom");
+        as->Asm("RTS");
+        as->Label("continueRandom");
+    }
+
     if (m_procName.toLower()=="print") {
         QString s = "";
         if (m_params.count()!=4)

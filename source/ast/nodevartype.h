@@ -12,9 +12,23 @@
 class NodeVarType : public Node {
 public:
     QString value;
-    NodeVarType(Token t) {
+    Token m_arrayVarType;
+    QStringList m_data;
+    QString m_filename, m_position;
+
+    NodeVarType(Token t,    Token arrayVarType=Token(),QStringList data =QStringList() ) {
         m_op = t;
         value = t.m_value;
+        m_arrayVarType = arrayVarType;
+        m_data = data;
+
+    }
+    NodeVarType(Token t,    QString filename, QString position ) {
+        m_op = t;
+        value = t.m_value;
+        m_filename = filename;
+        m_position = position;
+
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override;
     void ExecuteSym(SymbolTable* symTab) override {

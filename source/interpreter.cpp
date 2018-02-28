@@ -49,6 +49,7 @@ void Interpreter::Build(Interpreter::Type type)
     if (m_tree!=nullptr)
         try {
         m_tree->Build(m_assembler);
+        m_assembler->Connect();
     } catch (FatalErrorException e) {
         ErrorHandler::e.CatchError(e, "Error during assembly");
     }

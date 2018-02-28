@@ -29,6 +29,11 @@ void Parser::Eat(TokenType::Type t)
     }
 }
 
+void Parser::Eat()
+{
+    Eat(m_currentToken.m_type);
+}
+
 void Parser::VerifyToken(Token t)
 {
     //if (Syntax::s.globals.contains(t.m_value))
@@ -390,11 +395,55 @@ QVector<Node *> Parser::VariableDeclarations()
 Node *Parser::TypeSpec()
 {
     Token t = m_currentToken;
-    if (m_currentToken.m_type == TokenType::INTEGER) {
-        Eat(TokenType::INTEGER);
+
+    if (m_currentToken.m_type == TokenType::INCBIN) {
+        Eat();
+        Eat(TokenType::LPAREN);
+        QString binFile = m_currentToken.m_value;
+        qDebug() << "binfile: " << binFile;
+        Eat();
+        QString position ="";
+        if (m_currentToken.m_type==TokenType::COMMA) {
+            Eat();
+            position = m_currentToken.m_value;
+            Eat();
+        }
+        Eat(TokenType::RPAREN);
+        return new NodeVarType(t,binFile, position);
+
     }
-    else
-        Eat(TokenType::REAL);
+
+
+    if (m_currentToken.m_type == TokenType::ARRAY) {
+        Eat(TokenType::ARRAY);
+        Eat(TokenType::LBRACKET);
+        qDebug() << m_currentToken.getType() << " with value " << m_currentToken.m_value;
+        float count =m_currentToken.m_intVal;
+        Eat(m_currentToken.m_type);
+        Eat(TokenType::RBRACKET);
+        Eat(TokenType::OF);
+        Token arrayType = m_currentToken;
+        Eat(m_currentToken.m_type);
+        QStringList data;
+        // Contains constant init?
+        if (m_currentToken.m_type==TokenType::EQUALS) {
+            Eat();
+            Eat(TokenType::LPAREN);
+            while (m_currentToken.m_type!=TokenType::RPAREN) {
+                data << QString::number(m_currentToken.m_intVal);
+                Eat();
+                if (m_currentToken.m_type==TokenType::COMMA)
+                    Eat();
+            }
+            Eat(TokenType::RPAREN);
+        }
+
+        t.m_intVal = count;
+        return new NodeVarType(t,arrayType,data);
+
+    }
+
+    Eat(m_currentToken.m_type);
 
 
     return new NodeVarType(t);

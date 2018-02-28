@@ -37,7 +37,23 @@ public:
 
         NodeVar* v = (NodeVar*)m_varNode;
         NodeVarType* t = (NodeVarType*)m_typeNode;
-        as->DeclareVariable(v->value, t->value);
+        if (t->m_op.m_type==TokenType::ARRAY) {
+            as->DeclareArray(v->value, t->m_arrayVarType.m_value, t->m_op.m_intVal, t->m_data);
+        }
+        else
+            if (t->m_op.m_type==TokenType::INCBIN) {
+                if (t->m_position=="") {
+                    as->Label(v->value);
+                    as->Asm("incbin \"" + t->m_filename + "\"");
+                }
+                else {
+                    as->Appendix("org " +t->m_position,1);
+                    as->Appendix(v->value,0);
+                    as->Appendix("incbin \"" + t->m_filename + "\"",1);
+                }
+            }
+            else
+                as->DeclareVariable(v->value, t->value);
         return "";
     }
 

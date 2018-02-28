@@ -12,7 +12,8 @@ public:
             return true;
         return false;
     }
-    QString byte = ".byte";
+    QString byte = "dc.b";
+    QString word = "dc.w";
     QString m_currentVar="";
 //    QString m_currentLoopVar="";
     //int m_lblIdx = 0;
@@ -20,6 +21,7 @@ public:
 
     void Program(QString name) override;
     void EndProgram() override;
+    void DeclareArray(QString name, QString type, int count, QStringList lst) override;
 
 
     void VarDeclHeader();

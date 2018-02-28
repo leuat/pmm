@@ -69,6 +69,7 @@ public:
     Node* TypeSpec();
     Node* BuiltinFunction();
     Node* Constant();
+    void Eat();
 
 
 };
