@@ -8,6 +8,7 @@
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
 #include "source/ast/nodevar.h"
+#include "source/ast/nodevartype.h"
 
 class NodeVarDecl : public Node {
 public:
@@ -29,6 +30,14 @@ public:
         }
 
     }
+
+    QString Build(Assembler* as) {
+        NodeVar* v = (NodeVar*)m_varNode;
+        NodeVarType* t = (NodeVarType*)m_typeNode;
+        as->DeclareVariable(v->value, t->value);
+        return "";
+    }
+
 
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);

@@ -74,9 +74,11 @@ Node *Parser::Statement()
 
         node = FindProcedure();
         if (node==nullptr)
+            node = BuiltinFunction();
+        if (node==nullptr)
             node = AssignStatement();
     }
-    else if (m_currentToken.m_type==TokenType::WRITELN) {
+/*    else if (m_currentToken.m_type==TokenType::WRITELN) {
         Eat(TokenType::WRITELN);
         Eat(TokenType::LPAREN);
         NodeString* text = (NodeString*)String();
@@ -91,7 +93,7 @@ Node *Parser::Statement()
         Eat(TokenType::RPAREN);
         //Eat(TokenType::SEMI);
         node = ExecuteInternalFunction(TokenType::WRITELN, text, block);
-    }
+    }*/
     else if (m_currentToken.m_type == TokenType::IF) {
         node = Conditional();
     }
@@ -372,11 +374,6 @@ QVector<Node *> Parser::VariableDeclarations()
     return var_decleratons;
 }
 
-Node *Parser::ExecuteInternalFunction(TokenType::Type t,  Node* text,Node* block)
-{
-    return new NodeBuiltinMethod("writeln", text, block);
-}
-
 Node *Parser::TypeSpec()
 {
     Token t = m_currentToken;
@@ -388,6 +385,35 @@ Node *Parser::TypeSpec()
 
 
     return new NodeVarType(t);
+
+}
+
+Node *Parser::BuiltinFunction()
+{
+    if (Syntax::s.builtInFunctions.contains(m_currentToken.m_value.toLower())) {
+        QString procName = m_currentToken.m_value;
+        Eat(TokenType::ID);
+        Eat(TokenType::LPAREN);
+        QVector<Node*> paramList;
+        while (m_currentToken.m_type!=TokenType::RPAREN) {
+            if (m_currentToken.m_type==TokenType::STRING) {
+                paramList.append( String() );
+                Eat(TokenType::STRING);
+            }
+            else
+                paramList.append(Expr());
+
+            if (m_currentToken.m_type==TokenType::COMMA)
+                Eat(TokenType::COMMA);
+        }
+
+        Eat(TokenType::RPAREN);
+        return new NodeBuiltinMethod(procName,paramList);
+        //p->SetParameters(paramList);
+
+
+    }
+    return nullptr;
 
 }
 

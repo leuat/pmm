@@ -64,9 +64,8 @@ public:
 //    QVector<Node*> Procedure();
     QVector<Node*> Declarations();
     QVector<Node*> VariableDeclarations();
-    Node* ExecuteInternalFunction(TokenType::Type t, Node* text, Node* block);
     Node* TypeSpec();
-
+    Node* BuiltinFunction();
 
 
 };

@@ -5,29 +5,59 @@ Interpreter::Interpreter(Parser p)
     m_parser = p;
 }
 
-float Interpreter::Visit(Node* n)
+void Interpreter::Parse()
 {
-    n->Execute(nullptr, 0);
-    return 0;
-}
-
-float Interpreter::Interpret()
-{
-    Node* tree = nullptr;
+    m_tree = nullptr;
     try {
-        tree = m_parser.Parse();
+        m_tree = m_parser.Parse();
     } catch (FatalErrorException e) {
         ErrorHandler::e.CatchError(e, "Error during parsing:");
     }
-    if (tree!=nullptr)
+
+}
+
+void Interpreter::Visit(Node* n)
+{
+    n->Execute(nullptr, 0);
+}
+
+void Interpreter::Interpret()
+{
+    if (m_tree!=nullptr)
         try {
-        Visit(tree);
+        Visit(m_tree);
     } catch (FatalErrorException e) {
         ErrorHandler::e.CatchError(e, "Error during interpreting");
     }
 
- //   qDebug() << "\n\nDeleting...";
-//    tree->Delete();
-  //  qDebug() << "Done deleting";
-    return 0;
+}
+
+void Interpreter::Build(Interpreter::Type type)
+{
+    if (m_tree==nullptr) {
+        qDebug() << "Interpreter::Build : tree not parsed!";
+        return;
+    }
+    if (m_assembler)
+        delete m_assembler;
+
+    if (type==MOS6502)
+        m_assembler = new AsmMOS6502();
+    if (type==PASCAL)
+        m_assembler = new AsmPascal();
+
+    if (m_tree!=nullptr)
+        try {
+        m_tree->Build(m_assembler);
+    } catch (FatalErrorException e) {
+        ErrorHandler::e.CatchError(e, "Error during interpreting");
+    }
+
+}
+
+void Interpreter::SaveBuild(QString filename)
+{
+    if (!m_assembler)
+        return;
+    m_assembler->Save(filename);
 }

@@ -19,6 +19,13 @@ public:
     PVar Execute(SymbolTable* symTab, uint lvl) override;
     void ExecuteSym(SymbolTable* symTab) override {
     }
+
+    QString Build(Assembler *as) override {
+        as->Number(m_val);
+        return QString::number(m_val);
+    }
+
+
 };
 
 #endif // NODENUMBER_H

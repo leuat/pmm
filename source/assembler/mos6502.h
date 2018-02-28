@@ -1,0 +1,57 @@
+#ifndef MOS6502_H
+#define MOS6502_H
+
+#include "source/assembler/assembler.h"
+
+class AsmMOS6502 : public Assembler
+{
+public:
+    AsmMOS6502();
+    bool endTerm() {
+        if (m_term.split(" ").count()==2)
+            return true;
+        return false;
+    }
+    QString byte = ".byte";
+    QString m_currentVar="";
+//    QString m_currentLoopVar="";
+    //int m_lblIdx = 0;
+    QMap<QString, int> m_lblIdx;
+
+    void Program(QString name) override;
+    void EndProgram() override;
+
+    void Asm(QString s);
+    void Label(QString s);
+
+    void VarDeclHeader();
+    void DeclareVariable(QString name, QString type) override;
+
+    void BeginBlock() override;
+    void EndBlock() override;
+    void ApplyTerm() override;
+    void Number(float f) override;
+    void String(QString s) override;
+    void AssignVariable(QString v) override;
+    void EndAssignVariable(QString variable) override;
+    void BinOP(TokenType::Type t) override;
+    void Poke(QString addr, QString val) override;
+    void Writeln() override;
+    void EndWriteln() override;
+    void LoadVariable(QString var) override;
+
+    void Variable(QString var) override;
+
+
+    void WriteBuiltinWriteln();
+    void StartPrint() override;
+
+
+    void StartForLoop(QString a, QString b) override;
+    void EndForLoop(QString endVal) override;
+
+
+};
+
+
+#endif // MOS6502_H

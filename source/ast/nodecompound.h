@@ -37,6 +37,13 @@ public:
         }
     }
 
+    QString Build(Assembler* as) {
+        as->BeginBlock();
+        for (Node* n: children)
+            n->Build(as);
+        as->EndBlock();
+        return "";
+    }
 
 };
 #endif // NODECOMPOUND_H

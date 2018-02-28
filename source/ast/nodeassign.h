@@ -33,6 +33,20 @@ public:
         return *s->m_value;
 
     }
+    QString Build(Assembler* as) {
+        NodeVar* v = (NodeVar*)m_left;
+        as->ClearTerm();
+        //as->AssignVariable(v->value);
+
+        //QString var = m_left->Build(as);
+        //as->LoadVariable(var);
+
+        m_right->Build(as);
+        as->EndAssignVariable(v->value);
+        as->ApplyTerm();
+        return v->value;
+
+    }
     void ExecuteSym(SymbolTable* symTab) override {
         QString varName = ((NodeVar*)m_left)->value;
         Symbol* varSymbol = symTab->Lookup(varName);

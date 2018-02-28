@@ -45,6 +45,19 @@ public:
 
     }
 
+   QString Build(Assembler* as) {
+       as->VarDeclHeader();
+        for (Node* n: m_decl) {
+            n->Build(as);
+        }
+
+        if (m_compoundStatement!=nullptr)
+            m_compoundStatement->Build(as);
+
+        return "";
+
+    }
+
     PVar Execute(SymbolTable* symTab, uint lvl) override;
 
     void ExecuteSym(SymbolTable* symTab) override;

@@ -22,6 +22,13 @@ public:
         m_right->ExecuteSym(symTab);
     }
 
+    QString Build(Assembler *as) override {
+        m_left->Build(as);
+        as->BinOP(m_op.m_type);
+        m_right->Build(as);
+        return "";
+    }
+
 };
 
 

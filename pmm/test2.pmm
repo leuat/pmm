@@ -1,10 +1,22 @@
-PROGRAM Part10AST;
+PROGRAM FirstC64;
 VAR
-   a, b : INTEGER;
-   y    : REAL;
+   a, b, i, j : INTEGER;
 
-BEGIN {Part10AST}
+BEGIN
    a := 2;
-   b := 10 * a + 10 * a DIV 4;
-   y := 20 / 7 + 3.14;
-END.  {Part10AST}
+   a := 5+5;
+   b:= 10 +a;
+
+   for i:=0 to b do begin
+      writeln("halla",a);
+      poke(53280,i);
+{      a:=1+a;}
+
+      for j:=0 to 200 do begin
+      	poke(53281,j);
+		writeln("balla",0);
+
+      end;
+
+   end;
+END.

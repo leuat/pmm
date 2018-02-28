@@ -32,6 +32,13 @@ public:
         m_NodeBlock->ExecuteSym(symTab);
     }
 
+    QString Build(Assembler* a) {
+        a->Program(m_name);
+        m_NodeBlock->Build(a);
+        a->EndProgram();
+        return "";
+    }
+
 };
 
 #endif // NODEPROGRAM_H

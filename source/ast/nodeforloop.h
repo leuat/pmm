@@ -48,5 +48,7 @@ public:
     }
 
 
+    QString Build(Assembler *as) override;
+
 };
 #endif // NODEFORLOOP_H

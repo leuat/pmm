@@ -31,6 +31,11 @@ public:
        return v;
 
     }
+
+    QString Build(Assembler *as) override {
+        as->Variable(value);
+        return value;
+    }
     void ExecuteSym(SymbolTable* symTab) override {
         QString varName = m_op.m_value;
         Symbol* varSymbol = symTab->Lookup(varName);

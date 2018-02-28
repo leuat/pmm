@@ -11,43 +11,22 @@
 class NodeBuiltinMethod : public Node {
 public:
     QString m_procName;
-    Node* m_block = nullptr;
-    Node* m_text = nullptr;
-    NodeBuiltinMethod(QString m, Node* text, Node* block) {
+    QVector<Node*> m_params;
+    NodeBuiltinMethod(QString m, QVector<Node*> params) {
         m_procName = m;
-        m_block = block;
-        m_text = text;
+        m_params = params;
     }
 
     void Delete() override {
-        if (m_block) {
-            m_block->Delete();
-            delete m_block;
-            m_block = nullptr;
-        }
-        if (m_text) {
-            m_text->Delete();
-            delete m_text;
-            m_text = nullptr;
+        for (Node* n: m_params) {
+            n->Delete();
+            delete n;
         }
     }
 
-    PVar Execute(SymbolTable* symTab, uint lvl) override {
-        ErrorHandler::e.DebugLow("Calling Builtin",level);
-        level = lvl+1;
+    QString Build(Assembler *as) override;
 
-        if (m_procName.toLower()=="writeln") {
-            QString s = "";
-            if (m_text!=nullptr)
-                s+=m_text->Execute(symTab, level).toString();
-            if (m_block!=nullptr)
-                s+=m_block->Execute(symTab, level).toString();
-
-            ErrorHandler::e.OutputText(s);
-        }
-        return PVar();
-
-    }
+    PVar Execute(SymbolTable* symTab, uint lvl) override;
     void ExecuteSym(SymbolTable* symTab) override {
 
     }

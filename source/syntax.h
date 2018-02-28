@@ -12,12 +12,29 @@
 
 
 
+class BuiltInFunction {
+public:
+    enum Type {STRING, INTEGER, REAL};
+    QString m_name;
+    QVector<Type> m_params;
+    BuiltInFunction() {}
+//    QVector<PVar> m_params;
+
+    BuiltInFunction(QString name, QVector<Type> params) {
+        m_name = name;
+        m_params = params;
+    }
+};
+
 class Syntax
 {
 public:
     QVector<Token> reservedWords;
+    //QVector<BuiltInFunction> builtinFunctions;
+    QMap<QString, BuiltInFunction> builtInFunctions;
     Syntax();
     void SetupReservedWords();
+    void SetupBuiltinFunctions();
     QString digit = "0123456789";
     QString alpha = "abcdefghijklmnopqrstuvwxyz";
     QString alnum =alpha+digit;
@@ -26,6 +43,12 @@ public:
     void SetupConstants();
 
     static Syntax s;
+
+    bool isNumeric(QString s) {
+        bool ok;
+        int dec = s.toInt(&ok, 10);
+        return ok;
+    }
 
     bool isDigit(QString s) {
         return digit.contains(s);

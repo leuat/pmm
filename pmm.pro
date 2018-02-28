@@ -36,7 +36,10 @@ SOURCES += main.cpp \
     source/ast/nodeprocedure.cpp \
     source/ast/nodeconditional.cpp \
     source/ast/nodeforloop.cpp \
-    source/ast/nodebuiltinmethod.cpp
+    source/ast/nodebuiltinmethod.cpp \
+    source/assembler/mos6502.cpp \
+    source/assembler/assembler.cpp \
+    source/assembler/asmpascal.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -76,4 +79,7 @@ HEADERS += \
     source/ast/nodeprocedure.h \
     source/ast/nodeconditional.h \
     source/ast/nodeforloop.h \
-    source/ast/nodebuiltinmethod.h
+    source/ast/nodebuiltinmethod.h \
+    source/assembler/mos6502.h \
+    source/assembler/assembler.h \
+    source/assembler/asmpascal.h

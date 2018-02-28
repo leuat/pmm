@@ -4,6 +4,7 @@
 #include "source/token.h"
 #include "source/symboltable.h"
 #include "source/errorhandler.h"
+#include "source/assembler/assembler.h"
 
 
 class Node {
@@ -26,7 +27,9 @@ public:
             m_left = nullptr;
 
         }
-
+    }
+    virtual QString Build(Assembler* as) {
+        return "";
     }
 };
 

@@ -20,6 +20,12 @@ public:
         level = lvl +1;
         return PVar(m_val);
     }
+
+    QString Build(Assembler *as) override {
+       as->String(m_val);
+       return m_val;
+    }
+
     void ExecuteSym(SymbolTable* symTab) override {
     }
 };
