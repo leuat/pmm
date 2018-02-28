@@ -75,8 +75,11 @@ Node *Parser::Statement()
         node = FindProcedure();
         if (node==nullptr)
             node = BuiltinFunction();
+//        if (node==nullptr)
+//            node = Constant();
         if (node==nullptr)
             node = AssignStatement();
+
     }
 /*    else if (m_currentToken.m_type==TokenType::WRITELN) {
         Eat(TokenType::WRITELN);
@@ -182,7 +185,8 @@ Node *Parser::Program()
 Node* Parser::Factor()
 {
     Token t = m_currentToken;
-    if (t.m_type == TokenType::INTEGER_CONST || t.m_type ==TokenType::REAL_CONST) {
+    if (t.m_type == TokenType::INTEGER_CONST || t.m_type ==TokenType::REAL_CONST
+            || t.m_type ==TokenType::ADDRESS) {
         Eat(t.m_type);
         return new NodeNumber(t, t.m_intVal);
     }
@@ -206,6 +210,9 @@ Node* Parser::Factor()
         Node* node = FindProcedure();
         if (node!=nullptr)
             return node;
+/*        node = Constant();
+        if (node!=nullptr)
+            return Constant();*/
 
     }
        return Variable();
@@ -226,6 +233,8 @@ Node* Parser::Term()
 
 Node* Parser::Parse()
 {
+
+    SymbolTable::Initialize();
     Node* root = Program();
     if (m_currentToken.m_type!=TokenType::TEOF)
         ErrorHandler::e.Error("End of file error");
@@ -391,7 +400,8 @@ Node *Parser::TypeSpec()
 Node *Parser::BuiltinFunction()
 {
     if (Syntax::s.builtInFunctions.contains(m_currentToken.m_value.toLower())) {
-        QString procName = m_currentToken.m_value;
+        QString procName = m_currentToken.m_value.toLower();
+        int noParams = Syntax::s.builtInFunctions[procName].m_params.count();
         Eat(TokenType::ID);
         Eat(TokenType::LPAREN);
         QVector<Node*> paramList;
@@ -408,6 +418,15 @@ Node *Parser::BuiltinFunction()
         }
 
         Eat(TokenType::RPAREN);
+
+        //qDebug() << "Params count for " << procName << " :" << paramList.count();
+        if (noParams!=paramList.count()) {
+            QString s = "Error using builtin function " + procName + " \n";
+            s += "Requires " + QString::number(noParams) + " parameters but has " + QString::number(paramList.count());
+
+            ErrorHandler::e.Error(s);
+        }
+
         return new NodeBuiltinMethod(procName,paramList);
         //p->SetParameters(paramList);
 
@@ -415,6 +434,20 @@ Node *Parser::BuiltinFunction()
     }
     return nullptr;
 
+}
+
+Node *Parser::Constant()
+{
+    QString id = m_currentToken.m_value;
+    if (SymbolTable::m_constants.contains(id)) {
+        Eat(m_currentToken.m_type);
+        Symbol* s = SymbolTable::m_constants[id];
+        qDebug() << "IS CONSTANT " << id << " " << s->m_value->m_fVal;
+        qDebug() << s->getTokenType();
+        Node* n =  new NodeNumber(Token(s->getTokenType(), s->m_value->m_fVal), s->m_value->m_fVal);
+        return n;
+    }
+    return nullptr;
 }
 
 Node* Parser::Expr()

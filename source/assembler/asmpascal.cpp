@@ -49,9 +49,9 @@ void AsmPascal::ApplyTerm()
     ClearTerm();
 }
 
-void AsmPascal::Number(float f)
+void AsmPascal::Number(QString s)
 {
-    m_term+=QString::number(f);
+    m_term+=s;
 }
 
 void AsmPascal::String(QString s)

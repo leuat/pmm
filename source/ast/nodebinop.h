@@ -24,8 +24,10 @@ public:
 
     QString Build(Assembler *as) override {
         m_left->Build(as);
+        as->Term();
         as->BinOP(m_op.m_type);
         m_right->Build(as);
+        as->Term();
         return "";
     }
 

@@ -46,14 +46,14 @@ void Lexer::SkipComment()
 Token Lexer::Number()
 {
     QString res="";
-    while (!m_finished && Syntax::s.digit.contains(m_currentChar)) {
+    while (!m_finished && Syntax::s.digitAll.contains(m_currentChar)) {
         res+=m_currentChar;
         Advance();
     }
     if (m_currentChar==".") {
         res+=m_currentChar;
         Advance();
-        while (!m_finished && Syntax::s.digit.contains(m_currentChar)) {
+        while (!m_finished && Syntax::s.digitAll.contains(m_currentChar)) {
             res+=m_currentChar;
             Advance();
         }
@@ -63,16 +63,32 @@ Token Lexer::Number()
     }
     bool ok;
     float val = 0;
-//    qDebug() << res;
+    // Memory address
+    bool isConstant = false;
+    if (res.contains("#")) {
+        res.remove("#");
+        isConstant = true;
+    }
+
     if (res.contains("$")) {
         res.remove("$");
         val = res.toInt(&ok, 16);
-  //      qDebug() << ok << "  "  << val;
     }
+    else
+    if (res.contains("%")) {
+        res.remove("%");
+        val = res.toInt(&ok, 2);
+    }
+
+
+
     else
         val = res.toFloat();
 
-    return Token(TokenType::INTEGER_CONST, val);
+    if (isConstant)
+        return Token(TokenType::INTEGER_CONST, val);
+    else
+        return Token(TokenType::ADDRESS, val);
 
 }
 
@@ -140,13 +156,16 @@ Token Lexer::GetNextToken()
             return Token(TokenType::COMMA, ":");
         }
 
+        if (Syntax::s.isDigit(m_currentChar)) {
+            return Number();
+        }
 
         if (Syntax::s.isAlpha(m_currentChar)) {
+          //  qDebug() << m_currentChar << " is Alpha";
+
             return _Id();
         }
 
-        if (Syntax::s.isDigit(m_currentChar))
-            return Number();
 
         if (m_currentChar==":" && peek()=="=") {
             Advance();

@@ -32,6 +32,9 @@ public:
     }
 
     QString Build(Assembler* as) {
+
+        ExecuteSym(as->m_symTab);
+
         NodeVar* v = (NodeVar*)m_varNode;
         NodeVarType* t = (NodeVarType*)m_typeNode;
         as->DeclareVariable(v->value, t->value);

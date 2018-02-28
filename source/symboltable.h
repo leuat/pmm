@@ -6,12 +6,22 @@
 #include <QDebug>
 #include "errorhandler.h"
 #include "pvar.h"
+#include "token.h"
 
 class Symbol {
 public:
     QString m_name;
     QString m_type;
     PVar* m_value = nullptr;
+    TokenType::Type getTokenType() {
+        if (m_type.toLower()=="integer")
+            return TokenType::INTEGER;
+        if (m_type.toLower()=="float")
+            return TokenType::REAL;
+        if (m_type.toLower()=="address")
+            return TokenType::ADDRESS;
+        return TokenType::NADA;
+    }
     Symbol(QString name, QString type="") {
         m_name = name;
         m_type = type;
@@ -52,6 +62,7 @@ public:
     static QMap<QString, Symbol*> m_constants;
     QString m_name;
     SymbolTable();
+    static SymbolTable s;
 
     static bool isInitialized;
     static void Initialize();
@@ -101,6 +112,19 @@ public:
             ErrorHandler::e.Error("Symbol '" + name + "' does not exist in the current scope");
         }
         return m_symbols[name];
+    }
+    Symbol* LookupVariables(QString name) {
+        if (!m_symbols.contains(name)) {
+           return nullptr;
+        }
+        return m_symbols[name];
+    }
+
+    Symbol* LookupConstants(QString name) {
+        if (m_constants.contains(name)) {
+            return m_constants[name];
+        }
+        return nullptr;
     }
 
 };

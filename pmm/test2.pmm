@@ -1,33 +1,34 @@
 PROGRAM FirstC64;
 VAR
-   a, b, i, j : INTEGER;
+   a, b, c, i, j : INTEGER;
 
 BEGIN
-   a := 2;
-   b:= 5;
-   a:= a + a +1;
-   poke(53280,10);
-
-   writeln("starting",a);
-   b := 1;
-   for i:=0 to b do begin
-      writeln("halla",a);
-
-      poke(53280,i);
-      for j:=0 to 20 do begin
-      	poke(53281,j);
-      	writeln("/\\",0);
-
-      end;
-
+   {b := #1;
+   c:= #10;
+   poke(SCREEN_BACKGROUND_COLOR,b, c);
+}
+   for i:=#1 to #255 do begin
+    peek($d012,#0,a);
+   	poke(SCREEN_BACKGROUND_COLOR,#0, a);
+	writeln("Heisann",0);
+   
    end;
-    poke( $C202, 13);
-	poke($7F8, 13);
-	poke($D015, 255);
-    poke($D027, 2);
-    poke($D000,100);
-    poke($D001,100);
-   for i:=1 to 10 do begin
 
+    poke(SCREEN_BACKGROUND_COLOR,#0,RED);
+
+    poke( $C202, #0,#13);
+    poke($7F8,#0, #3);
+    poke($D015,#0, #255);
+    poke($D027,#0, #2);
+    poke($D000,#0, #100);
+    poke($D001,#0, #100);
+    b := #255;
+   for i:=#1 to b do begin
+     poke(SPRITE_LOC,#0,i);
+     poke(SPRITE_LOC,#1,i);
+     writeln("heisann",0);
+     peek(RASTERLINE_POS,#0,a);
+     {poke(53280,#0,a);}
    end;
+
 END.

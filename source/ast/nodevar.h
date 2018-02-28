@@ -33,8 +33,22 @@ public:
     }
 
     QString Build(Assembler *as) override {
-        as->Variable(value);
-        return value;
+        QString  val = value;
+        Symbol* s= as->m_symTab->LookupConstants(value);
+        if (s!=nullptr) {
+            val = QString::number(s->m_value->m_fVal);
+            if (!(s->m_type.toLower()=="address"))
+                val = "#" + val;
+        }
+        if (s==nullptr) {
+            s = as->m_symTab->LookupVariables(value);
+            if (s==nullptr) {
+                ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?");
+            }
+        }
+
+        as->Variable(val);
+        return val;
     }
     void ExecuteSym(SymbolTable* symTab) override {
         QString varName = m_op.m_value;

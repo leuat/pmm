@@ -16,7 +16,7 @@ public:
     void EndBlock() override;
     void AssignVariable(QString var) override;
     void ApplyTerm() override;
-    void Number(float f) override;
+    void Number(QString n) override;
     void String(QString s) override;
     void BinOP(TokenType::Type t) override;
     void Poke(bool b) override  { }

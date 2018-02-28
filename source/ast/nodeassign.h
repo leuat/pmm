@@ -36,14 +36,16 @@ public:
     QString Build(Assembler* as) {
         NodeVar* v = (NodeVar*)m_left;
         as->ClearTerm();
-        //as->AssignVariable(v->value);
 
-        //QString var = m_left->Build(as);
-        //as->LoadVariable(var);
-
+        //m_right->Build(as);
+        //as->EndAssignVariable(v->value);
+        //as->ApplyTerm();
+        as->ClearTerm();
+        as->Term("lda ");
         m_right->Build(as);
-        as->EndAssignVariable(v->value);
-        as->ApplyTerm();
+        as->Term();
+        as->Term("sta " + v->value,1);
+
         return v->value;
 
     }

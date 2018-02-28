@@ -24,16 +24,6 @@ void AsmMOS6502::EndProgram()
     Asm("rts");
 }
 
-void AsmMOS6502::Asm(QString s)
-{
-    Write(s,1);
-}
-
-void AsmMOS6502::Label(QString s)
-{
-    Write(s,0);
-}
-
 void AsmMOS6502::VarDeclHeader()
 {
     m_labelStack["block"].push();
@@ -69,18 +59,19 @@ void AsmMOS6502::ApplyTerm()
     m_currentVar = "";
 }
 
-void AsmMOS6502::Number(float f)
+void AsmMOS6502::Number(QString n)
 {
-    QString n = QString::number((int)f);
-    //Asm("#"+n);
-   //m_term +=n;
-    //Asm(m_term +"\#" + n);
+
+    m_term +=n;
+    return;
+
     if (m_term=="")
         m_term = "lda ";
-    if (m_term.contains("sta"))
+
+//    if (m_term.contains("sta"))
         m_term +=n;
-    else
-        m_term+="\#" + n;
+  //  else
+    //    m_term+="\#" + n;
     if (endTerm()) {
         Asm(m_term);
         ClearTerm();
@@ -118,13 +109,18 @@ void AsmMOS6502::BinOP(TokenType::Type t)
 
 void AsmMOS6502::Poke(bool start)
 {
+    //if (start)
+     //   m_term = "lda ";
+    if (!start)
+       m_term = "sta ";
+}
+
+void AsmMOS6502::Peek(bool start)
+{
     if (start)
         m_term = "lda ";
    else m_term = "sta ";
-/*    if (Syntax::s.isDigit(val))
-      val = "\#" + val;
-    Asm("lda "+val);
-    Asm("sta "+addr);*/
+
 }
 
 void AsmMOS6502::Writeln()
@@ -159,6 +155,10 @@ void AsmMOS6502::LoadVariable(QString var)
 
 void AsmMOS6502::Variable(QString v)
 {
+    m_term += v;
+    return;
+
+
     if (m_term=="")
         m_term = "lda ";
     m_term+=v;
@@ -207,8 +207,8 @@ void AsmMOS6502::EndForLoop(QString endVal)
     Asm("inc " + m_stack["for"].current());
     Asm("lda "+m_stack["for"].current());
 
-    if (Syntax::s.isNumeric(endVal))
-        endVal = "#" + endVal;
+//    if (Syntax::s.isNumeric(endVal))
+//        endVal = "#" + endVal;
     Asm("cmp " + endVal);
     Asm("bne "+getLabel("for"));
     m_labelStack["for"].pop();

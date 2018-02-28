@@ -2,7 +2,7 @@
 
 Assembler::Assembler()
 {
-
+    m_symTab = new SymbolTable();
 }
 
 void Assembler::Save(QString filename) {
@@ -30,6 +30,32 @@ void Assembler::Write(QString str, int level)
         s+="\t";
     s+=str;
     m_source.append(s);
+}
+
+void Assembler::Asm(QString s)
+{
+    Write(s,1);
+}
+
+void Assembler::Label(QString s)
+{
+    Write(s,0);
+}
+
+void Assembler::Term(QString s, bool write)
+{
+    m_term+=s;
+    if (write) {
+        Asm(m_term);
+        ClearTerm();
+
+    }
+}
+
+void Assembler::Term()
+{
+    Asm(m_term);
+    ClearTerm();
 }
 
 

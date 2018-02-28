@@ -66,6 +66,7 @@ public:
     QVector<Node*> VariableDeclarations();
     Node* TypeSpec();
     Node* BuiltinFunction();
+    Node* Constant();
 
 
 };

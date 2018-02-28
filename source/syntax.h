@@ -35,9 +35,10 @@ public:
     Syntax();
     void SetupReservedWords();
     void SetupBuiltinFunctions();
-    QString puredigit = "0123456789";
-    QString digit = "0123456789$ABCDEF";
-    QString alpha = "abcdefghijklmnopqrstuvwxyz";
+    QString puredigit = "0123456789#";
+    QString digit = "#0123456789$%";
+    QString digitAll = "#0123456789$%ABCDEFabcdef";
+    QString alpha = "abcdefghijklmnopqrstuvwxyz_";
     QString alnum =alpha+digit;
     QString alnumString =alpha+digit+ " ;:æøå!#¤%&/()=.,-+*";
     uint lineNumber = 0;
@@ -52,7 +53,9 @@ public:
     }
 
     bool isDigit(QString s) {
+        // Check if HEX
         return digit.contains(s);
+
     }
     bool isAlnum(QString s) {
         return alnum.contains(s.toLower());

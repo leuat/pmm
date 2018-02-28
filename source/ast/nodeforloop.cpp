@@ -30,6 +30,8 @@ QString NodeForLoop::Build(Assembler *as) {
         to = QString::number(((NodeNumber*)m_b)->m_val);
     if (dynamic_cast<const NodeVar*>(m_b) != nullptr)
         to = ((NodeVar*)m_b)->value;
+    if (m_b->m_op.m_type==TokenType::INTEGER ||m_b->m_op.m_type==TokenType::INTEGER_CONST )
+        to = "#" + to;
     as->StartForLoop(var, to);
     m_block->Build(as);
 

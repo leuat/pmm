@@ -50,7 +50,7 @@ void Interpreter::Build(Interpreter::Type type)
         try {
         m_tree->Build(m_assembler);
     } catch (FatalErrorException e) {
-        ErrorHandler::e.CatchError(e, "Error during interpreting");
+        ErrorHandler::e.CatchError(e, "Error during assembly");
     }
 
 }

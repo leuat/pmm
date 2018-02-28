@@ -21,8 +21,15 @@ public:
     }
 
     QString Build(Assembler *as) override {
-        as->Number(m_val);
-        return QString::number(m_val);
+        QString val = "";
+        if (m_op.m_type==TokenType::INTEGER)
+            val = "#"+QString::number((int)m_val);
+        if (m_op.m_type==TokenType::INTEGER_CONST)
+            val = "#"+QString::number((int)m_val);
+        if (m_op.m_type==TokenType::ADDRESS)
+            val = QString::number((int)m_val);
+        as->Number(val);
+        return val;
     }
 
 

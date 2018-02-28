@@ -39,18 +39,26 @@ void Syntax::SetupBuiltinFunctions()
 
 
     QVector<BuiltInFunction::Type> print;
-    writeln.append(BuiltInFunction::INTEGER);
-    writeln.append(BuiltInFunction::INTEGER);
-    writeln.append(BuiltInFunction::STRING);
-    writeln.append(BuiltInFunction::INTEGER);
+    print.append(BuiltInFunction::INTEGER);
+    print.append(BuiltInFunction::INTEGER);
+    print.append(BuiltInFunction::STRING);
+    print.append(BuiltInFunction::INTEGER);
     builtInFunctions["print"] = (BuiltInFunction(
-                                "print",  writeln));
+                                "print",  print));
 
     QVector<BuiltInFunction::Type> poke;
-    writeln.append(BuiltInFunction::INTEGER);
-    writeln.append(BuiltInFunction::INTEGER);
+    poke.append(BuiltInFunction::INTEGER);
+    poke.append(BuiltInFunction::INTEGER);
+    poke.append(BuiltInFunction::INTEGER);
     builtInFunctions["poke"] = (BuiltInFunction(
-                                "poke",  writeln));
+                                "poke",  poke));
+
+    QVector<BuiltInFunction::Type> peek;
+    peek.append(BuiltInFunction::INTEGER);
+    peek.append(BuiltInFunction::INTEGER);
+    peek.append(BuiltInFunction::INTEGER);
+    builtInFunctions["peek"] = (BuiltInFunction(
+                                "peek",  peek));
 
 }
 

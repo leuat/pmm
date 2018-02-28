@@ -8,7 +8,7 @@
 #include <QTextStream>
 #include "source/token.h"
 #include "source/errorhandler.h"
-
+#include "source/symboltable.h"
 
 class Stack {
 public:
@@ -54,6 +54,7 @@ public:
     QString m_term;
     QMap<QString, Stack> m_stack;
     QMap<QString, LabelStack> m_labelStack;
+    SymbolTable* m_symTab;
 
     QString getLabel(QString s) {
         return s+m_labelStack[s].m_current;
@@ -73,11 +74,13 @@ public:
     virtual void AssignVariable(QString var) = 0;
     virtual void EndAssignVariable(QString var) {}
     virtual void ApplyTerm() = 0;
-    virtual void Number(float f) = 0;
+    virtual void Number(QString n) = 0;
     virtual void String(QString s) = 0;
     virtual void BinOP(TokenType::Type t)=0;
     virtual void Poke(bool start) = 0;
-
+    virtual void Peek(bool start) {}
+    virtual void Term(QString s, bool write=false);
+    void Term();
     virtual void Writeln() = 0;
     virtual void EndWriteln() = 0;
     virtual void WriteBuiltinWriteln() {}
@@ -89,6 +92,8 @@ public:
 
     virtual void StartForLoop(QString a, QString b) {}
     virtual void EndForLoop(QString endVal) {}
+    void Asm(QString s);
+    void Label(QString s);
 
     void ClearTerm() {
         m_term = "";

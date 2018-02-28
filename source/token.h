@@ -4,6 +4,7 @@
 #include <QString>
 #include "data_pmm.h"
 
+
 class TokenType {
 public:
     enum Type {
@@ -13,7 +14,7 @@ public:
         PROGRAM, COLON, COMMA, INTEGER_CONST,
         REAL_CONST, PROCEDURE, STRING,
         IF, THEN, EQUALS,NOTEQUALS, GREATER, LESS,
-        FOR, TO, DO, NADA};
+        FOR, TO, DO, NADA, ADDRESS};
 
     static QString types[];
     static QString getType(Type t) {

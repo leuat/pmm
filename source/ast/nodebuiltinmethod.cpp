@@ -11,17 +11,33 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         as->EndWriteln();
     }
     if (m_procName.toLower()=="poke") {
-        if (m_params.count()!=2)
-            ErrorHandler::e.Error("Poke requires 2 parameters");
 
         as->ClearTerm();
-        as->Poke(true);
+        as->Term("lda ");
         m_params[1]->Build(as);
-        as->Poke(false);
+        as->Term();
+        as->Asm("tax");
+        as->Term("lda ");
+        m_params[2]->Build(as);
+        as->Term();
+        as->Term("sta ");
         m_params[0]->Build(as);
+        as->Term(",x", true);
+
+    }
+    if (m_procName.toLower()=="peek") {
+
         as->ClearTerm();
-
-
+        as->Term("lda ");
+        m_params[1]->Build(as);
+        as->Term();
+        as->Asm("tax");
+        as->Term("lda ");
+        m_params[0]->Build(as);
+        as->Term(",x", true);
+        as->Term("sta ");
+        m_params[2]->Build(as);
+        as->Term();
     }
 
     if (m_procName.toLower()=="print") {

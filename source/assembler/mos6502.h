@@ -21,8 +21,6 @@ public:
     void Program(QString name) override;
     void EndProgram() override;
 
-    void Asm(QString s);
-    void Label(QString s);
 
     void VarDeclHeader();
     void DeclareVariable(QString name, QString type) override;
@@ -30,12 +28,14 @@ public:
     void BeginBlock() override;
     void EndBlock() override;
     void ApplyTerm() override;
-    void Number(float f) override;
+    void Number(QString n) override;
     void String(QString s) override;
     void AssignVariable(QString v) override;
     void EndAssignVariable(QString variable) override;
     void BinOP(TokenType::Type t) override;
     void Poke(bool start) override;
+    void Peek(bool start) override;
+
     void Writeln() override;
     void EndWriteln() override;
     void LoadVariable(QString var) override;
