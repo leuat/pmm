@@ -34,18 +34,19 @@ public:
 
     QString Build(Assembler *as) override {
         QString  val = value;
-        Symbol* s= as->m_symTab->LookupConstants(value);
+      /*  Symbol* s= as->m_symTab->LookupConstants(value);
         if (s!=nullptr) {
             val = "$" + QString::number((int)s->m_value->m_fVal,16);
             if (!(s->m_type.toLower()=="address"))
                 val = "#" + val;
         }
-        if (s==nullptr) {
-            s = as->m_symTab->LookupVariables(value);
+        if (s==nullptr) {*/
+
+        Symbol* s = as->m_symTab->LookupVariables(value);
             if (s==nullptr) {
                 ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?");
             }
-        }
+
 
         as->Variable(val);
         return val;

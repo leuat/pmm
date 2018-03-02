@@ -4,6 +4,7 @@
 AsmMOS6502::AsmMOS6502()
 {
 //    m_stack["for"] = new Stack();
+
 }
 
 void AsmMOS6502::Program(QString programName)

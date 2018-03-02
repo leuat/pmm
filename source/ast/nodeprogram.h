@@ -7,7 +7,7 @@
 #include "source/symboltable.h"
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
-
+#include "source/ast/nodebuiltinmethod.h"
 #include "source/ast/nodeblock.h"
 
 class NodeProgram : public Node {
@@ -33,6 +33,7 @@ public:
     }
 
     QString Build(Assembler* a) {
+        NodeBuiltinMethod::m_isInitialized.clear();
         a->Program(m_name);
         m_NodeBlock->Build(a);
         a->EndProgram();

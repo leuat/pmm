@@ -28,6 +28,9 @@ public:
 
         }
     }
+    virtual bool isPureNumeric() {
+        return false;
+    }
     virtual QString Build(Assembler* as) {
         return "";
     }

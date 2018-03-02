@@ -45,8 +45,16 @@ void Parser::VerifyToken(Token t)
 
 Node *Parser::Variable()
 {
-    Node* n = new NodeVar(m_currentToken);
-    Eat(TokenType::ID);
+    Node* n = nullptr;
+    if (SymbolTable::m_constants.contains(m_currentToken.m_value)) {
+        Symbol* s = SymbolTable::m_constants[m_currentToken.m_value];
+        if (s->m_type=="ADDRESS") m_currentToken.m_type=TokenType::ADDRESS;
+        if (s->m_type=="INTEGER") m_currentToken.m_type=TokenType::INTEGER;
+        n = new NodeNumber(m_currentToken, s->m_value->m_fVal);
+    }
+    else
+        n = new NodeVar(m_currentToken);
+    Eat(m_currentToken.m_type);
     return n;
 }
 

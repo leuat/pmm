@@ -1,0 +1,37 @@
+PROGRAM FirstC64;
+VAR
+   a, b, c, i, j,k,val : byte;
+   x : integer;
+   sprite0data: IncBin("sprite1.bin");
+   charset: IncBin("scrap.bin","$1ffe");
+
+BEGIN
+	
+	InitRandom();
+
+
+	i:=#0;
+	a:=#0;
+	b:=#0;
+	poke(SCREEN_BACKGROUND_COLOR, #1, DARK_GREY);
+	poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
+	poke($d018, #0, #$18);
+    	poke($C202, #0,#13);
+
+	i:=#1;
+	j:=#1;
+	while i<#10 do begin
+		rand(#0,#255,val);
+		j:=j+#1;
+		val:=j;
+
+	for k:=#0 to #199 do begin
+		rand(#0,#255,val);
+		poke(SCREEN_LOCATION1,k,val); 
+	end;
+
+       end;
+
+
+
+END.

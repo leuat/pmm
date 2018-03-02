@@ -1,85 +1,62 @@
 PROGRAM FirstC64;
 VAR
-   a, b, c, i, j,val : byte;
-   x : integer;
+   a, b, c, i, j,k,val : byte;
+   x,y,scrollx : byte;
    sprite0data: IncBin("sprite1.bin");
    charset: IncBin("scrap.bin","$1ffe");
-
+   colorVals : array [8] of byte = (0, 11, 6, 12, 14, 13, 15, 17,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,17, 15, 13 ,14 ,12, 6, 11 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+   charVals : array[8] of byte = (166, 161, 162, 191, 187, 169);
 BEGIN
+	
 	InitRandom();
 
 
 	i:=#0;
 	a:=#0;
 	b:=#0;
-	poke(SCREEN_BACKGROUND_COLOR, #1, DARK_GREY);
-	poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
-	poke($d018, #0, #$18);
-    	poke($C202, #0,#13);
-    	poke(SPRITE_DATA_LOC,#0, #$0D); 
-	poke(SPRITE_DATA_LOC,#1, #$0D);
-    	poke(SPRITE_BITMASK,#0, #%00000111);
-    	poke(SPRITE_COLOR,#0, WHITE);
-    	poke(SPRITE_COLOR,#1, YELLOW);
-    	memcpy(sprite0data, $0340, #63);
+	poke(SCREEN_BACKGROUND_COLOR, #1, BLACK);
+ 	poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
+	{poke($d018, #0, #$18);
+    	poke($C202, #0,#13);}
 
-
-	for i:=#0 to #199 do begin
-		rand(#65, #90, val);
-		poke(SCREEN_LOCATION1,i,val); 
-		poke(SCREEN_LOCATION2,i,val); 
-		poke(SCREEN_LOCATION3,i,val); 
-		poke(SCREEN_LOCATION4,i,val); 
-		poke(SCREEN_LOCATION5,i,val); 
-{		poke($D800,i,val);}
-		poke($D8C8,i,val);
-		poke($D990,i,val);
-		poke($DA58,i,val);
-		poke($DB20,i,val);
-	end;
-	i:=#1;
+	j:=#1;
+	c:=#0;
+	scrollx:=#7;
 	while i<#10 do begin
+ 		{rand(#0,#40,x);
+		rand(#0,#25,y);
+		moveto(x,y,#$04);
+	
+		moveto(x,y,#$D8);}
+		c:=c+#1;
+		if c=#40 then begin
+			c:=#0;
+		end;
+		{pokescreen(val);}
+		peek(colorVals, c, k); 
 
+{			rand(#0,#5,val);
+			peek(charVals, val, j);
+			fill($0400,j,#$FF);
+			fill($D800,k,#$FF);
+			fill($0400+1*#$FF,j,#$FF);
+			fill($D800+1*#$FF,k,#$FF);
+			fill($0400+2*#$FF,j,#$FF);
+			fill($0400+3*#$FF,j,#$FF);
+			{fill($D800+2*#$FF,k,#$FF);}
 
 		while a<>#0 do begin
-			peek(RASTERLINE_POS, #0, a);
+			peek(RASTERLINE_POS, #0,a);
 		end;
-		while a<>#10 do begin
-			peek(RASTERLINE_POS, #0, a);
-
+		while a<>#199 do begin
+			peek(RASTERLINE_POS, #0,a);
 		end;
-			rand(#64, #90, val);	
-			rand(#0, #200, j);
-			poke(SCREEN_LOCATION1,j,val); 
-		
-{		rand(#64, #90, val);	
-		rand(#0, #200, j);
-		poke(SCREEN_LOCATION2,j,val); 
-
-		rand(#64, #90, val);	
-		rand(#0, #200, j);
-		poke(SCREEN_LOCATION3,j,val); 
-
-		rand(#64, #90, val);	
-		rand(#0, #200, j);
-		poke(SCREEN_LOCATION4,j,val); }
-		
-		{poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
-		while a<>#0 do begin
-			peek(RASTERLINE_POS, #0, a);
+	scroll(scrollx);
+		scrollx:=scrollx+#1;	
+		if scrollx=#0 then begin
+			scrollx:=#7;
 		end;
-		
-		poke(SCREEN_BACKGROUND_COLOR, #0, RED);}
-		b:=b+#1;
-		
-		c:=#255-b;
-    		poke(SPRITE_POS,#0, b);
-    		poke(SPRITE_POS,#1, b);
-    		poke(SPRITE_POS,#2, b);
-    		poke(SPRITE_POS,#3, b);
-
-
-
+	
 
        end;
 

@@ -6,6 +6,7 @@
 #include "token.h"
 #include <QDebug>
 #include <QMap>
+#include <QList>
 #include "pvar.h"
 #include "errorhandler.h"
 
@@ -16,11 +17,11 @@ class BuiltInFunction {
 public:
     enum Type {STRING, INTEGER, REAL};
     QString m_name;
-    QVector<Type> m_params;
+    QList<Type> m_params;
     BuiltInFunction() {}
 //    QVector<PVar> m_params;
 
-    BuiltInFunction(QString name, QVector<Type> params) {
+    BuiltInFunction(QString name, QList<BuiltInFunction::Type> params) {
         m_name = name;
         m_params = params;
     }

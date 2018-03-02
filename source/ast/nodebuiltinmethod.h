@@ -12,6 +12,8 @@ class NodeBuiltinMethod : public Node {
 public:
     QString m_procName;
     QVector<Node*> m_params;
+    static QMap<QString, bool> m_isInitialized;
+
     NodeBuiltinMethod(QString m, QVector<Node*> params) {
         m_procName = m;
         m_params = params;
@@ -25,8 +27,22 @@ public:
     }
 
     QString Build(Assembler *as) override;
-
+    void Poke(Assembler* as);
+    void Peek(Assembler* as);
+    void MemCpy(Assembler* as);
+    void Rand(Assembler* as);
+    void InitMoveto(Assembler *as);
+    void MoveTo(Assembler* as);
+    void InitRandom(Assembler* as);
+    void PokeScreen(Assembler* as, int hiAddress);
+    void Fill(Assembler* as);
+    void Scroll(Assembler* as);
     PVar Execute(SymbolTable* symTab, uint lvl) override;
+
+    void LoadVar(Assembler* as, int paramNo, QString register);
+    void LoadVar(Assembler* as, int paramNo);
+    void SaveVar(Assembler* as, int paramNo, QString register);
+    void SaveVar(Assembler* as, int paramNo);
     void ExecuteSym(SymbolTable* symTab) override {
 
     }

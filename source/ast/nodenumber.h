@@ -20,6 +20,10 @@ public:
     void ExecuteSym(SymbolTable* symTab) override {
     }
 
+    bool isPureNumeric() override {
+        return true;
+    }
+
     QString Build(Assembler *as) override {
         QString val = "";
         if (m_op.m_type==TokenType::INTEGER)
@@ -29,7 +33,8 @@ public:
         if (m_op.m_type==TokenType::ADDRESS) {
             val = "$" + QString::number((int)m_val,16);
         }
-        as->Number(val);
+        //as->Number(val);
+        as->Term(val);
         return val;
     }
 

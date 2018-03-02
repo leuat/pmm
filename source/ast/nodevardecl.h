@@ -66,6 +66,22 @@ public:
 
     }
     void ExecuteSym(SymbolTable* symTab) override {
+/*        NodeVar* v = (NodeVar*)m_varNode;
+        NodeVarType* t = (NodeVarType*)m_typeNode;
+
+        if (t->m_op.m_type==TokenType::ARRAY) {
+            QString typeName = ((NodeVar*)m_typeNode)->value;
+            Symbol* typeSymbol = symTab->Lookup(typeName);
+            QString varName = ((NodeVar*)m_varNode)->value;
+            ErrorHandler::e.DebugLow("Typename define : " + typeName + "  variable " + varName);
+            qDebug() << "ARRAY: " << varName;
+            qDebug() << "ARRAY type: " << t->m_op.getType();
+            Symbol* varSymbol = new VarSymbol(varName, typeSymbol->m_name);
+            qDebug () << "NEW SYMBOL : " << varName << "  "  << typeSymbol->m_name;
+            symTab->Define(varSymbol);
+
+            return;
+        }*/
         QString typeName = ((NodeVar*)m_typeNode)->value;
         Symbol* typeSymbol = symTab->Lookup(typeName);
         QString varName = ((NodeVar*)m_varNode)->value;
@@ -73,6 +89,7 @@ public:
 
         Symbol* varSymbol = new VarSymbol(varName, typeSymbol->m_name);
         symTab->Define(varSymbol);
+
     }
 
 

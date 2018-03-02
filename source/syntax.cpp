@@ -1,6 +1,7 @@
 #include "syntax.h"
 #include <QtMath>
 
+
 Syntax Syntax::s;
 
 Syntax::Syntax()
@@ -36,55 +37,65 @@ void Syntax::SetupReservedWords()
 
 void Syntax::SetupBuiltinFunctions()
 {
-    QVector<BuiltInFunction::Type> writeln;
-    writeln.append(BuiltInFunction::STRING);
-    writeln.append(BuiltInFunction::INTEGER);
-    builtInFunctions["writeln"] = (BuiltInFunction(
-                                "writeln",  writeln));
+    builtInFunctions["writeln"] = BuiltInFunction(
+                "writeln",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::STRING<< BuiltInFunction::Type::INTEGER );
+
+    builtInFunctions["poke"] = BuiltInFunction(
+                "poke",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER);
+
+    builtInFunctions["peek"] = BuiltInFunction(
+                "peek",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER);
+
+    builtInFunctions["memcpy"] = BuiltInFunction(
+                "memcpy",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER);
 
 
-    QVector<BuiltInFunction::Type> print;
-    print.append(BuiltInFunction::INTEGER);
-    print.append(BuiltInFunction::INTEGER);
-    print.append(BuiltInFunction::STRING);
-    print.append(BuiltInFunction::INTEGER);
-    builtInFunctions["print"] = (BuiltInFunction(
-                                "print",  print));
-
-    QVector<BuiltInFunction::Type> poke;
-    poke.append(BuiltInFunction::INTEGER);
-    poke.append(BuiltInFunction::INTEGER);
-    poke.append(BuiltInFunction::INTEGER);
-    builtInFunctions["poke"] = (BuiltInFunction(
-                                "poke",  poke));
-
-    QVector<BuiltInFunction::Type> peek;
-    peek.append(BuiltInFunction::INTEGER);
-    peek.append(BuiltInFunction::INTEGER);
-    peek.append(BuiltInFunction::INTEGER);
-    builtInFunctions["peek"] = (BuiltInFunction(
-                                "peek",  peek));
-
-    QVector<BuiltInFunction::Type> memcpy;
-    memcpy.append(BuiltInFunction::INTEGER);
-    memcpy.append(BuiltInFunction::INTEGER);
-    memcpy.append(BuiltInFunction::INTEGER);
-    builtInFunctions["memcpy"] = (BuiltInFunction(
-                                "memcpy",  memcpy));
-
-
-    QVector<BuiltInFunction::Type> initRandom;
     builtInFunctions["initrandom"] = (BuiltInFunction(
-                                "initrandom",  initRandom));
+                                "initrandom",  QList<BuiltInFunction::Type>()));
 
-    QVector<BuiltInFunction::Type> rand;
-    rand.append(BuiltInFunction::INTEGER);
-    rand.append(BuiltInFunction::INTEGER);
-    rand.append(BuiltInFunction::INTEGER);
-    builtInFunctions["rand"] = (BuiltInFunction(
-                                "rand",  rand));
+    builtInFunctions["rand"] = BuiltInFunction(
+                "rand",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER);
 
+
+    builtInFunctions["initmoveto"] = BuiltInFunction(
+                "initmoveto",
+                QList<BuiltInFunction::Type>());
+
+    builtInFunctions["moveto"] = BuiltInFunction(
+                "moveto",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER);
+
+    builtInFunctions["pokescreen"] = BuiltInFunction(
+                "pokescreen",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER);
+
+
+    builtInFunctions["fill"] = BuiltInFunction(
+                "fill",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER<< BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["scroll"] = BuiltInFunction(
+                "scroll",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                );
 
 
 }
+
 
