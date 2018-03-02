@@ -81,6 +81,7 @@ END.
 To do:
   - Sine wave table
   - 16 bit operands
+  - 16 bit poke sprite location
   - memory direct access like
      a:=vals[b]; // aka peek
      vals[b]:=5; // aka poke
@@ -89,3 +90,5 @@ To do:
   - print number at x,y
   - sid music
   - IRQs
+  - user input
+  - create small shooter game
