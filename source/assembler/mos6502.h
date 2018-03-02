@@ -7,6 +7,8 @@ class AsmMOS6502 : public Assembler
 {
 public:
     AsmMOS6502();
+
+    QVector<int> m_removeLines;
     bool endTerm() {
         if (m_term.split(" ").count()==2)
             return true;
@@ -52,7 +54,12 @@ public:
     void StartForLoop(QString a, QString b) override;
     void EndForLoop(QString endVal) override;
 
-
+    void Optimise() override;
+    void OptimisePassStaLda();
+    QString getLine(int i);
+    QString getNextLine(int i, int &j);
+    QString getToken(QString, int t);
+    void RemoveLines();
 };
 
 

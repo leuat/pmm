@@ -238,17 +238,109 @@ void AsmMOS6502::StartForLoop(QString var, QString startVal)
 void AsmMOS6502::EndForLoop(QString endVal)
 {
     m_stack["for"].pop();
+    m_labelStack["forLoopFix"].push();
+    m_labelStack["forLoopDone"].push();
+    QString label2 = getLabel("forLoopFix");
+    QString labelDone = getLabel("forLoopDone");
+
     Asm("inc " + m_stack["for"].current());
     Asm("lda "+m_stack["for"].current());
 
 //    if (Syntax::s.isNumeric(endVal))
 //        endVal = "#" + endVal;
     Asm("cmp " + endVal);
-    Asm("bne "+getLabel("for"));
+    Asm("bne "+label2);
+    Asm("jmp "+labelDone);
+    Label(label2);
+    Asm("jmp " + getLabel("for"));
+
+    Label(labelDone);
     m_labelStack["for"].pop();
+    m_labelStack["forLoopFix"].pop();
+    m_labelStack["forLoopDone"].pop();
 
-    qDebug() << "loop: " << m_stack["for"].current();
+ //   qDebug() << label2;
+  //  qDebug() << labelDone;
 
+
+
+ //   qDebug() << "loop: " << m_stack["for"].current();
+
+}
+
+void AsmMOS6502::Optimise()
+{
+    OptimisePassStaLda();
+}
+
+void AsmMOS6502::OptimisePassStaLda()
+{
+    m_removeLines.clear();
+    int j;
+    for (int i=0;i<m_source.count()-1;i++) {
+        QString l0 = getLine(i);
+
+
+
+        if (l0.contains("sta")) {
+            QString l1 = getNextLine(i,j);
+            if (l0==l1) {
+                m_removeLines.append(j);
+                continue;
+            }
+
+
+
+            QString var = getToken(l0,1);
+            if (getToken(l1,1)==var && getToken(l1,0)=="lda") {
+
+                m_removeLines.append(j);
+                i++;
+                continue;
+            }
+
+
+        }
+    }
+    RemoveLines();
+}
+
+QString AsmMOS6502::getLine(int i)
+{
+    QString s = m_source[i].trimmed().toLower().simplified();
+    return s;
+}
+
+QString AsmMOS6502::getNextLine(int i, int &j)
+{
+    bool ok = false;
+    i=i+1;
+    QString line ="";
+    while (i<m_source.count() && getLine(i)=="") {
+        i++;
+    }
+    j=i;
+    return getLine(i);
+
+}
+
+QString AsmMOS6502::getToken(QString s, int t)
+{
+    QStringList lst = s.split(" ");
+    if (t>=lst.count())
+        return "";
+    return lst[t];
+}
+
+void AsmMOS6502::RemoveLines()
+{
+    int k=0;
+    for (int i: m_removeLines) {
+        qDebug() << "Removing line " << (i) << " : " << getLine(i-k);
+        m_source.removeAt(i-k);
+        k++;
+    }
+    m_removeLines.clear();
 }
 
 

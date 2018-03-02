@@ -32,7 +32,7 @@ public:
     QString m_current;
     void push() {
 
-        m_current = QString::number(rand()%10000);
+        m_current = QString::number(rand()%50000);
         m_vars.push_back(m_current);
     }
     void pop() {
@@ -96,7 +96,7 @@ public:
     virtual void EndForLoop(QString endVal) {}
     void Asm(QString s);
     void Label(QString s);
-
+    virtual void Optimise() {}
     void ClearTerm() {
         m_term = "";
     }

@@ -25,7 +25,8 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         Rand(as);
     if (m_procName.toLower() == "scroll")
        Scroll(as);
-
+    if (m_procName.toLower() == "incscreenx")
+            IncScreenX(as);
 
     if (m_procName.toLower()=="fill")
         Fill(as);
@@ -257,6 +258,30 @@ PVar NodeBuiltinMethod::Execute(SymbolTable *symTab, uint lvl) {
     }
 
     return PVar();
+
+}
+
+void NodeBuiltinMethod::IncScreenX(Assembler *as)
+{
+    as->m_labelStack["incscreenx"].push();
+    QString lbl = as->getLabel("incscreenx");
+
+    as->Term("lda ");
+    m_params[0]->Build(as);
+    as->Term();
+    as->Asm("sta screen_x");
+    as->Asm("lda screenMemory");
+    as->Asm("cpx #0");
+    as->Asm("beq " + lbl);
+    as->Asm("clc");
+    as->Asm("adc screen_x");
+    as->Asm("bcc " + lbl);
+    as->Asm("inc screenMemory+1");
+    as->Label(lbl);
+    as->Asm("sta screenMemory");
+
+
+    as->m_labelStack["incscreenx"].pop();
 
 }
 

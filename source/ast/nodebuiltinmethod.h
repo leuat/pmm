@@ -39,6 +39,8 @@ public:
     void Scroll(Assembler* as);
     PVar Execute(SymbolTable* symTab, uint lvl) override;
 
+    void IncScreenX(Assembler* as);
+
     void LoadVar(Assembler* as, int paramNo, QString register);
     void LoadVar(Assembler* as, int paramNo);
     void SaveVar(Assembler* as, int paramNo, QString register);

@@ -60,6 +60,18 @@ public:
         return (m_left->isPureNumeric() && m_right->isPureNumeric());
     }
 
+    int getShiftCount(int i) {
+        if (i==1) return 0;
+        if (i==2) return 1;
+        if (i==4) return 2;
+        if (i==8) return 3;
+        if (i==16) return 4;
+        if (i==32) return 5;
+        if (i==64) return 6;
+        if (i==128) return 7;
+        return -1;
+    }
+
     QString Build(Assembler *as) override {
 
         // First check if both are consants:
@@ -84,7 +96,34 @@ public:
             return "";
         }
 
+        if (m_op.m_type==TokenType::MUL || m_op.m_type==TokenType::DIV) {
+            if (m_right->isPureNumeric())  {
+                int val = ((NodeNumber*)m_right)->m_val;
+                //check power of two
+                int cnt = getShiftCount(val);
+                if (cnt == -1 ) {
+                    ErrorHandler::e.Error("Binary operation */ not implemented for this value yet ( " + QString::number(val) + ")");
+                }
+                QString command = "";
+                if (m_op.m_type == TokenType::DIV)
+                    command = "lsr";
+                if (m_op.m_type == TokenType::MUL)
+                    command = "asl";
 
+                m_left->Build(as);
+                as->Term();
+                for (int i=0;i<cnt;i++)
+                    as->Asm(command);
+                as->Term("sta ");
+                m_left->Build(as);
+                as->Term();
+                return "";
+
+            }
+
+
+            ErrorHandler::e.Error("Binary operation */ not implemented for this type yet...");
+        }
 
         m_left->Build(as);
         as->Term();

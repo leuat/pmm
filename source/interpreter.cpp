@@ -50,6 +50,7 @@ void Interpreter::Build(Interpreter::Type type)
         try {
         m_tree->Build(m_assembler);
         m_assembler->Connect();
+        m_assembler->Optimise();
     } catch (FatalErrorException e) {
         ErrorHandler::e.CatchError(e, "Error during assembly");
     }

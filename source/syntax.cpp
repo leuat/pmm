@@ -95,6 +95,11 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
                 );
 
+    builtInFunctions["incscreenx"] = BuiltInFunction(
+                "incscreenx",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                );
+
 
 }
 
