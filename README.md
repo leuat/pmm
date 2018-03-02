@@ -8,15 +8,6 @@ Write sexy Rascal programs directly for your c64. Compiles to dasm assembler.
 Example program: 
 
 
-PROGRAM FirstC64;
-VAR
-   a, b, c, i, j,k,val : byte;
-   x,y,scrollx : byte;
-   sprite0data: IncBin("sprite1.bin");
-   charset: IncBin("scrap.bin","$1ffe");
-   colorVals : array [8] of byte = (0, 11, 6, 12, 14, 13, 15, 17,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,17, 15, 13 ,14 ,12, 6, 11 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-   charVals : array[8] of byte = (166, 161, 162, 191, 187, 169);
-BEGIN
 	
   ```Pascal
   PROGRAM FirstC64;
