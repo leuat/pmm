@@ -63,7 +63,7 @@ BEGIN
 			peek(RASTERLINE_POS, #0,a);
 		end;
 		scroll(scrollx);
-		scrollx:=scrollx+#1;	
+		scrollx:=scrollx-#1;	
 		if scrollx=#0 then begin
 			scrollx:=#7;
 		end;
