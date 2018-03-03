@@ -72,6 +72,32 @@ public:
         return -1;
     }
 
+
+
+
+
+
+    void EightBitMul(Assembler* as) {
+        as->ClearTerm();
+        as->Term("lda ");
+        m_left->Build(as);
+        as->Term();
+        as->Term("ldx ");
+        m_right->Build(as);
+        as->Term();
+        as->Asm("jsr multiply_eightbit");
+        as->Asm("txa");
+
+
+    }
+
+
+    void LoadVariable(Assembler* as) override {
+        Build(as);
+
+    }
+
+
     QString Build(Assembler *as) override {
 
         // First check if both are consants:
@@ -96,13 +122,22 @@ public:
             return "";
         }
 
+
+
         if (m_op.m_type==TokenType::MUL || m_op.m_type==TokenType::DIV) {
             if (m_right->isPureNumeric())  {
                 int val = ((NodeNumber*)m_right)->m_val;
+
+
+
                 //check power of two
                 int cnt = getShiftCount(val);
                 if (cnt == -1 ) {
-                    ErrorHandler::e.Error("Binary operation */ not implemented for this value yet ( " + QString::number(val) + ")");
+                    if (m_op.m_type == TokenType::MUL)
+                        EightBitMul(as);
+                    else
+                        ErrorHandler::e.Error("Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
+                    return "";
                 }
                 QString command = "";
                 if (m_op.m_type == TokenType::DIV)
@@ -110,23 +145,17 @@ public:
                 if (m_op.m_type == TokenType::MUL)
                     command = "asl";
 
-                m_left->Build(as);
-                as->Term();
+
+                as->Asm("");
+                m_left->LoadVariable(as);
                 for (int i=0;i<cnt;i++)
                     as->Asm(command);
-                as->Term("sta ");
-                m_left->Build(as);
-                as->Term();
                 return "";
 
             }
 
-
             ErrorHandler::e.Error("Binary operation */ not implemented for this type yet...");
         }
-
-        m_left->Build(as);
-        as->Term();
         bool isWord = false;
         QString varName="";
 
@@ -142,10 +171,41 @@ public:
 
 
         if (!isWord) {
-            qDebug() << "FACTOR";
-            as->BinOP(m_op.m_type);
-            m_right->Build(as);
-            as->Term();
+            // Optimizing check: if right var is number, then cut losses
+
+            if (dynamic_cast<const NodeNumber*>(m_right)!=nullptr) {
+                m_left->Build(as);
+                as->Term();
+                as->BinOP(m_op.m_type);
+                m_right->Build(as);
+                as->Term();
+                as->Term(" ; end mul var with constant", true);
+
+            }
+            else {
+                QString lbl = as->NewLabel("rightvar");
+                QString lblJmp = as->NewLabel("jmprightvar");
+                as->Asm("jmp " + lblJmp);
+                as->Write(lbl +"\t.byte\t0");
+                as->Label(lblJmp);
+                as->ClearTerm();
+                m_right->Build(as);
+                as->Term();
+                as->Asm("sta " +lbl);
+                as->Term();
+                /*if (dynamic_cast<NodeVar* >(m_left)!=nullptr) {
+                    as->Term("lda ");
+                    m_left->Build(as);
+                    as->Term();
+                }*/
+                m_left->Build(as);
+                as->Term();
+
+                as->BinOP(m_op.m_type);
+                as->Term(lbl,true);
+                as->PopLabel("rightvar");
+                as->PopLabel("jmprightvar");
+            }
         }
         else {
             as->m_labelStack["wordAdd"].push();

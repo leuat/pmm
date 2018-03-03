@@ -63,6 +63,9 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["initrandom"] = (BuiltInFunction(
                                 "initrandom",  QList<BuiltInFunction::Type>()));
 
+    builtInFunctions["initsinetable"] = (BuiltInFunction(
+                                "initsinetable",  QList<BuiltInFunction::Type>()));
+
     builtInFunctions["rand"] = BuiltInFunction(
                 "rand",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
@@ -74,6 +77,12 @@ void Syntax::SetupBuiltinFunctions()
                 "initmoveto",
                 QList<BuiltInFunction::Type>());
 
+    builtInFunctions["initeightbitmul"] = BuiltInFunction(
+                "initeightbitmul",
+                QList<BuiltInFunction::Type>());
+
+
+
     builtInFunctions["moveto"] = BuiltInFunction(
                 "moveto",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
@@ -81,7 +90,8 @@ void Syntax::SetupBuiltinFunctions()
 
     builtInFunctions["pokescreen"] = BuiltInFunction(
                 "pokescreen",
-                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER);
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
+                BuiltInFunction::Type::INTEGER);
 
 
     builtInFunctions["fill"] = BuiltInFunction(
@@ -98,6 +108,24 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["incscreenx"] = BuiltInFunction(
                 "incscreenx",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["sin"] = BuiltInFunction(
+                "sin",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
+                BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["and"] = BuiltInFunction(
+                "and",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
+                BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["or"] = BuiltInFunction(
+                "or",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
+                BuiltInFunction::Type::INTEGER
                 );
 
 

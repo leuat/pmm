@@ -20,6 +20,8 @@ public:
             return TokenType::REAL;
         if (m_type.toLower()=="address")
             return TokenType::ADDRESS;
+        if (m_type.toLower()=="byte")
+            return TokenType::BYTE;
         return TokenType::NADA;
     }
     Symbol(QString name, QString type="") {

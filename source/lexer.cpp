@@ -32,15 +32,20 @@ void Lexer::Advance()
 
 void Lexer::SkipWhiteSpace()
 {
-    while (!m_finished && (m_currentChar==" "||m_currentChar=="\n" ))
+    while (!m_finished && (m_currentChar==" "||m_currentChar=="\n" || m_currentChar=="\t"))
         Advance();
 }
 
 void Lexer::SkipComment()
 {
-    while (m_currentChar!= "}" && !m_finished)
+    while (!(m_currentChar== "*" && peek()=="/") && !m_finished)
+
         Advance();
+
     Advance();
+    Advance();
+    qDebug() << "Done ADV! " << m_currentChar;
+
 }
 
 Token Lexer::Number()
@@ -138,10 +143,13 @@ Token Lexer::GetNextToken()
             continue;
         }
 
-        if (m_currentChar=="{") {
-            Advance();
-            SkipComment();
-            continue;
+        if (m_currentChar=="/") {
+            if (peek()=="*") {
+                Advance();
+                Advance();
+                SkipComment();
+                continue;
+            }
 
         }
 

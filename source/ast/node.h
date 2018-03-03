@@ -34,6 +34,7 @@ public:
     virtual QString Build(Assembler* as) {
         return "";
     }
+    virtual void LoadVariable(Assembler* a) {}
 };
 
 

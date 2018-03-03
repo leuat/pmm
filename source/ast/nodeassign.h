@@ -8,6 +8,7 @@
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
 #include "source/ast/nodevar.h"
+#include "source/ast/nodevararray.h"
 
 
 class NodeAssign : public Node {
@@ -33,21 +34,34 @@ public:
         return *s->m_value;
 
     }
-    QString Build(Assembler* as) {
-        NodeVar* v = (NodeVar*)m_left;
-        as->ClearTerm();
 
-        //m_right->Build(as);
-        //as->EndAssignVariable(v->value);
-        //as->ApplyTerm();
-        as->ClearTerm();
-        as->Term("lda ");
+    QString AssignVariable(Assembler* as) {
+        NodeVar* v = (NodeVar*)m_left;
+        m_right->LoadVariable(as);
+        //v->LoadVariable(as);
+        as->Term("sta " + v->value,1);
+        return v->value;
+    }
+    QString AssignVariableArray(Assembler* as) {
+        NodeVarArray* v = (NodeVarArray*)m_left;
         m_right->Build(as);
         as->Term();
-        as->Term("sta " + v->value,1);
+        v->StoreAcc(as);
+        return ((NodeVar*)v->m_var)->value;
+    }
 
-        return v->value;
+    QString Build(Assembler* as) {
+        if (dynamic_cast<NodeVar*>(m_left)!=nullptr) {
+            return AssignVariable(as);
 
+        }
+        if (dynamic_cast<NodeVarArray*>(m_left)!=nullptr) {
+            return AssignVariableArray(as);
+        }
+
+        ErrorHandler::e.Error("Unknown assignment type!");
+
+        return "";
     }
     void ExecuteSym(SymbolTable* symTab) override {
         QString varName = ((NodeVar*)m_left)->value;

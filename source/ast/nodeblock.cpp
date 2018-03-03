@@ -18,6 +18,8 @@ PVar NodeBlock::Execute(SymbolTable *symTab, uint lvl) {
 }
 
 void NodeBlock::ExecuteSym(SymbolTable *symTab) {
+    m_useOwnSymTab = false;
+
     if (m_useOwnSymTab) {
         if (m_symTab == nullptr)
             m_symTab = new SymbolTable();

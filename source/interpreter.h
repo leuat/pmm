@@ -16,7 +16,7 @@ public:
     void Parse();
     void Visit(Node* n);
     void Interpret();
-    void Build(Type);
+    bool Build(Type);
     void SaveBuild(QString filename);
 
 };

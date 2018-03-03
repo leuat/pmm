@@ -252,11 +252,14 @@ Node* Parser::Parse()
 {
 
     SymbolTable::Initialize();
-    Node* root = Program();
+    NodeProgram* root = (NodeProgram*)Program();
+    for (QString s: m_procedures.keys())
+        root->m_NodeBlock->m_decl.append(m_procedures[s]);
+
     if (m_currentToken.m_type!=TokenType::TEOF)
         ErrorHandler::e.Error("End of file error");
 
-    root->ExecuteSym(nullptr);
+//    root->ExecuteSym(&SymbolTable::s);
     return root;
 }
 
@@ -408,7 +411,6 @@ Node *Parser::TypeSpec()
         Eat();
         Eat(TokenType::LPAREN);
         QString binFile = m_currentToken.m_value;
-        qDebug() << "binfile: " << binFile;
         Eat();
         QString position ="";
         if (m_currentToken.m_type==TokenType::COMMA) {
@@ -417,6 +419,9 @@ Node *Parser::TypeSpec()
             Eat();
         }
         Eat(TokenType::RPAREN);
+        if (!QFile::exists(binFile))
+            ErrorHandler::e.Error("Could not locate binary file for inclusion :" +binFile);
+
         return new NodeVarType(t,binFile, position);
 
     }
@@ -425,7 +430,6 @@ Node *Parser::TypeSpec()
     if (m_currentToken.m_type == TokenType::ARRAY) {
         Eat(TokenType::ARRAY);
         Eat(TokenType::LBRACKET);
-        qDebug() << m_currentToken.getType() << " with value " << m_currentToken.m_value;
         float count =m_currentToken.m_intVal;
         Eat(m_currentToken.m_type);
         Eat(TokenType::RBRACKET);

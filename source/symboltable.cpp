@@ -46,6 +46,7 @@ void SymbolTable::Initialize()
     m_constants["SPRITE_DATA"] = new Symbol("$0340","ADDRESS", 0x0340);
 
 
+
 }
 
 void SymbolTable::InitBuiltins()
@@ -59,5 +60,6 @@ void SymbolTable::InitBuiltins()
     Define(new BuiltInTypeSymbol("INCBIN",""));
 
     Define(new Symbol("return",""));
+    Define(new Symbol("sine", "address"));
 }
 

@@ -63,5 +63,5 @@ int main(int argc, char *argv[])
 {
     ErrorHandler::e.m_level = ErrorHandler::e.DEBUG_LOW;
     ErrorHandler::e.m_level = ErrorHandler::e.ERROR_ONLY;
-    ParseFile("..\\pmm\\pmm\\test.pmm");
+    ParseFile("..\\pmm\\pmm\\test.ras");
 }

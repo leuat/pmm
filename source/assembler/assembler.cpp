@@ -32,9 +32,11 @@ void Assembler::Write(QString str, int level)
     m_source.append(s);
 }
 
-void Assembler::Asm(QString s)
+void Assembler::Asm(QString s, QString comment)
 {
-    Write(s,1);
+    QString c = "\t;" + comment;
+    if (comment=="") c="";
+    Write(s+c ,1);
 }
 
 void Assembler::Label(QString s)

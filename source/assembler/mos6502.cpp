@@ -53,7 +53,7 @@ void AsmMOS6502::DeclareArray(QString name, QString type, int count, QStringList
 
         }
     }
-
+    Term();
 }
 
 void AsmMOS6502::VarDeclHeader()
@@ -137,8 +137,10 @@ void AsmMOS6502::BinOP(TokenType::Type t)
     if (t == TokenType::PLUS)
         m_term = "adc ";
 
-    if (t == TokenType::MINUS)
+    if (t == TokenType::MINUS) {
+        Asm("sec");
         m_term = "sbc ";
+    }
 }
 
 void AsmMOS6502::Poke(bool start)
@@ -189,17 +191,17 @@ void AsmMOS6502::LoadVariable(QString var)
 
 void AsmMOS6502::Variable(QString v)
 {
-    m_term += v;
+/*    m_term += v;
     return;
-
+*/
 
     if (m_term=="")
         m_term = "lda ";
     m_term+=v;
-    if (endTerm()) {
+  /*  if (endTerm()) {
         Asm(m_term);
         ClearTerm();
-    }
+    }*/
 }
 
 void AsmMOS6502::WriteBuiltinWriteln()

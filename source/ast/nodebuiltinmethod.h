@@ -31,12 +31,11 @@ public:
     void Peek(Assembler* as);
     void MemCpy(Assembler* as);
     void Rand(Assembler* as);
-    void InitMoveto(Assembler *as);
     void MoveTo(Assembler* as);
-    void InitRandom(Assembler* as);
     void PokeScreen(Assembler* as, int hiAddress);
     void Fill(Assembler* as);
     void Scroll(Assembler* as);
+    void BitOp(Assembler* as, int type);
     PVar Execute(SymbolTable* symTab, uint lvl) override;
 
     void IncScreenX(Assembler* as);
@@ -45,6 +44,17 @@ public:
     void LoadVar(Assembler* as, int paramNo);
     void SaveVar(Assembler* as, int paramNo, QString register);
     void SaveVar(Assembler* as, int paramNo);
+
+    void VerifyInitialized(QString method, QString initmethod);
+
+
+    // Initialize
+    void InitRandom(Assembler* as);
+    void InitSinusTable(Assembler* as);
+    void InitMoveto(Assembler *as);
+    void InitEightBitMul(Assembler* as);
+
+
     void ExecuteSym(SymbolTable* symTab) override {
 
     }

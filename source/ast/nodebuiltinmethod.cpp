@@ -5,8 +5,6 @@ QMap<QString, bool> NodeBuiltinMethod::m_isInitialized;
 
 QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="writeln") {
-        if (m_params.count()!=2)
-            ErrorHandler::e.Error("Writeln requires 2 parameters");
         as->Writeln();
 
         m_params[0]->Build(as);
@@ -21,18 +19,35 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="memcpy")
         MemCpy(as);
 
+    if (m_procName.toLower()=="and")
+        BitOp(as,0);
+
+    if (m_procName.toLower()=="or")
+        BitOp(as,1);
+
     if (m_procName.toLower()=="rand")
         Rand(as);
     if (m_procName.toLower() == "scroll")
        Scroll(as);
+
     if (m_procName.toLower() == "incscreenx")
             IncScreenX(as);
+
+    if (m_procName.toLower() == "initeightbitmul")
+            InitEightBitMul(as);
 
     if (m_procName.toLower()=="fill")
         Fill(as);
 
     if (m_procName.toLower()=="initrandom")
         InitRandom(as);
+
+    if (m_procName.toLower()=="initmoveto") {
+        InitMoveto(as);
+    }
+
+    if (m_procName.toLower()=="initsinetable")
+        InitSinusTable(as);
 
     if (m_procName.toLower()=="moveto")
         MoveTo(as);
@@ -91,8 +106,7 @@ void NodeBuiltinMethod::Peek(Assembler* as)
 void NodeBuiltinMethod::MemCpy(Assembler* as)
 {
     //as->ClearTerm();
-    as->m_labelStack["memcpy"].push();
-    QString lbl = as->getLabel("memcpy");
+    QString lbl = as->NewLabel("memcpy");
     as->Asm("ldx #0");
     as->Label(lbl);
     LoadVar(as, 0, "x");
@@ -103,14 +117,13 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     as->Term();
     as->Asm("bne " + lbl);
 
-    as->m_labelStack["memcpy"].pop();
+    as->PopLabel("memcpy");
 
 }
 
 void NodeBuiltinMethod::Rand(Assembler* as)
 {
-    if (!m_isInitialized["rand"])
-        ErrorHandler::e.Error("Please decaler InitRandom() before using Rand();");
+    VerifyInitialized("rand","InitRandom");
     LoadVar(as, 0);
     as->Asm("sta lowerRandom");
     LoadVar(as, 1);
@@ -122,8 +135,10 @@ void NodeBuiltinMethod::Rand(Assembler* as)
 
 void NodeBuiltinMethod::InitMoveto(Assembler *as)
 {
-    as->m_labelStack["moveto"].push();
-    QString lbl = as->getLabel("moveto");
+    if (m_isInitialized["moveto"])
+        return;
+
+    QString lbl = as->NewLabel("moveto");
     as->Asm("jmp " + lbl);
     as->Label("screenMemory = $fb ");
     as->Label("screen_x .byte 0 ");
@@ -159,16 +174,51 @@ void NodeBuiltinMethod::InitMoveto(Assembler *as)
     as->Asm("rts");
     as->Label(lbl);
 
-    as->m_labelStack["moveto"].pop();
+    as->PopLabel("moveto");
+    m_isInitialized["moveto"]=true;
 
+}
+
+void NodeBuiltinMethod::InitEightBitMul(Assembler *as)
+{
+    if (m_isInitialized["eightbitmul"])
+        return;
+
+    m_isInitialized["eightbitmul"] = true;
+
+    QString l = as->NewLabel("multiply_eightbit");
+    as->Asm("jmp " + l);
+    as->Label("multiplier	= $02 ; some zeropage adress");
+    as->Label("multiply_eightbit");
+    as->Asm("cpx #$00");
+    as->Asm("beq mul_end");
+    as->Asm("dex");
+    as->Asm("stx mul_mod+1");
+    as->Asm("lsr");
+    as->Asm("sta multiplier");
+    as->Asm("lda #$00");
+    as->Asm("ldx #$08");
+    as->Label("mul_loop");
+    as->Asm("bcc mul_skip");
+    as->Label("mul_mod");
+    as->Asm("adc #$00");
+    as->Label("mul_skip");
+    as->Asm("ror");
+    as->Asm("ror multiplier");
+    as->Asm("dex");
+    as->Asm("bne mul_loop");
+    as->Asm("ldx multiplier");
+    as->Asm("rts");
+    as->Label("mul_end");
+    as->Asm("txa");
+    as->Asm("rts");
+    as->Label(l);
+    as->PopLabel("multiply_eightbit");
 }
 
 void NodeBuiltinMethod::MoveTo(Assembler *as)
 {
-    if (!m_isInitialized["moveto"]) {
-        m_isInitialized["moveto"]=true;
-        InitMoveto(as);
-    }
+    VerifyInitialized("moveto", "InitMoveto");
     LoadVar(as, 0);
     as->Asm("sta screen_x");
     LoadVar(as, 1);
@@ -179,6 +229,8 @@ void NodeBuiltinMethod::MoveTo(Assembler *as)
 
 void NodeBuiltinMethod::InitRandom(Assembler *as)
 {
+    if (m_isInitialized["rand"])
+        return;
     m_isInitialized["rand"] = true;
     as->Asm ("; init random");
     as->Asm("LDA #$FF");
@@ -206,14 +258,16 @@ void NodeBuiltinMethod::PokeScreen(Assembler *as, int shift)
 {
 
     LoadVar(as, 0);
-    as->Asm("ldy #0");
+
+    as->Term("ldy ");
+    m_params[1]->Build(as);
+    as->Term();
     as->Asm("sta (screenMemory),y");
 }
 
 void NodeBuiltinMethod::Fill(Assembler *as)
 {
-    as->m_labelStack["fill"].push();
-    QString lbl = as->getLabel("fill");
+    QString lbl = as->NewLabel("fill");
     LoadVar(as,1);
     as->Asm("ldx #0");
     as->Label(lbl);
@@ -225,6 +279,7 @@ void NodeBuiltinMethod::Fill(Assembler *as)
     m_params[2]->Build(as);
     as->Term();
     as->Asm("bne "+lbl);
+    as->PopLabel("fill");
 
 }
 
@@ -240,6 +295,23 @@ void NodeBuiltinMethod::Scroll(Assembler *as)
     as->Term();
     as->Asm("sta $d016");
 
+}
+
+void NodeBuiltinMethod::BitOp(Assembler *as, int type)
+{
+    as->ClearTerm();
+    as->Term("lda ");
+    m_params[0]->Build(as);
+    as->Term();
+    if (type==0)
+        as->Term("and ");
+    if (type==1)
+        as->Term("ora ");
+    m_params[1]->Build(as);
+    as->Term();
+    as->Term("sta ");
+    m_params[0]->Build(as);
+    as->Term();
 }
 
 
@@ -260,6 +332,58 @@ PVar NodeBuiltinMethod::Execute(SymbolTable *symTab, uint lvl) {
     return PVar();
 
 }
+
+void NodeBuiltinMethod::InitSinusTable(Assembler *as)
+{
+    if (m_isInitialized["sinetab"])
+        return;
+    as->Asm("; initSineTable");
+    as->Asm("jmp initsin_continue");
+    as->Label("sine .byte 0 ");
+    as->Asm("org sine +#255");
+
+    as->Label("value .word 0");
+    as->Label("delta .word 0");
+    as->Label("initsin_continue");
+
+
+    as->Asm("ldy #$3f");
+    as->Asm("ldx #$00");
+    as->Label("initsin_a");
+    as->Asm("lda value");
+    as->Asm("clc");
+    as->Asm("adc delta");
+    as->Asm("sta value");
+    as->Asm("lda value+1");
+    as->Asm("adc delta+1");
+    as->Asm("sta value+1");
+
+    as->Asm("sta sine+$c0,x");
+    as->Asm("sta sine+$80,y");
+    as->Asm("eor #$ff");
+    as->Asm("sta sine+$40,x");
+    as->Asm("sta sine+$00,y");
+
+    as->Asm("lda delta");
+    as->Asm("adc #$10   ; this value adds up to the proper amplitude");
+
+    as->Asm("sta delta");
+    as->Asm("bcc initsin_b");
+    as->Asm("inc delta+1");
+    as->Label("initsin_b");
+
+    as->Asm("inx");
+    as->Asm("dey");
+    as->Asm("bpl initsin_a");
+
+
+    m_isInitialized["sinetab"]=true;
+
+
+}
+
+
+
 
 void NodeBuiltinMethod::IncScreenX(Assembler *as)
 {
@@ -304,6 +428,13 @@ void NodeBuiltinMethod::LoadVar(Assembler *as, int paramNo)
 void NodeBuiltinMethod::SaveVar(Assembler *as, int paramNo)
 {
     SaveVar(as, paramNo, "");
+}
+
+void NodeBuiltinMethod::VerifyInitialized(QString method, QString initmethod)
+{
+    if (!m_isInitialized[method])
+        ErrorHandler::e.Error("Please declare "+ initmethod+"() before using " + method+"();");
+
 }
 
 void NodeBuiltinMethod::SaveVar(Assembler *as, int paramNo, QString reg)

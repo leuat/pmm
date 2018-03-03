@@ -28,6 +28,16 @@ void NodeProcedureDecl::SetParametersValue(QVector<PVar> &lst) {
     //        ((NodeBlock*)m_block)->SetParameters(lst, names);
 }
 
+QString NodeProcedureDecl::Build(Assembler *as)
+{
+    as->Asm("jmp afterProc_" + m_procName);
+    as->Label(m_procName);
+    m_block->Build(as);
+    as->Asm("rts");
+    as->Label("afterProc_" + m_procName);
+    return 0;
+}
+
 PVar NodeProcedureDecl::Execute(SymbolTable *symTab, uint lvl) {
     Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
 

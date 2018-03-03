@@ -61,6 +61,15 @@ public:
         return s+m_labelStack[s].m_current;
     }
 
+    QString NewLabel(QString s) {
+        m_labelStack[s].push();
+        return s+m_labelStack[s].m_current;
+    }
+
+    void PopLabel(QString s) {
+        m_labelStack[s].pop();
+    }
+
     Assembler();
     void Save(QString filename);
     void Nl();
@@ -94,7 +103,7 @@ public:
 
     virtual void StartForLoop(QString a, QString b) {}
     virtual void EndForLoop(QString endVal) {}
-    void Asm(QString s);
+    void Asm(QString s, QString comment="");
     void Label(QString s);
     virtual void Optimise() {}
     void ClearTerm() {

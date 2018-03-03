@@ -32,6 +32,27 @@ public:
 
     }
 
+    void LoadVariable(Assembler* as) override {
+
+        TokenType::Type t = as->m_symTab->Lookup(value)->getTokenType();
+
+        if (t==TokenType::BYTE) {
+            qDebug() << "BYTE";
+            as->Asm("lda " +value);
+            return;
+        }
+        if (t == TokenType::INTEGER) {
+            as->Asm("lda " +value);
+            as->Asm("tax");
+            as->Asm("lda " +value+"+1");
+            return;
+
+        }
+        ErrorHandler::e.Error(TokenType::getType(t) + " assignment not supported yet for exp: " + value);
+        return;
+    }
+
+
     QString Build(Assembler *as) override {
         QString  val = value;
       /*  Symbol* s= as->m_symTab->LookupConstants(value);

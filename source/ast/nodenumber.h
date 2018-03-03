@@ -24,6 +24,13 @@ public:
         return true;
     }
 
+    void LoadVariable(Assembler* as) override {
+        as->ClearTerm();
+        as->Term("lda ");
+        Build(as);
+        as->Term();
+    }
+
     QString Build(Assembler *as) override {
         QString val = "";
         if (m_op.m_type==TokenType::INTEGER)
@@ -34,7 +41,10 @@ public:
             val = "$" + QString::number((int)m_val,16);
         }
         //as->Number(val);
-        as->Term(val);
+        if (as->m_term=="")
+            as->Asm("lda " + val);
+        else
+            as->Term(val);
         return val;
     }
 

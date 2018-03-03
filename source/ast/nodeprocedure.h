@@ -34,6 +34,12 @@ public:
         ErrorHandler::e.DebugLow("Memory DONE: Deleting in NodeProcedure", level);
     }
 
+
+    QString Build(Assembler* as) override {
+        as->Asm("jsr " + m_procedure->m_procName);
+        return "";
+    }
+
     PVar Execute(SymbolTable *symTab, uint lvl) override;
     void ExecuteSym(SymbolTable* symTab) override {
         m_procedure ->ExecuteSym(symTab);
