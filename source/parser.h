@@ -71,6 +71,8 @@ public:
     Node* Constant();
     void Eat();
 
+    void InitBuiltinFunctions();
+
 
 };
 

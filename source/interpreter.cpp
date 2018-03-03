@@ -51,7 +51,7 @@ bool Interpreter::Build(Interpreter::Type type)
         m_tree->Build(m_assembler);
         m_tree->ExecuteSym(m_assembler->m_symTab);
         m_assembler->Connect();
-        //m_assembler->Optimise();
+        m_assembler->Optimise();
     } catch (FatalErrorException e) {
         ErrorHandler::e.CatchError(e, "Error during assembly");
         return false;

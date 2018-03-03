@@ -46,8 +46,12 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         InitMoveto(as);
     }
 
-    if (m_procName.toLower()=="initsinetable")
+    if (m_procName.toLower()=="definesinetable")
         InitSinusTable(as);
+
+
+    if (m_procName.toLower()=="initsinetable")
+        as->Asm("jsr definesinetable");
 
     if (m_procName.toLower()=="moveto")
         MoveTo(as);

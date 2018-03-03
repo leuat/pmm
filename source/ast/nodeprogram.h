@@ -9,6 +9,7 @@
 #include "source/ast/node.h"
 #include "source/ast/nodebuiltinmethod.h"
 #include "source/ast/nodeblock.h"
+#include "source/ast/nodeproceduredecl.h"
 
 class NodeProgram : public Node {
 public:
@@ -18,6 +19,9 @@ public:
         m_NodeBlock = b;
         m_name = n;
     }
+
+
+
 
     void Delete() override {
         if (m_NodeBlock) {

@@ -1,4 +1,5 @@
 #include "nodeproceduredecl.h"
+#include "nodebuiltinmethod.h"
 
 
 NodeProcedureDecl::NodeProcedureDecl(QString m, QVector<Node *> paramDecl, Node *block) {
@@ -30,6 +31,9 @@ void NodeProcedureDecl::SetParametersValue(QVector<PVar> &lst) {
 
 QString NodeProcedureDecl::Build(Assembler *as)
 {
+    if (m_block==nullptr)  // Is builtin procedure
+        m_block = new NodeBuiltinMethod(m_procName, QVector<Node*>());
+
     as->Asm("jmp afterProc_" + m_procName);
     as->Label(m_procName);
     m_block->Build(as);

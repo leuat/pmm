@@ -34,6 +34,14 @@ void Parser::Eat()
     Eat(m_currentToken.m_type);
 }
 
+void Parser::InitBuiltinFunctions()
+{
+    m_procedures["initrandom"] = new NodeProcedureDecl("initrandom");
+    m_procedures["definesinetable"] = new NodeProcedureDecl("definesinetable");
+    m_procedures["initeightbitmul"] = new NodeProcedureDecl("initeightbitmul");
+    m_procedures["initmoveto"] = new NodeProcedureDecl("initmoveto");
+}
+
 void Parser::VerifyToken(Token t)
 {
     //if (Syntax::s.globals.contains(t.m_value))
@@ -252,9 +260,18 @@ Node* Parser::Parse()
 {
 
     SymbolTable::Initialize();
+    InitBuiltinFunctions();
     NodeProgram* root = (NodeProgram*)Program();
+
+    // First add builtin functions
     for (QString s: m_procedures.keys())
-        root->m_NodeBlock->m_decl.append(m_procedures[s]);
+        if (((NodeProcedureDecl*)m_procedures[s])->m_block==nullptr)
+            root->m_NodeBlock->m_decl.append(m_procedures[s]);
+    // Then add regular ones
+    for (QString s: m_procedures.keys())
+        if (((NodeProcedureDecl*)m_procedures[s])->m_block!=nullptr)
+            root->m_NodeBlock->m_decl.append(m_procedures[s]);
+
 
     if (m_currentToken.m_type!=TokenType::TEOF)
         ErrorHandler::e.Error("End of file error");

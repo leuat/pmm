@@ -13,7 +13,13 @@ class NodeProcedureDecl : public Node {
 public:
     QString m_procName;
     QVector<Node*> m_paramDecl;
-    Node* m_block;
+    Node* m_block = nullptr;
+
+
+    NodeProcedureDecl(QString m) {
+        m_procName = m;
+    }
+
 
     NodeProcedureDecl(QString m, QVector<Node*> paramDecl, Node* block);
 
