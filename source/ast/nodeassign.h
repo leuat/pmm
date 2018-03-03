@@ -13,6 +13,7 @@
 
 class NodeAssign : public Node {
 public:
+    Node* m_arrayIndex = nullptr;
     NodeAssign(Node* left, Token t, Node* r) {
         m_right = r;
         m_op = t;
@@ -36,32 +37,23 @@ public:
     }
 
     QString AssignVariable(Assembler* as) {
-        NodeVar* v = (NodeVar*)m_left;
-        m_right->LoadVariable(as);
-        //v->LoadVariable(as);
-        as->Term("sta " + v->value,1);
-        return v->value;
-    }
-    QString AssignVariableArray(Assembler* as) {
-        NodeVarArray* v = (NodeVarArray*)m_left;
+        NodeVar* v = (NodeVar*)dynamic_cast<const NodeVar*>(m_left);
+        if (v==nullptr)
+           ErrorHandler::e.Error("Left value not variable! ");
+
+        as->Comment("Assigning single variable : " + v->value);
+        //m_right->LoadVariable(as);
         m_right->Build(as);
         as->Term();
-        v->StoreAcc(as);
-        return ((NodeVar*)v->m_var)->value;
+        //v->LoadVariable(as);
+        v->StoreVariable(as);
+        //as->Term("sta " + v->value,1);
+        return v->value;
     }
 
     QString Build(Assembler* as) {
-        if (dynamic_cast<NodeVar*>(m_left)!=nullptr) {
-            return AssignVariable(as);
+        return AssignVariable(as);
 
-        }
-        if (dynamic_cast<NodeVarArray*>(m_left)!=nullptr) {
-            return AssignVariableArray(as);
-        }
-
-        ErrorHandler::e.Error("Unknown assignment type!");
-
-        return "";
     }
     void ExecuteSym(SymbolTable* symTab) override {
         QString varName = ((NodeVar*)m_left)->value;

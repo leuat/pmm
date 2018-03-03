@@ -33,6 +33,7 @@ public:
     void EndBlock() override;
     void ApplyTerm() override;
     void Number(QString n) override;
+    void Comment(QString s) override;
     void String(QString s) override;
     void AssignVariable(QString v) override;
     void EndAssignVariable(QString variable) override;

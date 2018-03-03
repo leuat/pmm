@@ -115,6 +115,11 @@ void AsmMOS6502::Number(QString n)
 
 }
 
+void AsmMOS6502::Comment(QString s)
+{
+    Asm("; "+ s) ;
+}
+
 void AsmMOS6502::String(QString s)
 {
     m_term +="\"" + s.toUpper() + "\"";

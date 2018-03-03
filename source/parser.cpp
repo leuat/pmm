@@ -59,10 +59,28 @@ Node *Parser::Variable()
         if (s->m_type=="ADDRESS") m_currentToken.m_type=TokenType::ADDRESS;
         if (s->m_type=="INTEGER") m_currentToken.m_type=TokenType::INTEGER;
         n = new NodeNumber(m_currentToken, s->m_value->m_fVal);
+        Eat(m_currentToken.m_type);
+
     }
-    else
-        n = new NodeVar(m_currentToken);
-    Eat(m_currentToken.m_type);
+    else {
+        Token t = m_currentToken;
+        Eat(m_currentToken.m_type);
+        if (m_currentToken.m_type!=TokenType::LBRACKET) {
+            n = new NodeVar(t);
+        }
+        else
+            {
+                Eat(TokenType::LBRACKET);
+                Node* expr = Expr();
+                Eat(TokenType::RBRACKET);
+                n = new NodeVar(t, expr);
+
+
+        }
+    }
+    if (n==nullptr) {
+        ErrorHandler::e.Error("Could not assign variable!");
+    }
     return n;
 }
 
@@ -73,15 +91,25 @@ Node *Parser::Empty()
 
 Node *Parser::AssignStatement()
 {
+    Node* arrayIndex = nullptr;
     Token t = m_currentToken;
     Node* left = Variable();
+/*    qDebug() << m_currentToken.getType();
+    if (m_currentToken.m_type==TokenType::LBRACKET) { // Is Array lookup
+        Eat(TokenType::LBRACKET);
+        arrayIndex = Expr();
+        qDebug() << "Array Index!";
+        Eat(TokenType::RBRACKET);
+    }*/
     Token token = m_currentToken;
+
+
     if (m_currentToken.m_type!=TokenType::ASSIGN)
         ErrorHandler::e.Error("Could not find variable or procedure '" + t.m_value+  "'");
     Eat(TokenType::ASSIGN);
     Node* right = Expr();
-    Node* node = new NodeAssign(left, token, right);
-    return node;
+    return new NodeAssign(left, token, right);
+
 
 }
 
@@ -235,12 +263,9 @@ Node* Parser::Factor()
         Node* node = FindProcedure();
         if (node!=nullptr)
             return node;
-/*        node = Constant();
-        if (node!=nullptr)
-            return Constant();*/
 
     }
-       return Variable();
+    return Variable();
 }
 
 Node* Parser::Term()

@@ -8,6 +8,7 @@ Interpreter::Interpreter(Parser p)
 void Interpreter::Parse()
 {
     m_tree = nullptr;
+    qDebug() << "Parsing..";
     try {
         m_tree = m_parser.Parse();
     } catch (FatalErrorException e) {
@@ -48,8 +49,11 @@ bool Interpreter::Build(Interpreter::Type type)
 
     if (m_tree!=nullptr)
         try {
+        qDebug() << "Building";
         m_tree->Build(m_assembler);
+        qDebug() << "Symbolic";
         m_tree->ExecuteSym(m_assembler->m_symTab);
+        qDebug() << "Rest...";
         m_assembler->Connect();
         m_assembler->Optimise();
     } catch (FatalErrorException e) {

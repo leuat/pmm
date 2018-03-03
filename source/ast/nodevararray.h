@@ -11,19 +11,26 @@ public:
     NodeVar* m_var;
     Node* m_expr;
 
-    NodeVarArray();
+    NodeVarArray(Token token, Node* expr) {
+        m_var = new NodeVar(token);
+        m_expr = expr;
+    }
 
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         return PVar();
     }
 
     QString Build(Assembler *as) override {
+        qDebug() << "Build";
+        return "";
         m_expr->Build(as);
         as->Asm("tax");
         as->Term("lda ");
         m_var->Build(as);
         as->Term(",x",true);
+        qDebug() << "end";
         return "";
+
     }
 
     void StoreAcc(Assembler* as) {
@@ -41,8 +48,11 @@ public:
 
 
     void ExecuteSym(SymbolTable* symTab) {
-        m_var->ExecuteSym(symTab);
-        m_expr->ExecuteSym(symTab);
+        qDebug()<< "Eecu";
+        if (m_var!=nullptr)
+            m_var->ExecuteSym(symTab);
+        if (m_expr!=nullptr)
+            m_expr->ExecuteSym(symTab);
 
     }
 

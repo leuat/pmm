@@ -78,6 +78,7 @@ public:
 
 
     void EightBitMul(Assembler* as) {
+        as->Comment("8 bit mul");
         as->ClearTerm();
         as->Term("lda ");
         m_left->Build(as);
@@ -106,7 +107,7 @@ public:
             NodeNumber *a = (NodeNumber*)dynamic_cast<const NodeNumber*>(m_left);
             NodeNumber *b = (NodeNumber*)dynamic_cast<const NodeNumber*>(m_right);
             //BothConstants(as);
-
+            as->Comment("Binop of two constant values");
             m_left->Build(as);
             if (m_op.m_type==TokenType::PLUS)
                 as->Term("+");
@@ -139,6 +140,8 @@ public:
                         ErrorHandler::e.Error("Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
                     return "";
                 }
+                as->Comment("8 bit mul of power 2");
+
                 QString command = "";
                 if (m_op.m_type == TokenType::DIV)
                     command = "lsr";
@@ -174,6 +177,8 @@ public:
             // Optimizing check: if right var is number, then cut losses
 
             if (dynamic_cast<const NodeNumber*>(m_right)!=nullptr) {
+                as->Comment("Add/sub where right value is constant number");
+
                 m_left->Build(as);
                 as->Term();
                 as->BinOP(m_op.m_type);
@@ -183,6 +188,8 @@ public:
 
             }
             else {
+                as->Comment("Add/sub right value is variable/expression");
+
                 QString lbl = as->NewLabel("rightvar");
                 QString lblJmp = as->NewLabel("jmprightvar");
                 as->Asm("jmp " + lblJmp);

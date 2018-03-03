@@ -44,7 +44,6 @@ void Lexer::SkipComment()
 
     Advance();
     Advance();
-    qDebug() << "Done ADV! " << m_currentChar;
 
 }
 
