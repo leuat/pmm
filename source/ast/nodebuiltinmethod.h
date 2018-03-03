@@ -34,6 +34,8 @@ public:
     void MoveTo(Assembler* as);
     void PokeScreen(Assembler* as, int hiAddress);
     void Fill(Assembler* as);
+    void PrintNumber(Assembler* as);
+    void PrintString(Assembler* as);
     void Scroll(Assembler* as);
     void BitOp(Assembler* as, int type);
     PVar Execute(SymbolTable* symTab, uint lvl) override;
@@ -53,6 +55,7 @@ public:
     void InitSinusTable(Assembler* as);
     void InitMoveto(Assembler *as);
     void InitEightBitMul(Assembler* as);
+    void InitPrintString(Assembler* as);
 
 
     void ExecuteSym(SymbolTable* symTab) override {

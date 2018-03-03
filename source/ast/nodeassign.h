@@ -8,6 +8,7 @@
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
 #include "source/ast/nodevar.h"
+#include "source/ast/nodestring.h"
 #include "source/ast/nodevararray.h"
 
 
@@ -35,6 +36,32 @@ public:
         return *s->m_value;
 
     }
+    void AssignString(Assembler *as) {
+
+        qDebug() << "Assigning string";
+
+        NodeString* right = (NodeString*)dynamic_cast<const NodeString*>(m_right);
+        NodeVar* left = (NodeVar*)dynamic_cast<const NodeVar*>(m_left);
+        QString lbl = as->NewLabel("stringassign");
+        QString str = as->NewLabel("stringassignstr");
+        QString lblCpy=as->NewLabel("stringassigncpy");
+        as->Asm("jmp " + lbl);
+        as->Label(str + "\t.dc \"" + right->m_op.m_value + "\",0");
+        as->Label(lbl);
+        as->Asm("ldx #0");
+        as->Label(lblCpy);
+        as->Asm("lda " + str+",x");
+        as->Asm("sta "+left->value +",x");
+        as->Asm("inx");
+        as->Asm("cmp #0");
+        as->Asm("bne " + lblCpy);
+
+        as->PopLabel("stringassign");
+        as->PopLabel("stringassignstr");
+        as->PopLabel("stringassigncpy");
+
+    }
+
 
     QString AssignVariable(Assembler* as) {
         NodeVar* v = (NodeVar*)dynamic_cast<const NodeVar*>(m_left);
@@ -42,6 +69,12 @@ public:
            ErrorHandler::e.Error("Left value not variable! ");
 
         as->Comment("Assigning single variable : " + v->value);
+        TokenType::Type t = as->m_symTab->Lookup(v->value)->getTokenType();
+       if ((NodeString*)dynamic_cast<const NodeString*>(m_right))
+        {
+            AssignString(as);
+            return v->value;
+        }
         //m_right->LoadVariable(as);
         m_right->Build(as);
         as->Term();

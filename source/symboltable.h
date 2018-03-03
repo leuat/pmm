@@ -22,6 +22,8 @@ public:
             return TokenType::ADDRESS;
         if (m_type.toLower()=="byte")
             return TokenType::BYTE;
+        if (m_type.toLower()=="string")
+            return TokenType::STRING;
         return TokenType::NADA;
     }
     Symbol(QString name, QString type="") {
@@ -111,7 +113,7 @@ public:
             return m_constants[name];
         }
         if (!m_symbols.contains(name)) {
-            ErrorHandler::e.Error("Symbol '" + name + "' does not exist in the current scope");
+            ErrorHandler::e.Error("Symbol/variable '" + name + "' does not exist in the current scope");
         }
         return m_symbols[name];
     }

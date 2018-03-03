@@ -40,6 +40,7 @@ void Parser::InitBuiltinFunctions()
     m_procedures["definesinetable"] = new NodeProcedureDecl("definesinetable");
     m_procedures["initeightbitmul"] = new NodeProcedureDecl("initeightbitmul");
     m_procedures["initmoveto"] = new NodeProcedureDecl("initmoveto");
+    m_procedures["initprintstring"] = new NodeProcedureDecl("initprintstring");
 }
 
 void Parser::VerifyToken(Token t)
@@ -58,14 +59,24 @@ Node *Parser::Variable()
         Symbol* s = SymbolTable::m_constants[m_currentToken.m_value];
         if (s->m_type=="ADDRESS") m_currentToken.m_type=TokenType::ADDRESS;
         if (s->m_type=="INTEGER") m_currentToken.m_type=TokenType::INTEGER;
+        if (s->m_type=="STRING") m_currentToken.m_type=TokenType::STRING;
         n = new NodeNumber(m_currentToken, s->m_value->m_fVal);
         Eat(m_currentToken.m_type);
 
     }
     else {
         Token t = m_currentToken;
+        if (m_currentToken.m_type==TokenType::STRING) {
+           n = String();
+           Eat(m_currentToken.m_type);
+           qDebug() << m_currentToken.m_value;
+           return n;
+
+        }
+
         Eat(m_currentToken.m_type);
         if (m_currentToken.m_type!=TokenType::LBRACKET) {
+
             n = new NodeVar(t);
         }
         else
@@ -94,13 +105,6 @@ Node *Parser::AssignStatement()
     Node* arrayIndex = nullptr;
     Token t = m_currentToken;
     Node* left = Variable();
-/*    qDebug() << m_currentToken.getType();
-    if (m_currentToken.m_type==TokenType::LBRACKET) { // Is Array lookup
-        Eat(TokenType::LBRACKET);
-        arrayIndex = Expr();
-        qDebug() << "Array Index!";
-        Eat(TokenType::RBRACKET);
-    }*/
     Token token = m_currentToken;
 
 
@@ -369,6 +373,8 @@ Node *Parser::ForLoop()
 
 Node *Parser::String()
 {
+    m_currentToken.m_type = TokenType::STRING;
+//    qDebug() << "Assigning STRING " << m_currentToken.m_value;
     NodeString* node = new NodeString(m_currentToken, m_currentToken.m_value);
     return node;
 }

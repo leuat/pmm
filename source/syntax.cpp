@@ -32,6 +32,7 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::OF,"OF"));
     reservedWords.append(Token(TokenType::BYTE,"BYTE"));
     reservedWords.append(Token(TokenType::INCBIN,"INCBIN"));
+    reservedWords.append(Token(TokenType::STRING,"STRING"));
 
 }
 
@@ -126,6 +127,22 @@ void Syntax::SetupBuiltinFunctions()
                 "or",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
                 BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["printstring"] = BuiltInFunction(
+                "printstring",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::STRING << BuiltInFunction::Type::INTEGER
+                );
+
+
+    builtInFunctions["printnumber"] = BuiltInFunction(
+                "printnumber",
+                QList<BuiltInFunction::Type>()<<BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["initprintstring"] = BuiltInFunction(
+                "initprintstring",
+                QList<BuiltInFunction::Type>()
                 );
 
 

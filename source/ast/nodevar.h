@@ -70,7 +70,6 @@ public:
             as->Asm("tax");
             as->Asm("lda " +value+"+1");
             return;
-
         }
         ErrorHandler::e.Error(TokenType::getType(t) + " assignment not supported yet for exp: " + value);
         return;
@@ -103,7 +102,6 @@ public:
                 val = "#" + val;
         }
         if (s==nullptr) {*/
-
         Symbol* s = as->m_symTab->LookupVariables(value);
         if (s==nullptr) {
             ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?");

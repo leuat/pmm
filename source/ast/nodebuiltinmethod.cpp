@@ -49,6 +49,16 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="definesinetable")
         InitSinusTable(as);
 
+    if (m_procName.toLower()=="initprintstring") {
+        InitPrintString(as);
+    }
+    if (m_procName.toLower()=="printnumber") {
+        PrintNumber(as);
+    }
+
+    if (m_procName.toLower()=="printstring") {
+        PrintString(as);
+    }
 
     if (m_procName.toLower()=="initsinetable")
         as->Asm("jsr definesinetable");
@@ -220,6 +230,106 @@ void NodeBuiltinMethod::InitEightBitMul(Assembler *as)
     as->PopLabel("multiply_eightbit");
 }
 
+void NodeBuiltinMethod::InitPrintString(Assembler *as)
+{
+    if (m_isInitialized["initprintstring"])
+        return;
+    m_isInitialized["initprintstring"] = true;
+
+    as->ClearTerm();
+    as->Label("print_text dc \"HEISANN\",0");
+    as->Asm("org print_text +#100");
+    as->Label("printstring");
+    as->Asm("ldy #0");
+    as->Label("printstringloop");
+    as->Asm("lda print_text,x");
+    as->Asm("cmp #0");
+    as->Asm("beq printstring_done");
+    as->Asm("sec");
+    as->Asm("sbc #64");
+//    as->Asm("cmp #28");
+//    as->Asm("bcs printstring_skip");
+    as->Asm("sta (screenMemory),y");
+ //   as->Label("printstring_skip");
+    as->Asm("iny");
+    as->Asm("inx");
+    as->Asm("jmp printstringloop");
+    as->Label("printstring_done");
+
+
+
+}
+void NodeBuiltinMethod::PrintNumber(Assembler *as)
+{
+
+    QString lbl= as->NewLabel("printnumber_call");
+    as->Asm("ldx #0");
+
+    as->ClearTerm();
+    m_params[0]->Build(as);
+    as->Term();
+
+    as->Asm("tay");
+    as->Asm("and #$0F");
+    as->Asm("cmp #$0A");
+    as->Asm("bcc printnumber_l1");
+    as->Asm("sec");
+    as->Asm("sbc #$39");
+    as->Label("printnumber_l1");
+    as->Asm("adc #$30 + #64");
+    as->Asm("sta print_text,x");
+    as->Asm("inx");
+    as->Asm("tya");
+    as->Asm("and #$F0");
+    as->Asm("lsr");
+    as->Asm("lsr ");
+    as->Asm("lsr ");
+    as->Asm("lsr ");
+
+    as->Asm("cmp #$0A");
+    as->Asm("bcc printnumber_l2");
+    as->Asm("sec");
+    as->Asm("sbc #$39");
+    as->Label("printnumber_l2");
+
+    as->Asm("adc #$30 + #64");
+    as->Asm("sta print_text,x");
+    as->Asm("inx");
+    as->Asm("lda #0");
+    as->Asm("sta print_text,x");
+
+    as->Asm("ldx #0");
+    as->Asm("jsr printstring");
+
+    as->PopLabel("printnumber_call");
+}
+
+void NodeBuiltinMethod::PrintString(Assembler *as)
+{
+    QString lbl= as->NewLabel("printstring_call");
+
+    as->Asm("ldx #0");
+    as->Label(lbl);
+
+    as->Term("lda ");
+    m_params[0]->Build(as);
+    as->Term(",x", true);
+    as->Asm("sta print_text,x");
+    as->Asm("inx");
+    as->Asm("cmp #0");
+    as->Asm("bne " + lbl);
+    as->Term("");
+    m_params[1]->Build(as);
+    as->Term();
+    as->Asm("tax");
+
+    as->Asm("jsr printstring");
+
+    as->PopLabel("printstring_call");
+
+}
+
+
 void NodeBuiltinMethod::MoveTo(Assembler *as)
 {
     VerifyInitialized("moveto", "InitMoveto");
@@ -286,6 +396,7 @@ void NodeBuiltinMethod::Fill(Assembler *as)
     as->PopLabel("fill");
 
 }
+
 
 void NodeBuiltinMethod::Scroll(Assembler *as)
 {
