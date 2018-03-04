@@ -27,6 +27,9 @@ public:
 
     void SetParameter(QString name, PVar var) {
         Symbol* s = m_symTab->Lookup(name);
+        if (s==nullptr)
+            ErrorHandler::e.Error("Could not find variable :" + name,m_op.m_lineNumber);
+
         s->m_value = new PVar(var);
     }
     void Delete() override {

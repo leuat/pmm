@@ -15,9 +15,15 @@ class FatalErrorException: public exception
 {
 public:
     QString message;
+    int linenr;
     FatalErrorException(QString msg)
     {
         message = msg;
+    }
+    FatalErrorException(QString msg, int ln)
+    {
+        message = msg;
+        linenr = ln;
     }
 };
 
@@ -62,14 +68,8 @@ public:
     }
     bool exitOnError= true;
 
-    void Error(QString str) {
-        QString msg = "";
-        msg +="\n**** FATAL ERROR on line: " + QString::number(Pmm::Data::d.lineNumber+1);
-        msg+="\nSource: " + Pmm::Data::d.currentLineText;
-        msg+="\nMessage: " + str;
-//        Message("\n**** FATAL ERROR on line: " + QString::number(Pmm::Data::d.lineNumber+1));
-  //      Message("Source: " + Pmm::Data::d.currentLineText);
-        throw FatalErrorException(msg);
+    void Error(QString str, int lineNumber=0) {
+        throw FatalErrorException(str, lineNumber);
         //Message(str);
 
         //if (exitOnError)

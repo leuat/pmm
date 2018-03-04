@@ -112,9 +112,10 @@ public:
         if (m_constants.contains(name)) {
             return m_constants[name];
         }
-        if (!m_symbols.contains(name)) {
-            ErrorHandler::e.Error("Symbol/variable '" + name + "' does not exist in the current scope");
-        }
+/*        if (!m_symbols.contains(name)) {
+            ErrorHandler::e.Error("Symbol/variable '" + name + "' does not exist in the current scope", 0);
+            return nullptr;
+        }*/
         return m_symbols[name];
     }
     Symbol* LookupVariables(QString name) {

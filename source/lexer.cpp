@@ -1,6 +1,8 @@
 #include "lexer.h"
 #include <QDebug>
 
+#include <iostream>
+using namespace std;
 
 Lexer::Lexer()
 {
@@ -15,16 +17,16 @@ void Lexer::Advance()
         m_finished = true;
     }
     else {
+
         m_currentChar = m_text[m_pos];
-        if (m_localPos>=m_lines[Pmm::Data::d.lineNumber].length()) {
+        if (Pmm::Data::d.lineNumber<m_lines.count())
+        if (m_currentChar=="\n") {
             Pmm::Data::d.lineNumber ++;
+            if (Pmm::Data::d.lineNumber<m_lines.count())
             Pmm::Data::d.currentLineText = m_lines[Pmm::Data::d.lineNumber];
             m_localPos = 0;
         }
 
-        //if (m_currentChar=="\n") {
-        //    m_lineNumber++;
-        //}
 
     }
 
@@ -32,7 +34,7 @@ void Lexer::Advance()
 
 void Lexer::SkipWhiteSpace()
 {
-    while (!m_finished && (m_currentChar==" "||m_currentChar=="\n" || m_currentChar=="\t"))
+    while (!m_finished && (m_currentChar==" "|| m_currentChar=="\n" || m_currentChar=="\t"))
         Advance();
 }
 
@@ -132,8 +134,7 @@ Token Lexer::GetNextToken()
 {
     while (!m_finished) {
 
-
-        if (m_currentChar==" " || m_currentChar=="\n") {
+        if (m_currentChar==" " || m_currentChar=="\n" || m_currentChar=="\t") {
             SkipWhiteSpace();
             continue;
         }

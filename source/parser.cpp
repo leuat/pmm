@@ -21,17 +21,28 @@ void Parser::Eat(TokenType::Type t)
 {
     if (m_currentToken.m_type == t) {
         m_currentToken = m_lexer.GetNextToken();
-        //qDebug() << "Next token: " << m_currentToken.getType();
+
     }
     else {
         QString warning = "\nDid you forget a semicolon (;) ?";
-        ErrorHandler::e.Error("Expected '" + TokenType::getType(t) + "' but found '" +m_currentToken.m_value+"'" + warning);
+        ErrorHandler::e.Error("Expected '" + TokenType::getType(t) + "' but found '" +m_currentToken.m_value+"'" + warning,m_currentToken.m_lineNumber);
     }
 }
 
 void Parser::Eat()
 {
     Eat(m_currentToken.m_type);
+}
+
+int Parser::findSymbolLineNumber(QString symbol)
+{
+    int i=1;
+    for (QString& s: m_lexer.m_lines) {
+        i++;
+        if (s.contains(symbol))
+            return i;
+    }
+    return 1;
 }
 
 void Parser::InitBuiltinFunctions()
@@ -109,8 +120,10 @@ Node *Parser::AssignStatement()
     Token token = m_currentToken;
 
 
-    if (m_currentToken.m_type!=TokenType::ASSIGN)
-        ErrorHandler::e.Error("Could not find variable or procedure '" + t.m_value+  "'");
+    if (m_currentToken.m_type!=TokenType::ASSIGN) {
+        qDebug() << m_currentToken.m_lineNumber;
+        ErrorHandler::e.Error("Could not find variable or procedure '" + t.m_value+  "'", t.m_lineNumber);
+    }
     Eat(TokenType::ASSIGN);
     Node* right = Expr();
     return new NodeAssign(left, token, right);

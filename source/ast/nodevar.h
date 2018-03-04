@@ -102,9 +102,10 @@ public:
                 val = "#" + val;
         }
         if (s==nullptr) {*/
+        Pmm::Data::d.lineNumber = m_op.m_lineNumber;
         Symbol* s = as->m_symTab->LookupVariables(value);
         if (s==nullptr) {
-            ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?");
+            ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?", m_op.m_lineNumber);
         }
         if (m_expr!=nullptr) {
             as->ClearTerm();

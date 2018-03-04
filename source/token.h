@@ -39,9 +39,9 @@ class Token
 public:
     TokenType::Type m_type;
     QString m_value;
-    int m_intVal;
-    int m_lineNumber;
-    QString m_currentLineText;
+    int m_intVal=0;
+    int m_lineNumber=0;
+    QString m_currentLineText="";
     QString getType() {
         return TokenType::types[m_type];
     }

@@ -12,7 +12,7 @@ void Interpreter::Parse()
     try {
         m_tree = m_parser.Parse();
     } catch (FatalErrorException e) {
-        ErrorHandler::e.CatchError(e, "Error during parsing:");
+        HandleError(e, "Error during parsing:");
     }
 
 }
@@ -28,7 +28,7 @@ void Interpreter::Interpret()
         try {
         Visit(m_tree);
     } catch (FatalErrorException e) {
-        ErrorHandler::e.CatchError(e, "Error during interpreting");
+
     }
 
 }
@@ -49,17 +49,19 @@ bool Interpreter::Build(Interpreter::Type type)
 
     if (m_tree!=nullptr)
         try {
-        qDebug() << "Building";
-        m_tree->Build(m_assembler);
-        qDebug() << "Symbolic";
-        m_tree->ExecuteSym(m_assembler->m_symTab);
-        qDebug() << "Rest...";
-        m_assembler->Connect();
-        m_assembler->Optimise();
-    } catch (FatalErrorException e) {
-        ErrorHandler::e.CatchError(e, "Error during assembly");
-        return false;
+            m_tree->Build(m_assembler);
+        } catch (FatalErrorException e) {
+            HandleError(e,"Error during build");
+            return false;
+         }
+        try {
+            m_tree->ExecuteSym(m_assembler->m_symTab);
+        } catch (FatalErrorException e) {
+            HandleError(e,"Error during symbolic check");
+            return false;
     }
+    m_assembler->Connect();
+    m_assembler->Optimise();
     return true;
 
 }
@@ -69,4 +71,18 @@ void Interpreter::SaveBuild(QString filename)
     if (!m_assembler)
         return;
     m_assembler->Save(filename);
+}
+
+void Interpreter::HandleError(FatalErrorException fe, QString e)
+{
+    QString msg = "";
+    QString line = "on line: " + QString::number(fe.linenr+1);
+    msg +="\nFatal error " + line;
+    if (fe.linenr<m_parser.m_lexer.m_lines.count())
+        msg+="\nSource: " + m_parser.m_lexer.m_lines[fe.linenr];
+    msg+="\n\nMessage: ";
+    Pmm::Data::d.lineNumber = fe.linenr+1;
+
+    ErrorHandler::e.CatchError(fe, e + msg);
+
 }

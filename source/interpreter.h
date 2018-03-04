@@ -18,7 +18,7 @@ public:
     void Interpret();
     bool Build(Type);
     void SaveBuild(QString filename);
-
+    void HandleError(FatalErrorException fe, QString se);
 };
 
 #endif // INTERPRETER_H

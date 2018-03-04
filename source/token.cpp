@@ -9,5 +9,7 @@ QString TokenType::types[42] = { "INTEGER", "PLUS", "MINUS", "MUL", "DIV", "LPAR
 
 Token::Token()
 {
+    m_lineNumber = Pmm::Data::d.lineNumber;
+    m_currentLineText = Pmm::Data::d.currentLineText;
 
 }

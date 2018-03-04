@@ -71,6 +71,9 @@ public:
     Node* Constant();
     void Eat();
 
+    int findSymbolLineNumber(QString symbol);
+
+
     void InitBuiltinFunctions();
 
 

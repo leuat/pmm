@@ -69,7 +69,14 @@ public:
            ErrorHandler::e.Error("Left value not variable! ");
 
         as->Comment("Assigning single variable : " + v->value);
-        TokenType::Type t = as->m_symTab->Lookup(v->value)->getTokenType();
+        Symbol* s = as->m_symTab->Lookup(v->value);
+        if (s==nullptr)
+            ErrorHandler::e.Error("Could not find variable :" + v->value,m_op.m_lineNumber);
+
+        TokenType::Type t = s->getTokenType();
+
+
+
        if ((NodeString*)dynamic_cast<const NodeString*>(m_right))
         {
             AssignString(as);

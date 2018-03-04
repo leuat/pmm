@@ -69,6 +69,9 @@ public:
 
         QString typeName = ((NodeVar*)m_typeNode)->value;
         Symbol* typeSymbol = symTab->Lookup(typeName);
+        if (typeSymbol==nullptr)
+            ErrorHandler::e.Error("Could not find type symbol :" + typeName,m_op.m_lineNumber);
+
         QString varName = ((NodeVar*)m_varNode)->value;
         ErrorHandler::e.DebugLow("Typename define : " + typeName + "  variable " + varName);
 
