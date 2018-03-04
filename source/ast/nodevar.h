@@ -7,6 +7,7 @@
 #include "source/symboltable.h"
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
+#include "source/ast/nodenumber.h"
 
 class NodeVar : public Node {
 public:
@@ -42,11 +43,18 @@ public:
     }
 
     void LoadByteArray(Assembler *as) {
-        as->ClearTerm();
-        m_expr->Build(as);
-        as->Term();
-        as->Asm("tax");
-        as->Asm("lda " + value+",x");
+        // Optimizer: if expression is number, just return direct
+        NodeNumber* number = dynamic_cast<NodeNumber*>(m_expr);
+        if (number!=nullptr) { // IS NUMBER optimize}
+            as->Asm("lda " + value + "+"+ QString::number(number->m_val));
+        }
+        else {
+            as->ClearTerm();
+            m_expr->Build(as);
+            as->Term();
+            as->Asm("tax");
+            as->Asm("lda " + value+",x");
+        }
     }
 
     void LoadVariable(Assembler* as) override {
@@ -77,13 +85,19 @@ public:
 
     void StoreVariable(Assembler* as) {
         if (m_expr != nullptr) {
-            as->Asm("tay");
-            as->ClearTerm();
-            m_expr->Build(as);
-            as->Term();
-            as->Asm("tax");
-            as->Asm("tya");
-            as->Asm("sta " + value+",x");
+            NodeNumber* number = dynamic_cast<NodeNumber*>(m_expr);
+            if (number!=nullptr) { // IS NUMBER optimize}
+                as->Asm("sta " + value + "+"+ QString::number(number->m_val));
+            }
+            else {
+                as->Asm("tay");
+                as->ClearTerm();
+                m_expr->Build(as);
+                as->Term();
+                as->Asm("tax");
+                as->Asm("tya");
+                as->Asm("sta " + value+",x");
+            }
             return;
         }
         else {

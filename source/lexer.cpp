@@ -49,6 +49,14 @@ void Lexer::SkipComment()
 
 }
 
+void Lexer::SkipUntilNewLine()
+{
+    while (!(m_currentChar== "\n") && !m_finished)
+
+        Advance();
+
+}
+
 Token Lexer::Number()
 {
     QString res="";
@@ -153,6 +161,13 @@ Token Lexer::GetNextToken()
 
         }
 
+        if (m_currentChar=="/") {
+            if (peek()=="/") {
+                SkipUntilNewLine();
+                continue;
+            }
+
+        }
         if (m_currentChar=="\"") {
             Advance();
             return String();

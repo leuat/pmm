@@ -38,8 +38,6 @@ public:
     }
     void AssignString(Assembler *as) {
 
-        qDebug() << "Assigning string";
-
         NodeString* right = (NodeString*)dynamic_cast<const NodeString*>(m_right);
         NodeVar* left = (NodeVar*)dynamic_cast<const NodeVar*>(m_left);
         QString lbl = as->NewLabel("stringassign");

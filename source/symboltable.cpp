@@ -61,5 +61,6 @@ void SymbolTable::InitBuiltins()
 
     Define(new Symbol("return",""));
     Define(new Symbol("sine", "address"));
+    Define(new Symbol("joystickvalue", "address"));
 }
 

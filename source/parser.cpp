@@ -52,7 +52,7 @@ void Parser::InitBuiltinFunctions()
     InitBuiltinFunction(QStringList()<< "*", "initeightbitmul");
     InitBuiltinFunction(QStringList()<< "moveto", "initmoveto");
     InitBuiltinFunction(QStringList()<< "printstring" << "printnumber", "initprintstring");
-    InitBuiltinFunction(QStringList()<< "joystick" , "initprintstring");
+    InitBuiltinFunction(QStringList()<< "joystick" , "initjoystick");
  }
 
 void Parser::InitBuiltinFunction(QStringList methodName, QString builtinFunctionName)
@@ -92,7 +92,6 @@ Node *Parser::Variable()
         if (m_currentToken.m_type==TokenType::STRING) {
            n = String();
            Eat(m_currentToken.m_type);
-           qDebug() << m_currentToken.m_value;
            return n;
 
         }
@@ -132,7 +131,6 @@ Node *Parser::AssignStatement()
 
 
     if (m_currentToken.m_type!=TokenType::ASSIGN) {
-        qDebug() << m_currentToken.m_lineNumber;
         ErrorHandler::e.Error("Could not find variable or procedure '" + t.m_value+  "'", t.m_lineNumber);
     }
     Eat(TokenType::ASSIGN);
@@ -585,8 +583,6 @@ Node *Parser::Constant()
     if (SymbolTable::m_constants.contains(id)) {
         Eat(m_currentToken.m_type);
         Symbol* s = SymbolTable::m_constants[id];
-        qDebug() << "IS CONSTANT " << id << " " << s->m_value->m_fVal;
-        qDebug() << s->getTokenType();
         Node* n =  new NodeNumber(Token(s->getTokenType(), s->m_value->m_fVal), s->m_value->m_fVal);
         return n;
     }
@@ -595,12 +591,8 @@ Node *Parser::Constant()
 
 Node *Parser::InlineAssembler()
 {
-    qDebug() << "START";
-    qDebug() << "1:" << m_currentToken.getType();
     Eat(TokenType::ASM);
-    qDebug() << "2:" <<m_currentToken.getType();
     Eat(TokenType::LPAREN);
-    qDebug() << m_currentToken.getType();
     if (m_currentToken.m_type!=TokenType::STRING)
         ErrorHandler::e.Error("Inline assembler must be enclosed as a string");
     Node* n = new NodeAsm(m_currentToken);

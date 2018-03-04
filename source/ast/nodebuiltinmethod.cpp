@@ -455,7 +455,7 @@ void NodeBuiltinMethod::Scroll(Assembler *as)
 
 void NodeBuiltinMethod::Joystick(Assembler *as)
 {
-
+    as->Asm("jsr callJoystick");
 }
 
 void NodeBuiltinMethod::BitOp(Assembler *as, int type)
@@ -599,39 +599,65 @@ void NodeBuiltinMethod::VerifyInitialized(QString method, QString initmethod)
 
 void NodeBuiltinMethod::InitJoystick(Assembler *as)
 {
-    /*start    lda $02
-             cmp $dc00
-             beq start      ; loop until the joystick register changes.
+    as->Label("joystickvalue .byte 0,0,0,0");
+    as->Label("callJoystick");
+    as->Asm("lda #0");
+    as->Asm("sta joystickvalue+1");
+    as->Asm("sta joystickvalue+2");
+    as->Asm("sta joystickvalue+3");
+/*    as->Asm("lda joystickvalue");
+    as->Asm("cmp $dc00");
+    as->Asm("beq callJoystick_end");
+    as->Asm("lda  $dc00      ; store new value in memory location 2.");
+    as->Asm("sta joystickvalue");
+*/
+    // UP
+    as->Asm("lda #%00000001 ; mask joystick up movement");
+    as->Asm("bit $dc00      ; bitwise AND with address 56320");
+    as->Asm("bne joystick_down       ; zero flag is not set -> skip to down");
+    as->Asm("lda #255");
+    as->Asm("sta joystickvalue+2");
 
-             lda $dc00      ; store new value in memory location 2.
-             sta $02
+    as->Label("joystick_down");
+    // DOWN
 
-    up       lda #%00000001 ; mask joystick up movement
-             bit $dc00      ; bitwise AND with address 56320
-             bne down       ; zero flag is not set -> skip to down
-             inc $d020      ; border color + 1
+    as->Asm("lda #%00000010 ; mask joystick down movement");
+    as->Asm("bit $dc00      ; bitwise AND with address 56320");
+    as->Asm("bne joystick_left       ; zero flag is not set -> skip to down");
+    as->Asm("lda #1");
+    as->Asm("sta joystickvalue+2");
+    // LEFT
 
-    down     lda #%00000010 ; mask joystick down movement
-             bit $dc00      ; bitwise AND with address 56320
-             bne left       ; zero flag is not set -> skip to left
-             dec $d020      ; border color- 1
+    as->Label("joystick_left");
 
-    left     lda #%00000100 ; mask joystick left movement
-             bit $dc00      ; bitwise AND with address 56320
-             bne right      ; zero flag is not set -> skip to right
-             inc $d021      ; background color + 1
+    as->Asm("lda #%00000100 ; mask joystick left movement");
+    as->Asm("bit $dc00      ; bitwise AND with address 56320");
+    as->Asm("bne joystick_right       ; zero flag is not set -> skip to down");
+    as->Asm("lda #255");
+    as->Asm("sta joystickvalue+1");
 
-    right    lda #%00001000 ; mask joystick right movement
-             bit $dc00      ; bitwise AND with address 56320
-             bne buton      ; zero flag is not set -> skip to buton
-             dec $d021      ; background color - 1
+    // RIGHT
+    as->Label("joystick_right");
 
-    buton    lda #%00010000 ; mask joystick button push
-             bit $dc00      ; bitwise AND with address 56320
-             bne start      ; button not pressed -> enter loop again
-             rts            ; back to basic
+    as->Asm("lda #%00001000 ; mask joystick up movement");
+    as->Asm("bit $dc00      ; bitwise AND with address 56320");
+    as->Asm("bne joystick_button       ; zero flag is not set -> skip to down");
+    as->Asm("lda #1");
+    as->Asm("sta joystickvalue+1");
 
-             */
+    as->Label("joystick_button");
+    // BUTTON
+
+    as->Asm("lda #%00010000 ; mask joystick up movement");
+    as->Asm("bit $dc00      ; bitwise AND with address 56320");
+    as->Asm("bne callJoystick_end       ; zero flag is not set -> skip to down");
+    as->Asm("lda #1");
+    as->Asm("sta joystickvalue+3");
+
+
+    as->Label("callJoystick_end");
+    as->Asm("rts");
+
 }
 
 void NodeBuiltinMethod::SaveVar(Assembler *as, int paramNo, QString reg)

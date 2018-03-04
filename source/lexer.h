@@ -31,6 +31,7 @@ public:
     void Advance();
     void SkipWhiteSpace();
     void SkipComment();
+    void SkipUntilNewLine();
     Token Number();
     Token _Id();
     Token String();
