@@ -47,12 +47,23 @@ int Parser::findSymbolLineNumber(QString symbol)
 
 void Parser::InitBuiltinFunctions()
 {
-    m_procedures["initrandom"] = new NodeProcedureDecl("initrandom");
-    m_procedures["initsinetable"] = new NodeProcedureDecl("initsinetable");
-    m_procedures["initeightbitmul"] = new NodeProcedureDecl("initeightbitmul");
-    m_procedures["initmoveto"] = new NodeProcedureDecl("initmoveto");
-    m_procedures["initprintstring"] = new NodeProcedureDecl("initprintstring");
-    m_procedures["initjoystick"] = new NodeProcedureDecl("initjoystick");
+    InitBuiltinFunction(QStringList()<< "rand", "initrandom");
+    InitBuiltinFunction(QStringList()<< "sine", "initsinetable");
+    InitBuiltinFunction(QStringList()<< "*", "initeightbitmul");
+    InitBuiltinFunction(QStringList()<< "moveto", "initmoveto");
+    InitBuiltinFunction(QStringList()<< "printstring" << "printnumber", "initprintstring");
+    InitBuiltinFunction(QStringList()<< "joystick" , "initprintstring");
+ }
+
+void Parser::InitBuiltinFunction(QStringList methodName, QString builtinFunctionName)
+{
+    QString txt = m_lexer.m_text.toLower();
+    for (QString s: methodName)
+     if (txt.contains(s)) {
+        m_procedures[builtinFunctionName] = new NodeProcedureDecl(builtinFunctionName);
+        return;
+     }
+
 }
 
 void Parser::VerifyToken(Token t)
@@ -175,6 +186,11 @@ Node *Parser::Statement()
         Eat(TokenType::WHILE);
         node = Conditional(true);
     }
+    else if (m_currentToken.m_type == TokenType::ASM) {
+        return InlineAssembler();
+
+    }
+
     else {
         //ErrorHandler::e.Error("Unknown method " + m_currentToken.getType());
         return Empty();
@@ -575,6 +591,22 @@ Node *Parser::Constant()
         return n;
     }
     return nullptr;
+}
+
+Node *Parser::InlineAssembler()
+{
+    qDebug() << "START";
+    qDebug() << "1:" << m_currentToken.getType();
+    Eat(TokenType::ASM);
+    qDebug() << "2:" <<m_currentToken.getType();
+    Eat(TokenType::LPAREN);
+    qDebug() << m_currentToken.getType();
+    if (m_currentToken.m_type!=TokenType::STRING)
+        ErrorHandler::e.Error("Inline assembler must be enclosed as a string");
+    Node* n = new NodeAsm(m_currentToken);
+    Eat(TokenType::STRING);
+    Eat(TokenType::RPAREN);
+    return n;
 }
 
 Node* Parser::Expr()

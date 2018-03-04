@@ -33,6 +33,7 @@ public:
     void Rand(Assembler* as);
     void MoveTo(Assembler* as);
     void PokeScreen(Assembler* as, int hiAddress);
+    void PokeScreenColor(Assembler* as, int hiAddress);
     void Fill(Assembler* as);
     void PrintNumber(Assembler* as);
     void PrintString(Assembler* as);

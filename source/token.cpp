@@ -5,7 +5,8 @@ QString TokenType::types[42] = { "INTEGER", "PLUS", "MINUS", "MUL", "DIV", "LPAR
             "END", "SEMI", "DOT", "VAR", "REAL",
             "PROGRAM", "COLON", "COMMA", "INTEGER_CONST", "REAL_CONST", "PROCEDURE",
             "STRING", "IF", "THEN", "EQUALS", "NOTEQUALS", "GREATER", "LESS",
-            "FOR", "TO","DO", "NADA","ADDRESS", "WHILE", "ARRAY", "OF", "BYTE", "LBRACKET", "RBRACKET", "INCBIN"};
+            "FOR", "TO","DO", "NADA","ADDRESS", "WHILE", "ARRAY", "OF",
+            "BYTE", "LBRACKET", "RBRACKET", "INCBIN", "ASM"};
 
 Token::Token()
 {

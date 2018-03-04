@@ -42,7 +42,7 @@ public:
         }
         //as->Number(val);
         if (as->m_term=="")
-            as->Asm("lda " + val);
+            as->Term("lda " + val);
         else
             as->Term(val);
         return val;

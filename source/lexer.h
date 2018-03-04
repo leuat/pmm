@@ -10,12 +10,12 @@
 
 class Lexer
 {
-    QString m_text;
     QString m_currentChar;
     uint m_pos = 0;
     bool m_finished = false;
 
 public:
+    QString m_text;
     uint m_localPos = 0;
     QStringList m_lines;
     Lexer();

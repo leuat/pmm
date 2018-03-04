@@ -1,5 +1,5 @@
 #include "nodebuiltinmethod.h"
-
+#include "nodenumber.h"
 
 QMap<QString, bool> NodeBuiltinMethod::m_isInitialized;
 
@@ -75,6 +75,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower()=="pokescreen") {
         PokeScreen(as, 0);
+    }
+    if (m_procName.toLower()=="pokescreencolor") {
+        PokeScreenColor(as, 0);
     }
 
     if (m_procName.toLower()=="printchar") {
@@ -377,12 +380,44 @@ void NodeBuiltinMethod::InitRandom(Assembler *as)
 
 void NodeBuiltinMethod::PokeScreen(Assembler *as, int shift)
 {
-
     LoadVar(as, 0);
     as->Term("ldy ");
     m_params[1]->Build(as);
     as->Term();
     as->Asm("sta (screenMemory),y");
+}
+
+void NodeBuiltinMethod::PokeScreenColor(Assembler *as, int hiAddress)
+{
+    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[3]);
+    if (num==nullptr)
+        ErrorHandler::e.Error("PokeScreenColor: last parameter required to be pure constant number");
+
+
+
+    LoadVar(as, 0);
+    as->Term("ldy ");
+    m_params[2]->Build(as);
+    as->Term();
+    as->Asm("sta (screenMemory),y");
+    for (int i=0;i<num->m_val-1;i++) {
+        as->Asm("iny");
+        as->Asm("sta (screenMemory),y");
+    }
+
+    as->Asm("lda screenMemory+1");
+    as->Asm("tax");
+    as->Asm("adc #$D4");
+    as->Asm("sta screenMemory+1");
+    LoadVar(as, 1);
+    as->Asm("sta (screenMemory),y");
+    for (int i=0;i<num->m_val-1;i++) {
+        as->Asm("dey");
+        as->Asm("sta (screenMemory),y");
+    }
+
+    as->Asm("txa");
+    as->Asm("sta screenMemory+1");
 }
 
 void NodeBuiltinMethod::Fill(Assembler *as)

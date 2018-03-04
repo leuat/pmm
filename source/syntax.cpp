@@ -33,6 +33,7 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::BYTE,"BYTE"));
     reservedWords.append(Token(TokenType::INCBIN,"INCBIN"));
     reservedWords.append(Token(TokenType::STRING,"STRING"));
+    reservedWords.append(Token(TokenType::ASM,"ASM"));
 
 }
 
@@ -93,6 +94,11 @@ void Syntax::SetupBuiltinFunctions()
                 "pokescreen",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
                 BuiltInFunction::Type::INTEGER);
+
+    builtInFunctions["pokescreencolor"] = BuiltInFunction(
+                "pokescreencolor",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
+                BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER<<BuiltInFunction::Type::INTEGER);
 
 
     builtInFunctions["fill"] = BuiltInFunction(

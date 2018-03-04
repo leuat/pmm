@@ -21,6 +21,7 @@
 #include "source/ast/nodeforloop.h"
 #include "source/ast/nodebuiltinmethod.h"
 #include "source/ast/nodewhileloop.h"
+#include "source/ast/nodeasm.h"
 
 
 class Parser {
@@ -69,6 +70,7 @@ public:
     Node* TypeSpec();
     Node* BuiltinFunction();
     Node* Constant();
+    Node* InlineAssembler();
     void Eat();
 
     int findSymbolLineNumber(QString symbol);
@@ -76,6 +78,8 @@ public:
 
     void InitBuiltinFunctions();
 
+
+    void InitBuiltinFunction(QStringList methodName, QString builtinFunctionName);
 
 };
 
