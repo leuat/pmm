@@ -10,84 +10,154 @@ Example program:
 
 	
   ```Pascal
-  PROGRAM FirstC64;
+ PROGRAM FirstC64;
+
 VAR
-   a, b, c, i, j,k,val : byte;
-   x,y,scrollx : byte;
+   a, b, c, i, j,k,val,mainloop, idx, time,c2x, c2y,ax, ay : byte;
+   x,y,scrollx,shiftx, shifty : byte;
    sprite0data: IncBin("sprite1.bin");
-   charset: IncBin("scrap.bin","$1ffe");
-   colorVals : array [8] of byte = (0, 11, 6, 12, 14, 13, 15, 17,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,17, 15, 13 ,14 ,12, 6, 11 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-   charVals : array[8] of byte = (166, 161, 162, 191, 187, 169);
-BEGIN
-	InitRandom();
+   charset: IncBin("test.bin","$1fff");
+   fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
+	fadeRedBlue : array [8] of byte = (00,$0f,$09,$0e,$02,$0c,$00,$0c,$09,$00,$02,$00,$0b,$05,$06,$0c); 
+
+   siny : array[25] of byte; 
+   sinx : array[40] of byte; 
+
+   message: array[255] of byte;
   
+   sprite_x : array[8] of byte;
+   sprite_y : array[8] of byte;
+
+
+	
+procedure Plasma();
+begin
+
+	c2x:=ax;
+	c2y:=ay;
+
+	for x:=#0 to #25 do begin 
+		siny[x]:=  sine[c2x] + sine[c2y];
+
+		c2x:=c2x+#4;
+		c2y:=c2y+#9;
+	end;
+
+	ax:=ax+#3;
+	ay:=ay-#5;
+
+		
+
+	for x:=#0 to #40 do begin 
+		sinx[x] := sine[c2x] + sine[c2y];
+		c2x:=c2x+#6;
+		c2y:=c2y+#14;
+
+	end;
+
+	for y:=#9 to #23 do begin
+		moveto(#1,y, #$04);
+		peek(siny, y, val);
+		for x:=#1 to #19 do begin
+			k:=sinx[x] +val;
+
+		 	k:=k/#8;
+			c:=fadeRedBlue[k/#4];
+			k:=k+#64;
+
+			pokescreencolor(k,c,#0,#2);
+/*			pokescreencolor(k,c,#1);*/
+			incscreenx(#2);
+
+		end;
+	end;
+		
+	
+
+end;
+
+
+
+procedure InitializeSprites();
+
+begin
+    poke(SPRITE_DATA_LOC,#0, #$0D); 
+	poke(SPRITE_DATA_LOC,#1, #$0D);
+    poke(SPRITE_BITMASK,#0, #%00000111);
+	poke(SPRITE_COLOR,#0, WHITE);
+    poke(SPRITE_COLOR,#1, YELLOW);
+    memcpy(sprite0data, $0340, #63);
+
+end;
+
+
+procedure MoveSprite();
+begin
+	b:=time;
+	poke(SPRITE_POS,#0, b);
+    	poke(SPRITE_POS,#1, b);
+
+end;
+
+
+procedure PrintText(); 
+begin
+	MoveTo(#10, #24, #$04);
+	printstring(message, #0);
+	MoveTo(#17, #24, #$04);
+	printnumber(time);
+
+end;
+
+
+begin
+	moveto(#0,#0, #$04);
+	message:="TIME";
 	i:=#0;
-	a:=#0;
-	b:=#0;
+	a:=#4;
+	b:=#4;
+	a:=b*#3;
+	poke(SCREEN_BACKGROUND_COLOR, #0, a);
+
 	poke(SCREEN_BACKGROUND_COLOR, #1, BLACK);
  	poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
-	{poke($d018, #0, #$18);
-    	poke($C202, #0,#13);}
+	poke($d018, #0, #$18);
+    poke($C202, #0,#13);
 
-	j:=#1;
-	c:=#0;
-	scrollx:=#7;
-	while i<#10 do begin
- 		{rand(#0,#40,x);
-		rand(#0,#25,y);
-		moveto(x,y,#$04);
-	
-		moveto(x,y,#$D8);}
-		c:=c+#1;
-		if c=#40 then begin
-			c:=#0;
-		end;
-		{pokescreen(val);}
-		{k:=colorVals + c;}
-		peek(colorVals, c, k);
-
-			rand(#0,#5,val);
-			peek(charVals, val, j);
-			fill($0400,j,#$FF);
-			fill($D800,k,#$FF);
-			fill($0400+1*#$FF,j,#$FF);
-			fill($D800+1*#$FF,k,#$FF);
-			fill($0400+2*#$FF,j,#$FF);
-			fill($0400+3*#$FF,j,#$FF);
-			{fill($D800+2*#$FF,k,#$FF);}
-
-		while a<>#0 do begin
-			peek(RASTERLINE_POS, #0,a);
-		end;
-		while a<>#199 do begin
-			peek(RASTERLINE_POS, #0,a);
-		end;
-		scroll(scrollx);
-		scrollx:=scrollx-#1;	
-		if scrollx=#0 then begin
-			scrollx:=#7;
-		end;
-	
-
-       end;
+	mainloop:=#1;
+	time:=#0;
 
 
+	ax:=#1;
+	ay:=#5;
+	fill($D800, GREEN,#0);
+	fill($D900, GREEN,#0);
+	fill($DA00, GREEN,#0);
+	fill($DB00, GREEN,#0);
+	asm("
+	cli
+	");
+
+
+	InitializeSprites();
+
+	while mainloop<#10 do begin
+		time:=time+#1;
+		shiftx:=shiftx+#1;
+		shifty:=shifty+#3;
+
+		Plasma();
+		PrintText();
+		MoveSprite();
+	end;
 
 END.
-
 ```
 
 
 To do:
-  - Sine wave table
   - 16 bit operands
   - 16 bit poke sprite location
-  - memory direct access like
-     a:=vals[b]; // aka peek
-     vals[b]:=5; // aka poke
-     
-  - print text at x,y
-  - print number at x,y
   - sid music
   - IRQs
   - user input
