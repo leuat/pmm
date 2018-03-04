@@ -1,0 +1,128 @@
+PROGRAM FirstC64;
+VAR
+   a, b, c, i, j,k,val,mainloop, idx, time,c2x, c2y,ax, ay : byte;
+   x,y,scrollx,shiftx, shifty : byte;
+   sprite0data: IncBin("sprite1.bin");
+   charset: IncBin("test.bin","$1fff");
+   colorVals : array [8] of byte = (0, 11, 6, 12, 14, 13, 15, 17,1,1, 1,1,1,1,1,1,1,17, 15, 13 ,14 ,12, 6, 11 ,0,0,0,0,0,0,0,0,0);
+
+   siny : array[25] of byte; 
+   sinx : array[40] of byte; 
+
+
+procedure Plasma();
+
+begin
+	while mainloop<#10 do begin
+ 		
+		time:=time+#1;
+		shiftx:=shiftx+#1;
+		shifty:=shifty+#3;
+		c2x:=ax;
+		c2y:=ay;
+
+		for x:=#0 to #25 do begin 
+
+			peek(sine, c2x, i);
+			j:=i;
+			peek(sine, c2y, i);
+			j:=j+i;
+			poke(siny, x, j);
+			c2x:=c2x+#4;
+			c2y:=c2y+#9;
+		end;
+
+		ax:=ax+#3;
+		ay:=ay-#5;
+
+		c2x:=ax;
+		c2y:=ay;
+		
+
+	
+
+
+		for x:=#0 to #40 do begin 
+			peek(sine, c2x, i);
+			j:=i; 
+			peek(sine, c2y, i);
+			j:=j + i;
+			poke(sinx, x, i);
+			c2x:=c2x+#6;
+			c2y:=c2y+#14;
+
+		end;
+
+		for y:=#5 to #25 do begin
+		  moveto(#1,y, #$04);
+
+
+		  peek(siny, y, val);
+		  val:=val-y;
+		  for x:=#1 to #20 do begin
+		      peek(sinx, x, k);
+		      k:=k+val;
+
+		 	k:=k/#8;
+			k:=k+#64;
+
+			pokescreen(k,#0);
+			pokescreen(k,#1);
+			incscreenx(#2);
+
+		  end;
+
+		end;
+	
+
+       end;
+	
+end;
+
+
+
+BEGIN
+	InitMoveto();
+	InitRandom();
+	InitSinetable();
+	InitEightBitMul();
+	rand(#0,#255,val);
+	moveto(#0,#0, #$04);
+
+	Plasma();
+
+	i:=#0;
+	a:=#4;
+	b:=#4;
+	a:=b*#3;
+
+	poke(SCREEN_BACKGROUND_COLOR, #0, a);
+
+	
+	poke(SCREEN_BACKGROUND_COLOR, #1, BLACK);
+ 	poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
+	poke($d018, #0, #$18);
+    	poke($C202, #0,#13);
+
+	j:=#1;
+	c:=#0;
+	scrollx:=#7;
+	mainloop:=#1;
+	time:=#0;
+
+	shiftx:=#92;
+	shifty:=#5;
+	ax:=#1;
+	ay:=#5;
+	fill($D800, #$05,#0);
+
+	fill($D900, #$05,#0);
+	fill($DA00, #$05,#0);
+	fill($DB00, #$05,#0);
+
+
+	Plasma();
+
+
+
+END.

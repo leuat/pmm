@@ -1,0 +1,61 @@
+PROGRAM FirstC64;
+
+VAR
+   sprite_x : integer;
+   sprite_y : byte;
+	a: integer;
+   sprite0data: IncBin("sprite1.bin");
+   mainloop: byte;
+
+	
+
+procedure InitializeSprites();
+
+begin
+    poke(SPRITE_DATA_LOC,#0, #$0D); 
+	poke(SPRITE_DATA_LOC,#1, #$0D);
+    poke(SPRITE_BITMASK,#0, #%00000111);
+	poke(SPRITE_COLOR,#0, WHITE);
+    poke(SPRITE_COLOR,#1, YELLOW);
+    memcpy(sprite0data, $0340, #63);
+
+end;
+
+
+procedure MoveSprite();
+begin
+
+	SpritePos(sprite_x, sprite_y, #0,#1,#$FE);
+
+	Joystick();
+
+//	sprite_x:=sprite_x+#2;
+	sprite_x := sprite_x -joystickvalue[#1]*#4;
+	sprite_x := sprite_x +joystickvalue[#2]*#4;
+	sprite_y := sprite_y +joystickvalue[#3]*#2;
+	moveto(#1,#1, #$04);
+	printnumber(sprite_x[1]);
+
+end;
+
+
+
+begin
+	sprite_x:=#100;
+	sprite_y:=#30;
+	InitializeSprites();
+	while mainloop<#10 do begin
+		MoveSprite();
+
+		while a<>#0 do begin
+			peek(RASTERLINE_POS, #0, a);
+		end;
+		while a<>#199 do begin
+			peek(RASTERLINE_POS, #0, a);
+
+		end;
+
+	end;
+
+END.
+

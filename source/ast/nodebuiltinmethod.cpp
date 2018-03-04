@@ -33,6 +33,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower() == "incscreenx")
             IncScreenX(as);
 
+    if (m_procName.toLower() == "spritepos")
+            SetSpritePos(as);
+
     if (m_procName.toLower() == "initeightbitmul")
             InitEightBitMul(as);
 
@@ -50,6 +53,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     }
     if (m_procName.toLower()=="joystick") {
         Joystick(as);
+    }
+    if (m_procName.toLower()=="playsound") {
+        PlaySound(as);
     }
 
     if (m_procName.toLower()=="initprintstring") {
@@ -420,6 +426,48 @@ void NodeBuiltinMethod::PokeScreenColor(Assembler *as, int hiAddress)
     as->Asm("sta screenMemory+1");
 }
 
+void NodeBuiltinMethod::SetSpritePos(Assembler *as)
+{
+
+    QString lbl = as->NewLabel("spritepos");
+    QString lbl2 = as->NewLabel("spriteposcontinue");
+    as->Comment("Setting sprite position");
+    LoadVar(as, 2);
+
+    as->Asm("tay");
+
+    LoadVar(as, 0);
+    as->Asm("sta $D000,y");
+    m_params[0]->Build(as);
+    as->Term("+1",true);
+    as->Asm("cmp #0");
+    as->Asm("beq " + lbl);
+
+
+    as->Asm("lda $D010");
+    as->Term("ora ");
+    m_params[3]->Build(as);
+    as->Term();
+    as->Asm("sta $D010");
+    as->Asm("jmp "+lbl2);
+    as->Label(lbl);
+
+    as->Asm("lda $D010");
+    as->Term("and ");
+    m_params[4]->Build(as);
+    as->Term();
+    as->Asm("sta $D010");
+
+    as->Label(lbl2);
+
+    as->Asm("iny");
+    LoadVar(as, 1);
+    as->Asm("sta $D000,y");
+
+    as->PopLabel("spritepos");
+    as->PopLabel("spriteposcontinue");
+}
+
 void NodeBuiltinMethod::Fill(Assembler *as)
 {
     QString lbl = as->NewLabel("fill");
@@ -491,6 +539,17 @@ PVar NodeBuiltinMethod::Execute(SymbolTable *symTab, uint lvl) {
     }
 
     return PVar();
+
+}
+
+void NodeBuiltinMethod::PlaySound(Assembler *as)
+{
+//    LoadVar(as, 0);
+    NodeNumber *num = (NodeNumber*)m_params[0];
+    int SID = 54272;
+//    if (num->m_val==1) {
+ //       as->
+ //   }
 
 }
 
@@ -599,12 +658,13 @@ void NodeBuiltinMethod::VerifyInitialized(QString method, QString initmethod)
 
 void NodeBuiltinMethod::InitJoystick(Assembler *as)
 {
-    as->Label("joystickvalue .byte 0,0,0,0");
+    as->Label("joystickvalue .byte 0,0,0,0,4");
     as->Label("callJoystick");
     as->Asm("lda #0");
     as->Asm("sta joystickvalue+1");
     as->Asm("sta joystickvalue+2");
     as->Asm("sta joystickvalue+3");
+    as->Asm("sta joystickvalue+4");
 /*    as->Asm("lda joystickvalue");
     as->Asm("cmp $dc00");
     as->Asm("beq callJoystick_end");
@@ -616,7 +676,7 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne joystick_down       ; zero flag is not set -> skip to down");
     as->Asm("lda #255");
-    as->Asm("sta joystickvalue+2");
+    as->Asm("sta joystickvalue+3");
 
     as->Label("joystick_down");
     // DOWN
@@ -625,7 +685,7 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne joystick_left       ; zero flag is not set -> skip to down");
     as->Asm("lda #1");
-    as->Asm("sta joystickvalue+2");
+    as->Asm("sta joystickvalue+3");
     // LEFT
 
     as->Label("joystick_left");
@@ -633,7 +693,7 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("lda #%00000100 ; mask joystick left movement");
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne joystick_right       ; zero flag is not set -> skip to down");
-    as->Asm("lda #255");
+    as->Asm("lda #1");
     as->Asm("sta joystickvalue+1");
 
     // RIGHT
@@ -643,7 +703,7 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne joystick_button       ; zero flag is not set -> skip to down");
     as->Asm("lda #1");
-    as->Asm("sta joystickvalue+1");
+    as->Asm("sta joystickvalue+2");
 
     as->Label("joystick_button");
     // BUTTON
@@ -652,7 +712,7 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne callJoystick_end       ; zero flag is not set -> skip to down");
     as->Asm("lda #1");
-    as->Asm("sta joystickvalue+3");
+    as->Asm("sta joystickvalue+4");
 
 
     as->Label("callJoystick_end");

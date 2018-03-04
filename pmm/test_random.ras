@@ -1,0 +1,25 @@
+PROGRAM FirstC64;
+VAR
+   val,x,y,i : byte;
+
+procedure TestRandom();
+begin
+	rand(#0,#255,val);
+	rand(#0,#41, x);
+	rand(#0,#26, y);
+	
+	moveto(x,y,#$04);
+	pokeScreen(val,#0);
+end;
+
+BEGIN
+	
+    poke($C202, #0,#13);
+
+	i:=#1;
+	while i<#10 do begin
+		TestRandom();
+	end;
+
+
+END.

@@ -60,7 +60,7 @@ public:
     void LoadVariable(Assembler* as) override {
 
         TokenType::Type t = as->m_symTab->Lookup(value)->getTokenType();
-
+        qDebug() << value << " " << TokenType::getType(t);
         if (t==TokenType::ADDRESS) {
             LoadByteArray(as);
             return;
@@ -69,11 +69,14 @@ public:
         if (t==TokenType::BYTE) {
             if (m_expr!=nullptr)
                 LoadByteArray(as);
-            else
+            else {
                 as->Asm("lda " +value);
+            }
             return;
         }
         if (t == TokenType::INTEGER) {
+            qDebug() << "ASSIGN INTEGER";
+            as->Asm("Integer assignment in nodevar WTF");
             as->Asm("lda " +value);
             as->Asm("tax");
             as->Asm("lda " +value+"+1");
@@ -101,7 +104,17 @@ public:
             return;
         }
         else {
-            as->Asm("sta " + value);
+            if (as->m_symTab->Lookup(value)->getTokenType() == TokenType::BYTE) {
+                as->Asm("sta " + value);
+                return;
+            }
+            if (as->m_symTab->Lookup(value)->getTokenType() == TokenType::INTEGER) {
+                qDebug() << "NodeVar::Storevariable integer";
+                as->Asm("sta " + value);
+                as->Asm("txa " );
+                as->Asm("sta " + value + "+1");
+                return;
+            }
 
         }
 
@@ -125,9 +138,10 @@ public:
             as->ClearTerm();
             LoadByteArray(as);
         }
-        else
-
-        as->Variable(val);
+        else {
+            bool isOK = true;
+            as->Variable(val, isOK);
+        }
         return val;
     }
     void ExecuteSym(SymbolTable* symTab) override {

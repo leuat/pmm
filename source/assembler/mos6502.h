@@ -45,7 +45,7 @@ public:
     void EndWriteln() override;
     void LoadVariable(QString var) override;
 
-    void Variable(QString var) override;
+    void Variable(QString var, bool isBtyte) override;
 
 
     void WriteBuiltinWriteln();

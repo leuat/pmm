@@ -80,12 +80,9 @@ public:
             AssignString(as);
             return v->value;
         }
-        //m_right->LoadVariable(as);
         m_right->Build(as);
         as->Term();
-        //v->LoadVariable(as);
         v->StoreVariable(as);
-        //as->Term("sta " + v->value,1);
         return v->value;
     }
 

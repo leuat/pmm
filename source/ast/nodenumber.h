@@ -15,6 +15,9 @@ public:
     NodeNumber(Token op, int val) {
         m_op = op;
         m_val = val;
+        if (m_op.m_type!=TokenType::ADDRESS)
+            m_op.m_type = TokenType::INTEGER_CONST;
+
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override;
     void ExecuteSym(SymbolTable* symTab) override {
@@ -33,6 +36,8 @@ public:
 
     QString Build(Assembler *as) override {
         QString val = "";
+        if (m_op.m_type==TokenType::BYTE)
+            val = "#"+QString::number((int)m_val);
         if (m_op.m_type==TokenType::INTEGER)
             val = "#"+QString::number((int)m_val);
         if (m_op.m_type==TokenType::INTEGER_CONST)
@@ -40,7 +45,20 @@ public:
         if (m_op.m_type==TokenType::ADDRESS) {
             val = "$" + QString::number((int)m_val,16);
         }
-        //as->Number(val);
+
+        if (m_op.m_type==TokenType::INTEGER_CONST && m_val>255) {
+            as->Comment("Integer constant assigning");
+            int hiBit = ((int)m_val)>>8;
+            int loBit = ((int)m_val)&0xff;
+            as->Asm("lda #" + QString::number(hiBit) );
+            as->Asm("tax");
+            as->Asm("lda #" + QString::number(loBit) );
+            return val;
+
+            //qDebug() << m_op.m_value <<":" << m_val << " : " << hiBit << "  , " << loBit;
+            //exit(1);
+        }
+
         if (as->m_term=="")
             as->Term("lda " + val);
         else

@@ -34,6 +34,7 @@ public:
     void MoveTo(Assembler* as);
     void PokeScreen(Assembler* as, int hiAddress);
     void PokeScreenColor(Assembler* as, int hiAddress);
+    void SetSpritePos(Assembler* as);
     void Fill(Assembler* as);
     void PrintNumber(Assembler* as);
     void PrintString(Assembler* as);
@@ -41,7 +42,7 @@ public:
     void Joystick(Assembler* as);
     void BitOp(Assembler* as, int type);
     PVar Execute(SymbolTable* symTab, uint lvl) override;
-
+    void PlaySound(Assembler* as);
     void IncScreenX(Assembler* as);
 
     void LoadVar(Assembler* as, int paramNo, QString register);

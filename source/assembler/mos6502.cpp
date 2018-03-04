@@ -196,19 +196,23 @@ void AsmMOS6502::LoadVariable(QString var)
     Asm("lda "+ var);
 }
 
-void AsmMOS6502::Variable(QString v)
+void AsmMOS6502::Variable(QString v, bool isByte)
 {
-/*    m_term += v;
-    return;
-*/
+    if (isByte) {
+        if (m_term=="")
+            m_term = "lda ";
+        m_term+=v;
+    }
+    else {
+        Comment("integer assignment NodeVar");
+        if (m_term=="")
+            m_term = "lda ";
+        m_term+=v + "+1";
+        Term();
+        Asm("tax");
+        Asm("lda "+v);
 
-    if (m_term=="")
-        m_term = "lda ";
-    m_term+=v;
-  /*  if (endTerm()) {
-        Asm(m_term);
-        ClearTerm();
-    }*/
+    }
 }
 
 void AsmMOS6502::WriteBuiltinWriteln()

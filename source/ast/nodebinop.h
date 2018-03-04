@@ -46,6 +46,9 @@ public:
             if (a->m_op.m_type==TokenType::INTEGER && b->m_op.m_type==TokenType::INTEGER) {
                 str = "#"+ QString::number(val);
             }
+        if (a->m_op.m_type==TokenType::BYTE && b->m_op.m_type==TokenType::BYTE) {
+            str = "#"+ QString::number(val);
+        }
             else {
                 ErrorHandler::e.Error("BinOp for constants must be numbers or addresses");
             }
@@ -218,18 +221,44 @@ public:
         }
         else {
             as->m_labelStack["wordAdd"].push();
-            QString lbl = as->getLabel("wordAdd");
-            as->Asm("clc");
-            as->Asm("lda " +varName);
+            QString lblword = as->getLabel("wordAdd");
+
+            QString lbl = as->NewLabel("rightvarInteger");
+            QString lblJmp = as->NewLabel("jmprightvarInteger");
+
+            NodeVar* v = (NodeVar*)m_left;
+
+            as->Asm("jmp " + lblJmp);
+            as->Write(lbl +"\t.byte\t0");
+            as->Label(lblJmp);
             as->ClearTerm();
-            as->BinOP(m_op.m_type);
             m_right->Build(as);
             as->Term();
-            as->Asm("sta " + varName);
-            as->Asm("bcc "+lbl);
-            as->Asm("inc " +varName + "+1");
-            as->Label(lbl);
+            as->Asm("sta " +lbl);
+            as->Term();
+
+            as->Asm("clc");
+            as->Variable(v->value, false);
+            as->Term();
+            as->ClearTerm();
+            as->BinOP(m_op.m_type);
+            as->Term(lbl,true);
+    //        as->Asm("sta " + varName);
+            if (m_op.m_type==TokenType::PLUS) {
+                as->Asm("bcc "+lblword);
+                as->Asm("inx");
+            }
+            else {
+                as->Asm("bcs "+lblword);
+
+                as->Asm("dex");
+            }
+            as->Label(lblword);
+
             as->m_labelStack["wordAdd"].pop();
+
+            as->PopLabel("rightvarInteger");
+            as->PopLabel("jmprightvarInteger");
         }
         return "";
     }

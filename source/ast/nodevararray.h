@@ -23,6 +23,7 @@ public:
     QString Build(Assembler *as) override {
         qDebug() << "Build";
         return "";
+
         m_expr->Build(as);
         as->Asm("tax");
         as->Term("lda ");
@@ -48,7 +49,6 @@ public:
 
 
     void ExecuteSym(SymbolTable* symTab) {
-        qDebug()<< "Eecu";
         if (m_var!=nullptr)
             m_var->ExecuteSym(symTab);
         if (m_expr!=nullptr)

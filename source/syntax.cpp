@@ -162,6 +162,20 @@ void Syntax::SetupBuiltinFunctions()
                 );
 
 
+    builtInFunctions["spritepos"] = BuiltInFunction(
+                "spritepos",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
+                );
+
+
+    builtInFunctions["playsound"] = BuiltInFunction(
+                "playsound",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
+                );
 }
 
 

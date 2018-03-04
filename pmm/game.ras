@@ -1,0 +1,189 @@
+PROGRAM FirstC64;
+
+VAR
+   a, b, c, i, j,k,val,mainloop, time : byte;
+   x,y : byte;
+   sprite0data: IncBin("sprite1.bin");
+   charset: IncBin("test.bin","$1fff");
+   fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
+	fadeRedBlue : array [8] of byte = (00,$0f,$09,$0e,$02,$0c,$00,$0c,$09,$00,$02,$00,$0b,$05,$06,$0c); 
+	fade : array [8] of byte = (00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00); 
+
+
+   message: array[255] of byte;
+  
+   sprite_x : integer;
+   sprite_y : integer;
+
+   stars_x : array[100] of byte;	
+   stars_y : array[100] of byte;	
+   stars_dy : array[100] of byte;	
+   stars_col : array[100] of byte;	
+
+	
+   clearval : byte;
+   soundWait : byte;
+
+
+procedure InitializeSprites();
+
+begin
+	sprite_x:=#160;
+	sprite_y:=#180;
+
+    poke(SPRITE_DATA_LOC,#0, #$0D); 
+	poke(SPRITE_DATA_LOC,#1, #$0D);
+    poke(SPRITE_BITMASK,#0, #%00000111);
+	poke(SPRITE_COLOR,#0, WHITE);
+    poke(SPRITE_COLOR,#1, YELLOW);
+    memcpy(sprite0data, $0340, #63);
+
+end;
+
+
+procedure SoundTest();
+begin
+/*	soundWait:=#0;
+    if soundWait=#0 then begin*/
+
+/*	for i:=#0 to #27 do begin
+		poke(SID, i, #0);
+	end;*/
+	poke(SID, #24, #15);
+	poke(SID, #1, #20);
+	poke(SID, #5, #0*#16 + #0);
+	poke(SID, #6, #15*#16 + #9);
+	poke(SID, #4, #1+#16);
+	poke(SID, #4, #16);
+//	end;
+//end;
+
+
+procedure MoveSprite();
+begin
+//	b:=time;
+
+
+	spritepos(sprite_x, sprite_y, #0, #$01, #$FE);
+	Joystick();
+
+	sprite_x := sprite_x - joystickvalue[#1]*#4;
+	sprite_x := sprite_x + joystickvalue[#2]*#4;
+	sprite_y := sprite_y + joystickvalue[#3]*#4;
+
+
+	if joystickvalue[#4]=#1 then begin
+		SoundTest();
+		soundWait:=#20;
+	end;
+
+
+end;
+
+
+procedure PrintText(); 
+begin
+	MoveTo(#10, #24, #$04);
+	printstring(message, #0);
+	MoveTo(#17, #24, #$04);
+	printnumber(time);
+
+end;
+
+procedure Clear();
+begin
+	fill($D800, BLUE,#0);
+	fill($D900, BLUE,#0);
+	fill($DA00, BLUE,#0);
+	fill($DB00, BLUE,#0);
+	fill($0400, clearval,#0);
+	fill($0500, clearval,#0);
+	fill($0600, clearval,#0);
+	fill($0700, clearval,#0);
+
+end;
+
+procedure WaitRaster();
+begin
+	while a<>#199 do begin
+		peek(RASTERLINE_POS, #0, a);
+	end;
+/*	while a<>#199 do begin
+		peek(RASTERLINE_POS, #0, a);
+	end;*/
+
+end;
+
+
+
+
+procedure InitStars();
+begin
+   for i:=#0 to #100 do begin
+	 rand(#0,#40,x);
+	 rand(#0,#200,y);
+	 rand(#0,#4,val);
+	 rand(#1,#4,c);
+	 stars_x[i]:=x;
+	 stars_y[i]:=y;
+	 stars_col[i]:=val;
+	 stars_dy[i]:=c;
+   end
+end;
+
+
+procedure UpdateStars();
+begin
+	for i:=#0 to #50 do begin
+		y:=stars_y[i];
+		y:=y/#8;
+		moveto(stars_x[i], y, #$04);
+		pokescreen(clearval, #0);
+		stars_y[i]:=stars_y[i] + stars_dy[i];
+		if stars_y[i]>#150 then begin
+			stars_y[i]:=#0;
+			rand(#0,#40,val);
+			stars_x[i] := val;
+		end;
+		y:=stars_y[i];
+		x:=y;
+		and(x,#$7);
+		x:=x+#34;
+		y:=y/#8;
+		moveto(stars_x[i], y, #$04);
+		pokescreencolor(x,stars_col[i],#0,#1);
+
+
+	end;
+end;
+
+begin
+	poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
+	poke(SCREEN_BACKGROUND_COLOR, #1, BLACK);
+	poke($d018, #0, #$18);
+    poke($C202, #0,#13);
+	clearval := #$20;
+	Clear();
+	mainloop:=#1;
+	time:=#0;
+
+	asm("
+	cli
+	");
+
+	InitializeSprites();
+	InitStars();
+	while mainloop<#10 do begin
+		time:=time+#1;
+		UpdateStars();
+		PrintText();
+		MoveSprite();
+		WaitRaster();
+		if soundWait<>#0 then begin
+			soundWait:=soundWait-#1;
+		end;
+		
+
+	end;
+
+END.
