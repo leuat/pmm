@@ -37,6 +37,7 @@ public:
     void PrintNumber(Assembler* as);
     void PrintString(Assembler* as);
     void Scroll(Assembler* as);
+    void Joystick(Assembler* as);
     void BitOp(Assembler* as, int type);
     PVar Execute(SymbolTable* symTab, uint lvl) override;
 
@@ -51,6 +52,8 @@ public:
 
 
     // Initialize
+
+    void InitJoystick(Assembler* as);
     void InitRandom(Assembler* as);
     void InitSinusTable(Assembler* as);
     void InitMoveto(Assembler *as);

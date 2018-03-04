@@ -77,8 +77,8 @@ void AsmMOS6502::DeclareVariable(QString name, QString type)
 void AsmMOS6502::BeginBlock()
 {
     Nl();
-    Label(getLabel("block"));
 }
+
 
 void AsmMOS6502::EndBlock()
 {

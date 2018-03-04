@@ -37,10 +37,11 @@ void Parser::Eat()
 void Parser::InitBuiltinFunctions()
 {
     m_procedures["initrandom"] = new NodeProcedureDecl("initrandom");
-    m_procedures["definesinetable"] = new NodeProcedureDecl("definesinetable");
+    m_procedures["initsinetable"] = new NodeProcedureDecl("initsinetable");
     m_procedures["initeightbitmul"] = new NodeProcedureDecl("initeightbitmul");
     m_procedures["initmoveto"] = new NodeProcedureDecl("initmoveto");
     m_procedures["initprintstring"] = new NodeProcedureDecl("initprintstring");
+    m_procedures["initjoystick"] = new NodeProcedureDecl("initjoystick");
 }
 
 void Parser::VerifyToken(Token t)

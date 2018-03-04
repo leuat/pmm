@@ -19,11 +19,13 @@ public:
     QString m_name;
     QList<Type> m_params;
     BuiltInFunction() {}
+    bool m_initFunction = false;
 //    QVector<PVar> m_params;
 
-    BuiltInFunction(QString name, QList<BuiltInFunction::Type> params) {
+    BuiltInFunction(QString name, QList<BuiltInFunction::Type> params, bool initFunction = false) {
         m_name = name;
         m_params = params;
+        m_initFunction = initFunction;
     }
 };
 

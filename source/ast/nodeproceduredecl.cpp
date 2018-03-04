@@ -1,5 +1,6 @@
 #include "nodeproceduredecl.h"
 #include "nodebuiltinmethod.h"
+#include "source/syntax.h"
 
 
 NodeProcedureDecl::NodeProcedureDecl(QString m, QVector<Node *> paramDecl, Node *block) {
@@ -34,11 +35,35 @@ QString NodeProcedureDecl::Build(Assembler *as)
     if (m_block==nullptr)  // Is builtin procedure
         m_block = new NodeBuiltinMethod(m_procName, QVector<Node*>());
 
-    as->Asm("jmp afterProc_" + m_procName);
-    as->Label(m_procName);
+    bool isInitFunction=false;
+    bool isBuiltinFunction=false;
+    if (Syntax::s.builtInFunctions.contains(m_procName)) {
+        isBuiltinFunction = true;
+        isInitFunction = Syntax::s.builtInFunctions[m_procName].m_initFunction;
+    }
+
+
+    as->Asm("");
+    as->Asm("");
+    as->Comment("***********  Defining procedure : " + m_procName);
+    QString type = (isBuiltinFunction) ? "Built-in function" : "User-defined procedure";
+    as->Comment("   Procedure type : " + type);
+    if (isBuiltinFunction) {
+        type = (isInitFunction) ? "yes" : "no";
+        as->Comment("   Requires initialization : " + type);
+    }
+    as->Asm("");
+
+
+    if (!isInitFunction) {
+        as->Asm("jmp afterProc_" + m_procName);
+        as->Label(m_procName);
+    }
     m_block->Build(as);
-    as->Asm("rts");
-    as->Label("afterProc_" + m_procName);
+    if (!isInitFunction) {
+        as->Asm("rts");
+      as->Label("afterProc_" + m_procName);
+    }
     return 0;
 }
 

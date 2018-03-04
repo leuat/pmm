@@ -62,10 +62,10 @@ void Syntax::SetupBuiltinFunctions()
 
 
     builtInFunctions["initrandom"] = (BuiltInFunction(
-                                "initrandom",  QList<BuiltInFunction::Type>()));
+                                "initrandom",  QList<BuiltInFunction::Type>(), true));
 
     builtInFunctions["initsinetable"] = (BuiltInFunction(
-                                "initsinetable",  QList<BuiltInFunction::Type>()));
+                                "initsinetable",  QList<BuiltInFunction::Type>(), true));
 
     builtInFunctions["rand"] = BuiltInFunction(
                 "rand",
@@ -143,6 +143,16 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["initprintstring"] = BuiltInFunction(
                 "initprintstring",
                 QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["initjoystick"] = BuiltInFunction(
+                "initjoystick",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["joystick"] = BuiltInFunction(
+                "joystick",
+               QList<BuiltInFunction::Type>()
                 );
 
 

@@ -45,9 +45,12 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="initmoveto") {
         InitMoveto(as);
     }
-
-    if (m_procName.toLower()=="definesinetable")
-        InitSinusTable(as);
+    if (m_procName.toLower()=="initjoystick") {
+        InitJoystick(as);
+    }
+    if (m_procName.toLower()=="joystick") {
+        Joystick(as);
+    }
 
     if (m_procName.toLower()=="initprintstring") {
         InitPrintString(as);
@@ -60,8 +63,12 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         PrintString(as);
     }
 
+    /*    if (m_procName.toLower()=="definesinetable")
+            InitSinusTable(as);
+    */
+
     if (m_procName.toLower()=="initsinetable")
-        as->Asm("jsr definesinetable");
+        InitSinusTable(as);
 
     if (m_procName.toLower()=="moveto")
         MoveTo(as);
@@ -372,7 +379,6 @@ void NodeBuiltinMethod::PokeScreen(Assembler *as, int shift)
 {
 
     LoadVar(as, 0);
-
     as->Term("ldy ");
     m_params[1]->Build(as);
     as->Term();
@@ -409,6 +415,11 @@ void NodeBuiltinMethod::Scroll(Assembler *as)
     m_params[0]->Build(as);
     as->Term();
     as->Asm("sta $d016");
+
+}
+
+void NodeBuiltinMethod::Joystick(Assembler *as)
+{
 
 }
 
@@ -452,7 +463,6 @@ void NodeBuiltinMethod::InitSinusTable(Assembler *as)
 {
     if (m_isInitialized["sinetab"])
         return;
-    as->Asm("; initSineTable");
     as->Asm("jmp initsin_continue");
     as->Label("sine .byte 0 ");
     as->Asm("org sine +#255");
@@ -550,6 +560,43 @@ void NodeBuiltinMethod::VerifyInitialized(QString method, QString initmethod)
     if (!m_isInitialized[method])
         ErrorHandler::e.Error("Please declare "+ initmethod+"() before using " + method+"();");
 
+}
+
+void NodeBuiltinMethod::InitJoystick(Assembler *as)
+{
+    /*start    lda $02
+             cmp $dc00
+             beq start      ; loop until the joystick register changes.
+
+             lda $dc00      ; store new value in memory location 2.
+             sta $02
+
+    up       lda #%00000001 ; mask joystick up movement
+             bit $dc00      ; bitwise AND with address 56320
+             bne down       ; zero flag is not set -> skip to down
+             inc $d020      ; border color + 1
+
+    down     lda #%00000010 ; mask joystick down movement
+             bit $dc00      ; bitwise AND with address 56320
+             bne left       ; zero flag is not set -> skip to left
+             dec $d020      ; border color- 1
+
+    left     lda #%00000100 ; mask joystick left movement
+             bit $dc00      ; bitwise AND with address 56320
+             bne right      ; zero flag is not set -> skip to right
+             inc $d021      ; background color + 1
+
+    right    lda #%00001000 ; mask joystick right movement
+             bit $dc00      ; bitwise AND with address 56320
+             bne buton      ; zero flag is not set -> skip to buton
+             dec $d021      ; background color - 1
+
+    buton    lda #%00010000 ; mask joystick button push
+             bit $dc00      ; bitwise AND with address 56320
+             bne start      ; button not pressed -> enter loop again
+             rts            ; back to basic
+
+             */
 }
 
 void NodeBuiltinMethod::SaveVar(Assembler *as, int paramNo, QString reg)

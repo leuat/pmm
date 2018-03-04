@@ -9,6 +9,7 @@
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
 #include "source/ast/nodevar.h"
+#include "source/ast/nodevardecl.h"
 
 
 class NodeBlock : public Node {
@@ -47,10 +48,17 @@ public:
 
    QString Build(Assembler* as) {
        as->VarDeclHeader();
+       bool blockLabel = false;
         for (Node* n: m_decl) {
+            if (!blockLabel)
+                if (dynamic_cast<NodeVarDecl*>(n)==nullptr) {
+                    as->Label(as->getLabel("block"));
+                    blockLabel = true;
+                }
             n->Build(as);
         }
-
+        if (!blockLabel)
+            as->Label(as->getLabel("block"));
         if (m_compoundStatement!=nullptr)
             m_compoundStatement->Build(as);
 
