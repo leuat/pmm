@@ -20,9 +20,8 @@ VAR
    stars_dy : array[100] of byte;	
    stars_col : array[100] of byte;	
 
-	
    clearval : byte;
-   soundWait : byte;
+   scroll_x : byte;
 
 
 procedure InitializeSprites();
@@ -43,20 +42,13 @@ end;
 
 procedure SoundTest();
 begin
-/*	soundWait:=#0;
-    if soundWait=#0 then begin*/
-
-/*	for i:=#0 to #27 do begin
-		poke(SID, i, #0);
-	end;*/
-	poke(SID, #24, #15);
-	poke(SID, #1, #20);
-	poke(SID, #5, #0*#16 + #0);
-	poke(SID, #6, #15*#16 + #9);
-	poke(SID, #4, #1+#16);
-	poke(SID, #4, #16);
-//	end;
-//end;
+	poke(SID, #24, #15); // Volume
+	poke(SID, #1, #10);   // 20*256 = hi byte freq
+	poke(SID, #5, #0*#16 + #0);  // attack voice 1 is zero
+	poke(SID, #6, #15*#16 + #6);  // sustain = 15, release = 9
+	poke(SID, #4, #1+#32);  // // triangle = 16
+	poke(SID, #4, #32);       // release, triangle = 16 saw =32, noise = 128
+ end;
 
 
 procedure MoveSprite();
@@ -70,11 +62,12 @@ begin
 	sprite_x := sprite_x - joystickvalue[#1]*#4;
 	sprite_x := sprite_x + joystickvalue[#2]*#4;
 	sprite_y := sprite_y + joystickvalue[#3]*#4;
-
+	
+	scroll_x:= joystickvalue[#1];
+	scroll_x:= scroll_x- joystickvalue[#2];
 
 	if joystickvalue[#4]=#1 then begin
 		SoundTest();
-		soundWait:=#20;
 	end;
 
 
@@ -145,6 +138,16 @@ begin
 			rand(#0,#40,val);
 			stars_x[i] := val;
 		end;
+
+	/*	stars_x[i]:=stars_x[i]+scroll_x;
+		if stars_x[i]=#40 then begin
+			stars_x[i]:=#0;
+		end;
+		if stars_x[i]=#255 then begin
+			stars_x[i]:=#39;
+		end;
+*/
+
 		y:=stars_y[i];
 		x:=y;
 		and(x,#$7);
@@ -171,6 +174,8 @@ begin
 	cli
 	");
 
+	scroll_x:=#0;
+
 	InitializeSprites();
 	InitStars();
 	while mainloop<#10 do begin
@@ -179,9 +184,6 @@ begin
 		PrintText();
 		MoveSprite();
 		WaitRaster();
-		if soundWait<>#0 then begin
-			soundWait:=soundWait-#1;
-		end;
 		
 
 	end;
