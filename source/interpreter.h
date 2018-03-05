@@ -11,12 +11,12 @@ public:
     Node* m_tree = nullptr;
     enum Type{PASCAL, MOS6502};
     Assembler* m_assembler = nullptr;
-    Parser m_parser;
-    Interpreter(Parser p);
+    Parser* m_parser;
+    Interpreter(Parser* p);
     void Parse();
     void Visit(Node* n);
     void Interpret();
-    bool Build(Type);
+    bool Build(Type, QString projDir);
     void SaveBuild(QString filename);
     void HandleError(FatalErrorException fe, QString se);
 };

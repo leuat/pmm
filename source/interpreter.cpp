@@ -1,6 +1,6 @@
 #include "interpreter.h"
 
-Interpreter::Interpreter(Parser p)
+Interpreter::Interpreter(Parser* p)
 {
     m_parser = p;
 }
@@ -10,8 +10,10 @@ void Interpreter::Parse()
     m_tree = nullptr;
     qDebug() << "Parsing..";
     try {
-        m_tree = m_parser.Parse();
+
+        m_tree = m_parser->Parse();
     } catch (FatalErrorException e) {
+        qDebug() << "ERROR parse " << e.message;
         HandleError(e, "Error during parsing:");
     }
 
@@ -33,7 +35,7 @@ void Interpreter::Interpret()
 
 }
 
-bool Interpreter::Build(Interpreter::Type type)
+bool Interpreter::Build(Interpreter::Type type, QString project_dir)
 {
     if (m_tree==nullptr) {
         qDebug() << "Interpreter::Build : tree not parsed!";
@@ -47,6 +49,8 @@ bool Interpreter::Build(Interpreter::Type type)
     if (type==PASCAL)
         m_assembler = new AsmPascal();
 
+    m_assembler->m_projectDir = project_dir;
+
     if (m_tree!=nullptr)
         try {
             m_tree->Build(m_assembler);
@@ -55,7 +59,7 @@ bool Interpreter::Build(Interpreter::Type type)
             return false;
          }
         try {
-            m_tree->ExecuteSym(m_assembler->m_symTab);
+           // m_tree->ExecuteSym(m_assembler->m_symTab);
         } catch (FatalErrorException e) {
             HandleError(e,"Error during symbolic check");
             return false;
@@ -78,8 +82,8 @@ void Interpreter::HandleError(FatalErrorException fe, QString e)
     QString msg = "";
     QString line = "on line: " + QString::number(fe.linenr+1);
     msg +="\nFatal error " + line;
-    if (fe.linenr<m_parser.m_lexer.m_lines.count())
-        msg+="\nSource: " + m_parser.m_lexer.m_lines[fe.linenr];
+    if (fe.linenr<m_parser->m_lexer->m_lines.count())
+        msg+="\nSource: " + m_parser->m_lexer->m_lines[fe.linenr];
     msg+="\n\nMessage: ";
     Pmm::Data::d.lineNumber = fe.linenr+1;
 

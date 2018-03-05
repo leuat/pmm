@@ -59,8 +59,10 @@ public:
 
     void LoadVariable(Assembler* as) override {
 
+        if (as->m_symTab->Lookup(value)==nullptr)
+            ErrorHandler::e.Error("Could not find variable '" +value +"' for storing.",m_op.m_lineNumber);
+
         TokenType::Type t = as->m_symTab->Lookup(value)->getTokenType();
-        qDebug() << value << " " << TokenType::getType(t);
         if (t==TokenType::ADDRESS) {
             LoadByteArray(as);
             return;
@@ -75,7 +77,6 @@ public:
             return;
         }
         if (t == TokenType::INTEGER) {
-            qDebug() << "ASSIGN INTEGER";
             as->Asm("Integer assignment in nodevar WTF");
             as->Asm("lda " +value);
             as->Asm("tax");
@@ -86,7 +87,11 @@ public:
         return;
     }
 
-    void StoreVariable(Assembler* as) {
+    void StoreVariable(Assembler* as) override {
+
+        if (as->m_symTab->Lookup(value)==nullptr)
+            ErrorHandler::e.Error("Could not find variable '" +value +"' for storing.", m_op.m_lineNumber);
+
         if (m_expr != nullptr) {
             NodeNumber* number = dynamic_cast<NodeNumber*>(m_expr);
             if (number!=nullptr) { // IS NUMBER optimize}
@@ -104,12 +109,13 @@ public:
             return;
         }
         else {
+            // Not array
             if (as->m_symTab->Lookup(value)->getTokenType() == TokenType::BYTE) {
+
                 as->Asm("sta " + value);
                 return;
             }
             if (as->m_symTab->Lookup(value)->getTokenType() == TokenType::INTEGER) {
-                qDebug() << "NodeVar::Storevariable integer";
                 as->Asm("sta " + value);
                 as->Asm("txa " );
                 as->Asm("sta " + value + "+1");
@@ -122,13 +128,6 @@ public:
 
     QString Build(Assembler *as) override {
         QString  val = value;
-      /*  Symbol* s= as->m_symTab->LookupConstants(value);
-        if (s!=nullptr) {
-            val = "$" + QString::number((int)s->m_value->m_fVal,16);
-            if (!(s->m_type.toLower()=="address"))
-                val = "#" + val;
-        }
-        if (s==nullptr) {*/
         Pmm::Data::d.lineNumber = m_op.m_lineNumber;
         Symbol* s = as->m_symTab->LookupVariables(value);
         if (s==nullptr) {

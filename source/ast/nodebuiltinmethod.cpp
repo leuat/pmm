@@ -547,7 +547,20 @@ void NodeBuiltinMethod::PlaySound(Assembler *as)
 //    LoadVar(as, 0);
     NodeNumber *num = (NodeNumber*)m_params[0];
     int SID = 54272;
-//    if (num->m_val==1) {
+    LoadVar(as, 0);
+    as->Asm("sta 54272 +24");
+    LoadVar(as, 1);
+    as->Asm("sta 54272 +1");
+    LoadVar(as, 2);
+    as->Asm("sta 54272 +5");
+    LoadVar(as, 3);
+    as->Asm("sta 54272 +6");
+    LoadVar(as, 4);
+    as->Asm("sta 54272 +4");
+    LoadVar(as, 5);
+    as->Asm("sta 54272 +4");
+
+    //    if (num->m_val==1) {
  //       as->
  //   }
 

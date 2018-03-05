@@ -9,6 +9,30 @@ Lexer::Lexer()
 
 }
 
+void Lexer::IncludeFiles()
+{
+    QRegExp rx("\\{\\s*\\$include.*\\}", Qt::CaseInsensitive);
+    QStringList list;
+    int pos = 0;
+    QString newText = m_orgText;
+    m_text = m_orgText;
+   // return;
+    while ((pos = rx.indexIn(m_orgText, pos)) != -1) {
+/*        qDebug() <<rx.cap(0);
+        qDebug() << pos << " with " << rx.matchedLength();*/
+        QString filename= rx.cap(0).toLower().remove("{").remove("}").remove("$include").trimmed();
+        qDebug() << "FIle " << filename;
+        QString include = loadTextFile(m_path +"/" +filename);
+        qDebug() << "File loaded!";
+//        newText.remove(pos, rx.matchedLength());
+        newText.replace(rx.cap(0), include);
+        pos += rx.matchedLength();
+    }
+    m_text = newText;
+//    qDebug() << newText;
+//    exit(1);
+}
+
 void Lexer::Advance()
 {
     m_pos++;
@@ -55,6 +79,19 @@ void Lexer::SkipUntilNewLine()
 
         Advance();
 
+}
+
+QString Lexer::loadTextFile(QString filename)
+{
+    QFile file(filename);
+    if(!file.open( QIODevice::ReadOnly|QIODevice::Text ) ) {
+        ErrorHandler::e.Error("Could not open file for inclusion: " + filename);
+    }
+    QTextStream in(&file);
+    QString text ="";
+    while(!in.atEnd())
+        text+= in.readLine();
+    return text;
 }
 
 Token Lexer::Number()
@@ -138,10 +175,15 @@ QString Lexer::peek()
     return QString(m_text[m_pos+1]);
 }
 
+void Lexer::Initialize()
+{
+    IncludeFiles();
+    m_currentChar = m_text[0];
+}
+
 Token Lexer::GetNextToken()
 {
     while (!m_finished) {
-
         if (m_currentChar==" " || m_currentChar=="\n" || m_currentChar=="\t") {
             SkipWhiteSpace();
             continue;

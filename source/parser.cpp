@@ -20,7 +20,7 @@ void Parser::Delete()
 void Parser::Eat(TokenType::Type t)
 {
     if (m_currentToken.m_type == t) {
-        m_currentToken = m_lexer.GetNextToken();
+        m_currentToken = m_lexer->GetNextToken();
 
     }
     else {
@@ -37,7 +37,7 @@ void Parser::Eat()
 int Parser::findSymbolLineNumber(QString symbol)
 {
     int i=1;
-    for (QString& s: m_lexer.m_lines) {
+    for (QString& s: m_lexer->m_lines) {
         i++;
         if (s.contains(symbol))
             return i;
@@ -57,7 +57,7 @@ void Parser::InitBuiltinFunctions()
 
 void Parser::InitBuiltinFunction(QStringList methodName, QString builtinFunctionName)
 {
-    QString txt = m_lexer.m_text.toLower();
+    QString txt = m_lexer->m_text.toLower();
     for (QString s: methodName)
      if (txt.contains(s)) {
         m_procedures[builtinFunctionName] = new NodeProcedureDecl(builtinFunctionName);
@@ -316,7 +316,9 @@ Node* Parser::Term()
 
 Node* Parser::Parse()
 {
-
+    m_lexer->Initialize();
+    m_currentToken = m_lexer->GetNextToken();
+    //qDebug() <<m_lexer->m_text[0];
     SymbolTable::Initialize();
     InitBuiltinFunctions();
     NodeProgram* root = (NodeProgram*)Program();
@@ -325,10 +327,12 @@ Node* Parser::Parse()
     for (QString s: m_procedures.keys())
         if (((NodeProcedureDecl*)m_procedures[s])->m_block==nullptr)
             root->m_NodeBlock->m_decl.append(m_procedures[s]);
-    // Then add regular ones
-    for (QString s: m_procedures.keys())
-        if (((NodeProcedureDecl*)m_procedures[s])->m_block!=nullptr)
-            root->m_NodeBlock->m_decl.append(m_procedures[s]);
+
+    // Then add regular ones ORDERED BY DEFINITION
+    //for (QString s: m_procedures.keys())
+     //   if (((NodeProcedureDecl*)m_procedures[s])->m_block!=nullptr)
+        for ( Node* n: m_proceduresOnly )
+            root->m_NodeBlock->m_decl.append(n);
 
 
     if (m_currentToken.m_type!=TokenType::TEOF)
@@ -342,6 +346,7 @@ Node *Parser::FindProcedure()
 {
     if (m_procedures.contains(m_currentToken.m_value)) {
         QString procName = m_currentToken.m_value;
+        Token t = m_currentToken;
         Eat(TokenType::ID);
         Eat(TokenType::LPAREN);
         QVector<Node*> paramList;
@@ -355,7 +360,7 @@ Node *Parser::FindProcedure()
         NodeProcedureDecl* p = (NodeProcedureDecl*)m_procedures[procName];
         //p->SetParameters(paramList);
 
-        return new NodeProcedure(p, paramList);
+        return new NodeProcedure(p, paramList, t);
     }
     //qDebug() << m_currentToken.getType() << " with value " << m_currentToken.m_value;
     return nullptr;
@@ -441,6 +446,7 @@ QVector<Node*> Parser::Declarations()
         Eat(TokenType::SEMI);
 
         m_procedures[procName] = procDecl;
+        m_proceduresOnly.append(procDecl);
 
     }
 
@@ -495,8 +501,6 @@ Node *Parser::TypeSpec()
             Eat();
         }
         Eat(TokenType::RPAREN);
-        if (!QFile::exists(binFile))
-            ErrorHandler::e.Error("Could not locate binary file for inclusion :" +binFile);
 
         return new NodeVarType(t,binFile, position);
 

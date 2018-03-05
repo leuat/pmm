@@ -44,7 +44,13 @@ public:
             if (t->m_op.m_type==TokenType::INCBIN) {
                 if (t->m_position=="") {
                     as->Label(v->value);
-                    as->Asm("incbin \"" + t->m_filename + "\"");
+                    QString filename = as->m_projectDir + "/" + t->m_filename;
+                    qDebug() << "filename: " << filename;
+                    if (!QFile::exists(filename))
+                        ErrorHandler::e.Error("Could not locate binary file for inclusion :" +filename);
+
+
+                    as->Asm("incbin \"" + filename + "\"");
                 }
                 else {
                     as->Appendix("org " +t->m_position,1);
@@ -68,12 +74,19 @@ public:
     void ExecuteSym(SymbolTable* symTab) override {
 
         QString typeName = ((NodeVar*)m_typeNode)->value;
+        QString varName = ((NodeVar*)m_varNode)->value;
+        if (symTab->Lookup(varName)!=nullptr)
+                ErrorHandler::e.Error("Variable '" + varName +"' is already defined!",m_op.m_lineNumber);
+
+
         Symbol* typeSymbol = symTab->Lookup(typeName);
         if (typeSymbol==nullptr)
             ErrorHandler::e.Error("Could not find type symbol :" + typeName,m_op.m_lineNumber);
 
-        QString varName = ((NodeVar*)m_varNode)->value;
         ErrorHandler::e.DebugLow("Typename define : " + typeName + "  variable " + varName);
+
+
+
 
         Symbol* varSymbol = new VarSymbol(varName, typeSymbol->m_name);
         symTab->Define(varSymbol);

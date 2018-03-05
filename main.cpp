@@ -10,7 +10,7 @@
 #include <QTextStream>
 
 
-void TestSingleLine() {
+/*void TestSingleLine() {
     QTextStream s(stdin);
     QString text = "";
     while (text!="q") {
@@ -26,7 +26,7 @@ void TestSingleLine() {
     }
 
 }
-
+*/
 QString ReadFile(QString fileName, QStringList& lst) {
     if (!QFile::exists(fileName)) {
         qDebug() << "Cannot open file: " << fileName;
@@ -52,9 +52,9 @@ QString ReadFile(QString fileName, QStringList& lst) {
 void ParseFile(QString fileName) {
     QStringList lst;
     QString text = ReadFile(fileName, lst);
-    Lexer lexer = Lexer(text, lst);
-    Parser parser = Parser(lexer);
-    Interpreter interpreter = Interpreter(parser);
+    Lexer lexer = Lexer(&text, lst);
+    Parser parser = Parser(&lexer);
+    Interpreter interpreter = Interpreter(&parser);
     interpreter.Interpret();
 
 }

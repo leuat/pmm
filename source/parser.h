@@ -28,13 +28,13 @@ class Parser {
 public:
 
     QMap<QString, Node*> m_procedures;
+    QVector<Node*> m_proceduresOnly;
 
-    Lexer m_lexer;
+    Lexer* m_lexer;
     Token m_currentToken;
     Parser();
-    Parser(Lexer l) {
+    Parser(Lexer* l) {
         m_lexer = l;
-        m_currentToken = m_lexer.GetNextToken();
     }
     ~Parser() {
         Delete();

@@ -175,6 +175,8 @@ void Syntax::SetupBuiltinFunctions()
                 "playsound",
                 QList<BuiltInFunction::Type>()
                 <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
                 );
 }
 

@@ -57,6 +57,8 @@ QString NodeProcedureDecl::Build(Assembler *as)
 
     if (!isInitFunction) {
         as->Asm("jmp afterProc_" + m_procName);
+
+
         as->Label(m_procName);
     }
     m_block->Build(as);

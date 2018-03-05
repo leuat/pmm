@@ -1,7 +1,6 @@
 PROGRAM FirstC64;
-
 VAR
-   a, b, c, i, j,k,val,mainloop, time : byte;
+   a,b, c, i, j,k,val,mainloop, time : byte;
    x,y : byte;
    sprite0data: IncBin("sprite1.bin");
    charset: IncBin("test.bin","$1fff");
@@ -23,39 +22,33 @@ VAR
    clearval : byte;
    scroll_x : byte;
 
+{ $include suppe2.inc }
 
-procedure InitializeSprites();
 
+procedure SoundTest(wave_type:byte);
 begin
-	sprite_x:=#160;
-	sprite_y:=#180;
+	
+ //Volume, hi byte freq, attack voice 1, sustain=16* + release, waveform, release waveform 
 
-    poke(SPRITE_DATA_LOC,#0, #$0D); 
-	poke(SPRITE_DATA_LOC,#1, #$0D);
-    poke(SPRITE_BITMASK,#0, #%00000111);
-	poke(SPRITE_COLOR,#0, WHITE);
-    poke(SPRITE_COLOR,#1, YELLOW);
-    memcpy(sprite0data, $0340, #63);
+//
+//
+	PlaySound(#15, #10, #0*#16+#0, #15*#16 + #6, #1 +wave_type, wave_type);
 
-end;
-
-
-procedure SoundTest();
-begin
-	poke(SID, #24, #15); // Volume
-	poke(SID, #1, #10);   // 20*256 = hi byte freq
-	poke(SID, #5, #0*#16 + #0);  // attack voice 1 is zero
-	poke(SID, #6, #15*#16 + #6);  // sustain = 15, release = 9
-	poke(SID, #4, #1+#32);  // // triangle = 16
-	poke(SID, #4, #32);       // release, triangle = 16 saw =32, noise = 128
  end;
 
 
+
+procedure PrintText(); 
+begin
+	MoveTo(#10, #24, #$04);
+	printstring(message, #0);
+	MoveTo(#17, #24, #$04);
+	printnumber(time);
+
+end;
+
 procedure MoveSprite();
 begin
-//	b:=time;
-
-
 	spritepos(sprite_x, sprite_y, #0, #$01, #$FE);
 	Joystick();
 
@@ -67,19 +60,9 @@ begin
 	scroll_x:= scroll_x- joystickvalue[#2];
 
 	if joystickvalue[#4]=#1 then begin
-		SoundTest();
+		SoundTest(#32);
 	end;
 
-
-end;
-
-
-procedure PrintText(); 
-begin
-	MoveTo(#10, #24, #$04);
-	printstring(message, #0);
-	MoveTo(#17, #24, #$04);
-	printnumber(time);
 
 end;
 
@@ -98,8 +81,8 @@ end;
 
 procedure WaitRaster();
 begin
-	while a<>#199 do begin
-		peek(RASTERLINE_POS, #0, a);
+	while val<>#199 do begin
+		peek(RASTERLINE_POS, #0, val);
 	end;
 /*	while a<>#199 do begin
 		peek(RASTERLINE_POS, #0, a);
@@ -174,6 +157,8 @@ begin
 	cli
 	");
 
+
+
 	scroll_x:=#0;
 
 	InitializeSprites();
@@ -184,8 +169,6 @@ begin
 		PrintText();
 		MoveSprite();
 		WaitRaster();
-		
 
 	end;
-
 END.

@@ -35,6 +35,7 @@ public:
         return "";
     }
     virtual void LoadVariable(Assembler* a) {}
+    virtual void StoreVariable(Assembler* a) {}
 };
 
 

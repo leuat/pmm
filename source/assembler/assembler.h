@@ -56,6 +56,7 @@ public:
     QMap<QString, Stack> m_stack;
     QMap<QString, LabelStack> m_labelStack;
     SymbolTable* m_symTab;
+    QString m_projectDir;
 
     QString getLabel(QString s) {
         return s+m_labelStack[s].m_current;

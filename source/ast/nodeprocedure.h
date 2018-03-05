@@ -8,15 +8,17 @@
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
 #include "source/ast/nodeproceduredecl.h"
+#include "source/ast/nodevar.h"
 
 class NodeProcedure : public Node {
 public:
     NodeProcedureDecl* m_procedure;
     QVector<Node*> m_parameters;
 
-    NodeProcedure(NodeProcedureDecl* proc, QVector<Node*> params ) {
+    NodeProcedure(NodeProcedureDecl* proc, QVector<Node*> params, Token t ) {
         m_parameters = params;
         m_procedure = proc;
+        m_op = t;
     }
 
     void Delete() {
@@ -36,6 +38,20 @@ public:
 
 
     QString Build(Assembler* as) override {
+        if (m_parameters.count()!=m_procedure->m_paramDecl.count())
+            ErrorHandler::e.Error("Procedure '" + m_procedure->m_procName+"' requires "
+            + QString::number(m_procedure->m_paramDecl.count()) +" parameters, not "
+            + QString::number(m_parameters.count()) + ".", m_op.m_lineNumber);
+
+        for (int i=0; i<m_parameters.count();i++) {
+            qDebug() << "Load variable";
+            m_parameters[i]->LoadVariable(as);
+            NodeVarDecl* vd = (NodeVarDecl*)m_procedure->m_paramDecl[i];
+            qDebug() << "Store variable";
+            vd->m_varNode->StoreVariable(as);
+            qDebug() << "Done Store variable";
+        }
+
         as->Asm("jsr " + m_procedure->m_procName);
         return "";
     }
