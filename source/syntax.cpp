@@ -61,6 +61,7 @@ void Syntax::SetupBuiltinFunctions()
                 "memcpy",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
                 BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER <<
                 BuiltInFunction::Type::INTEGER);
 
 
@@ -176,6 +177,7 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["playsound"] = BuiltInFunction(
                 "playsound",
                 QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
@@ -184,6 +186,13 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["initsid"] = BuiltInFunction(
                 "initsid",
                 QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["clearscreen"] = BuiltInFunction(
+                "clearscreen",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER
                 );
 
@@ -220,6 +229,19 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER
                 );
+
+    builtInFunctions["waitraster"] = BuiltInFunction(
+                "waitraster",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                );
+    builtInFunctions["setspriteloc"] = BuiltInFunction(
+                "setspriteloc",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER
+                );
+
 
 }
 

@@ -12,9 +12,9 @@ class Lexer
 {
     QString m_currentChar;
     uint m_pos = 0;
-    bool m_finished = false;
 
 public:
+    bool m_finished = false;
     QString m_orgText = "";
     QString m_text = "";
     uint m_localPos = 0;

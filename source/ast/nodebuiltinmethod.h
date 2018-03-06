@@ -49,8 +49,11 @@ public:
     void DisableInterrupts(Assembler* as);
     void EnableInterrupts(Assembler* as);
     void RasterIRQ(Assembler* as);
+    void ClearScreen(Assembler* as);
+    void WaitRaster(Assembler* as);
+    void SetSpriteLoc(Assembler* as);
 
-    void LoadVar(Assembler* as, int paramNo, QString register);
+    void LoadVar(Assembler* as, int paramNo, QString register, QString load="");
     void LoadVar(Assembler* as, int paramNo);
     void SaveVar(Assembler* as, int paramNo, QString register);
     void SaveVar(Assembler* as, int paramNo);

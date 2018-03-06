@@ -27,6 +27,11 @@ void Parser::Eat(TokenType::Type t)
         QString warning = "\nDid you forget a semicolon (;) ?";
         ErrorHandler::e.Error("Expected '" + TokenType::getType(t) + "' but found '" +m_currentToken.m_value+"'" + warning,m_currentToken.m_lineNumber);
     }
+/*    if (m_currentToken.m_type==TokenType::TEOF) {
+        qDebug() << m_currentToken.getType();
+        ErrorHandler::e.Error("Syntax errror", m_currentToken.m_lineNumber);
+    }
+*/
 }
 
 void Parser::Eat()
@@ -270,7 +275,14 @@ Node *Parser::Program()
 
 Node* Parser::Factor()
 {
+
+
     Token t = m_currentToken;
+
+    if (t.m_type==TokenType::TEOF)
+        ErrorHandler::e.Error("Syntax errror", m_currentToken.m_lineNumber);
+
+
     if (t.m_type == TokenType::INTEGER_CONST || t.m_type ==TokenType::REAL_CONST
             || t.m_type ==TokenType::ADDRESS) {
         Eat(t.m_type);
@@ -350,10 +362,12 @@ Node *Parser::FindProcedure()
         Eat(TokenType::ID);
         Eat(TokenType::LPAREN);
         QVector<Node*> paramList;
-        while (m_currentToken.m_type!=TokenType::RPAREN) {
+        while (m_currentToken.m_type!=TokenType::RPAREN && !m_lexer->m_finished) {
             paramList.append(Expr());
             if (m_currentToken.m_type==TokenType::COMMA)
                 Eat(TokenType::COMMA);
+            //if (m_currentToken.m_type==TokenType::SEMI)
+            //    ErrorHandler::e.Error("Syntax errror", m_currentToken.m_lineNumber);
         }
         if (!m_procedures.contains(procName))
             ErrorHandler::e.Error("Could not find procedure :" + procName, m_currentToken.m_lineNumber);

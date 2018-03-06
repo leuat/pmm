@@ -207,10 +207,10 @@ void AsmMOS6502::Variable(QString v, bool isByte)
         Comment("integer assignment NodeVar");
         if (m_term=="")
             m_term = "lda ";
-        m_term+=v + "+1";
+        m_term+=v + "+1 ; Next one";
         Term();
         Asm("tax");
-        Asm("lda "+v);
+        Term("lda "+v);
 
     }
 }

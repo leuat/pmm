@@ -1,0 +1,54 @@
+program tutorial2;
+var  
+	random_char, cnt, random_color: byte; 
+	random_values : array[255] of byte;
+	x, y : byte;
+	index : byte;
+
+// Initialize random table, much faster then using the sid's random value
+// generator
+procedure InitializeRandom();
+begin
+	for x:=#0 to #255 do begin
+		rand(#0, #255, y);
+		random_values[x]:=y;
+    end;
+
+end;
+
+begin
+	InitializeRandom();
+	// Fill screen with blank
+	ClearScreen(#$20, SCREEN_CHAR_LOC );
+	// Fill color screen with background F and foreground 8
+	ClearScreen(#$F8, SCREEN_COL_LOC );
+
+	// Set screen foreground and background to black. The second parameter is an offset.
+	Poke(SCREEN_BG_COL, #0, BLACK);
+	Poke(SCREEN_FG_COL, #0, BLACK);
+	// point to start of random table
+	index:=#0; 
+	// infinite loop
+	cnt := #0;
+	while cnt<#10 do begin
+		// loop y		
+		for y:=#5 to #20 do begin
+			// moves current screen position
+			moveto(#5, y, #$04); // $04 is screen memory upper byte
+			// Select some random color
+			random_color := random_values[index];
+			// restrict to 0-16
+			random_color := random_color/#16;
+			for x:=#5 to #35 do begin
+				// Sets both screen and color values
+				PokeScreenColor(random_values[index], random_color, #0, #1);
+				// increases screen X counter
+				incscreenx(#1);
+				// Increase by some random non-repeatable prime
+				index:=index+#17;
+	    	end;
+		end
+	end;
+end.
+
+

@@ -34,6 +34,10 @@ public:
         as->Term();
     }
 
+    QString HexValue() {
+        return "$" + QString::number((int)m_val,16);
+    }
+
     QString Build(Assembler *as) override {
         QString val = "";
 

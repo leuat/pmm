@@ -1,0 +1,6 @@
+program test3;
+var  
+   index: byte; 
+begin
+
+end.

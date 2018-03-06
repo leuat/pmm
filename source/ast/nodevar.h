@@ -139,6 +139,8 @@ public:
         }
         else {
             bool isOK = true;
+            if (s->getTokenType()==TokenType::INTEGER)
+                isOK = false;
             as->Variable(val, isOK);
         }
         return val;

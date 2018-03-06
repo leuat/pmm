@@ -1,0 +1,7 @@
+program tutorial1;
+var  
+   index: byte; 
+begin
+	// Super interesting!
+	writeln("hello world",#0);
+end.

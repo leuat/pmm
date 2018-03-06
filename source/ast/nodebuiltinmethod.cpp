@@ -22,6 +22,8 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="call") {
         Call(as);
     }
+    if (m_procName.toLower() == "setspriteloc")
+        SetSpriteLoc(as);
 
     if (m_procName.toLower()=="initsid") {
         InitSid(as);
@@ -30,8 +32,14 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="poke")
         Poke(as);
 
+    if (m_procName.toLower()=="clearscreen")
+        ClearScreen(as);
+
     if (m_procName.toLower()=="peek")
         Peek(as);
+
+    if (m_procName.toLower()=="waitraster")
+        WaitRaster(as);
 
     if (m_procName.toLower()=="memcpy")
         MemCpy(as);
@@ -142,6 +150,25 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
 void NodeBuiltinMethod::Poke(Assembler* as)
 {
+    // Optimization : if parameter 1 is zero, drop the ldx / tax
+    as->Comment("Poke");
+    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
+    if (num!=nullptr!=0 && num->m_val==0) {
+        as->Comment("Optimization: shift is zero");
+        LoadVar(as,2);
+        SaveVar(as,0);
+        return;
+    }
+    // Optimization #2 : if parameter is num AND parameter 2 is num, just add
+    NodeNumber* num2 = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (num2!=nullptr!=0 && num!=nullptr) {
+        as->Comment("Optimization: both storage and shift are constant");
+        LoadVar(as,2);
+        //SaveVar(as,0);
+        as->Asm("sta $" + QString::number((int)(num2->m_val + num->m_val),16));
+        return;
+    }
+
     LoadVar(as,1);
     as->Asm("tax");
     LoadVar(as,2);
@@ -161,14 +188,26 @@ void NodeBuiltinMethod::Peek(Assembler* as)
 void NodeBuiltinMethod::MemCpy(Assembler* as)
 {
     //as->ClearTerm();
+    NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
+    if (var==nullptr) {
+        ErrorHandler::e.Error("First parameter must be variable", m_op.m_lineNumber);
+    }
+    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
+    if (num==nullptr) {
+        ErrorHandler::e.Error("Second parameter must be pure numeric", m_op.m_lineNumber);
+    }
+
+
+    as->Comment("memcpy");
     QString lbl = as->NewLabel("memcpy");
     as->Asm("ldx #0");
     as->Label(lbl);
-    LoadVar(as, 0, "x");
-    SaveVar(as, 1, "x");
+    //LoadVar(as, 0, "x");
+    as->Asm("lda " + var->value + " + #" + num->HexValue() + ",x");
+    SaveVar(as, 2, "x");
     as->Asm("inx");
     as->Term("cpx ");
-    m_params[2]->Build(as);
+    m_params[3]->Build(as);
     as->Term();
     as->Asm("bne " + lbl);
 
@@ -570,20 +609,25 @@ PVar NodeBuiltinMethod::Execute(SymbolTable *symTab, uint lvl) {
 void NodeBuiltinMethod::PlaySound(Assembler *as)
 {
 //    LoadVar(as, 0);
-    NodeNumber *num = (NodeNumber*)m_params[0];
+    NodeNumber *num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (num==nullptr) {
+        ErrorHandler::e.Error("First value must be constant - addresses chip");
+    }
+    QString add = " + " + num->HexValue();
+
     int SID = 54272;
-    LoadVar(as, 0);
-    as->Asm("sta 54272 +24");
     LoadVar(as, 1);
-    as->Asm("sta 54272 +1");
+    as->Asm("sta 54272 +24" );
     LoadVar(as, 2);
-    as->Asm("sta 54272 +5");
+    as->Asm("sta 54272 +1" + add);
     LoadVar(as, 3);
-    as->Asm("sta 54272 +6");
+    as->Asm("sta 54272 +5"+add);
     LoadVar(as, 4);
-    as->Asm("sta 54272 +4");
+    as->Asm("sta 54272 +6"+add);
     LoadVar(as, 5);
-    as->Asm("sta 54272 +4");
+    as->Asm("sta 54272 +$4"+add);
+    LoadVar(as, 6);
+    as->Asm("sta 54272 +$4"+add);
 
     //    if (num->m_val==1) {
  //       as->
@@ -744,6 +788,66 @@ void NodeBuiltinMethod::RasterIRQ(Assembler *as)
 
 }
 
+void NodeBuiltinMethod::ClearScreen(Assembler *as)
+{
+    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
+    if (num==nullptr)
+        ErrorHandler::e.Error("ClearScreen: second parameter must be constant number", m_op.m_lineNumber);
+
+
+    QString lbl = as->NewLabel("clearloop");
+    QString shift = "$" + QString::number((int)num->m_val, 16);
+    as->Comment("Clear screen with offset");
+    as->Asm("lda #$00");
+    as->Asm("tax");
+    LoadVar(as, 0);
+    as->Label(lbl);
+    as->Asm("sta $0000+"+shift+",x");
+    as->Asm("sta $0100+"+shift+",x");
+    as->Asm("sta $0200+"+shift+",x");
+    as->Asm("sta $0300+"+shift+",x");
+    as->Asm("dex");
+    as->Asm("bne "+lbl);
+    as->PopLabel("clearloop");
+}
+
+void NodeBuiltinMethod::WaitRaster(Assembler *as)
+{
+    as->Comment("wait for raster");
+    LoadVar(as, 0,"", "ldx ");
+//    as->Asm("lda $d012 ; raster line pos");
+//    as->Asm("clc ; clear carry ");
+ //   as->Label("lblTest");
+    as->Asm("cpx $d012");
+    as->Asm("bne *-3");
+
+}
+
+void NodeBuiltinMethod::SetSpriteLoc(Assembler *as)
+{
+    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
+    if (num==nullptr)
+        ErrorHandler::e.Error("SetSpriteLoc parameter 1 must be constant");
+
+    NodeNumber* num2 = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (num2==nullptr)
+        ErrorHandler::e.Error("SetSpriteLoc parameter 0 must be constant");
+
+    as->Comment("Set sprite location");
+    LoadVar(as,0);
+    as->Asm("tax");
+    LoadVar(as,1);
+//    SaveVar(as,0,"x");
+    as->Asm("sta $07f8,x");
+
+    int newLoc = 64*num->m_val;
+    QString c = "SPRITE_LOC" +QString::number((int)num2->m_val+1);
+    qDebug() << c;
+    as->m_symTab->m_constants[c]->m_value->m_fVal = newLoc;
+    as->m_symTab->m_constants[c]->m_value->m_strVal = "$" + QString::number((int)(newLoc),16);
+
+}
+
 void NodeBuiltinMethod::EnableInterrupts(Assembler* as) {
   //  as->Asm("lda $dc0d");
   //  as->Asm("lda $dd0d");
@@ -756,10 +860,13 @@ void NodeBuiltinMethod::EnableInterrupts(Assembler* as) {
     as->Asm("cli");
 }
 
-void NodeBuiltinMethod::LoadVar(Assembler *as, int paramNo, QString reg)
+void NodeBuiltinMethod::LoadVar(Assembler *as, int paramNo, QString reg, QString lda)
 {
     as->ClearTerm();
-    as->Term("lda ");
+    if (lda=="")
+        as->Term("lda ");
+    else
+        as->Term(lda);
     m_params[paramNo]->Build(as);
     if (reg!="")
         reg = "," + reg;

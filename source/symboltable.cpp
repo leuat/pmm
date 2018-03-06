@@ -14,13 +14,10 @@ void SymbolTable::Initialize()
     if (isInitialized)
         return;
     m_constants["PI"] = new Symbol("PI","REAL", M_PI);
-    m_constants["SCREEN_BACKGROUND_COLOR"] = new Symbol("53280","ADDRESS", 53280);
-    m_constants["SCREEN_FOREGROUND_COLOR"] = new Symbol("53281","ADDRESS", 53281);
-    m_constants["SCREEN_LOCATION1"] = new Symbol("$0400","ADDRESS", 0x0400+200);
-    m_constants["SCREEN_LOCATION2"] = new Symbol("$0400","ADDRESS", 0x0400+400);
-    m_constants["SCREEN_LOCATION3"] = new Symbol("$0400","ADDRESS", 0x0400+600);
-    m_constants["SCREEN_LOCATION4"] = new Symbol("$0400","ADDRESS", 0x0400+800);
-    m_constants["SCREEN_LOCATION5"] = new Symbol("$0400","ADDRESS", 0x0400);
+    m_constants["SCREEN_BG_COL"] = new Symbol("53280","ADDRESS", 53280);
+    m_constants["SCREEN_FG_COL"] = new Symbol("53281","ADDRESS", 53281);
+    m_constants["SCREEN_CHAR_LOC"] = new Symbol("$0400","ADDRESS", 0x0400);
+    m_constants["SCREEN_COL_LOC"] = new Symbol("$D800","ADDRESS", 0xD800);
     m_constants["RASTERLINE_POS"] = new Symbol("$D012","ADDRESS", 0xd012);
     m_constants["BLACK"] = new Symbol("#0","BYTE", 0);
     m_constants["WHITE"] = new Symbol("#1","BYTE", 1);
@@ -44,6 +41,25 @@ void SymbolTable::Initialize()
     m_constants["SPRITE_BITMASK"] = new Symbol("$d015", "ADDRESS", 0xd015);
     m_constants["SPRITE_COLOR"] = new Symbol("53287","ADDRESS", 0xD027);
     m_constants["SPRITE_DATA"] = new Symbol("$0340","ADDRESS", 0x0340);
+
+    m_constants["SPRITE_LOC1"] = new Symbol("", "ADDRESS", 0);
+    m_constants["SPRITE_LOC2"] = new Symbol("", "ADDRESS", 0);
+    m_constants["SPRITE_LOC3"] = new Symbol("", "ADDRESS", 0);
+    m_constants["SPRITE_LOC4"] = new Symbol("", "ADDRESS", 0);
+    m_constants["SPRITE_LOC5"] = new Symbol("", "ADDRESS", 0);
+    m_constants["SPRITE_LOC6"] = new Symbol("", "ADDRESS", 0);
+    m_constants["SPRITE_LOC7"] = new Symbol("", "ADDRESS", 0);
+    m_constants["SPRITE_LOC8"] = new Symbol("", "ADDRESS", 0);
+
+
+    m_constants["SID_TRI"] = new Symbol("#16","BYTE", 16);
+    m_constants["SID_SAW"] = new Symbol("#32","BYTE", 32);
+    m_constants["SID_PULSE"] = new Symbol("#64","BYTE", 64);
+    m_constants["SID_NOISE"] = new Symbol("#128","BYTE", 128);
+    m_constants["SID_CHANNEL1"] = new Symbol("#0","BYTE", 0);
+    m_constants["SID_CHANNEL2"] = new Symbol("#7","BYTE", 7);
+    m_constants["SID_CHANNEL3"] = new Symbol("#14","BYTE", 14);
+
     m_constants["SID"] = new Symbol("54272","ADDRESS", 54272);
 
     m_constants["SIDFILE_1_INIT"] = new Symbol("","ADDRESS", 0);
