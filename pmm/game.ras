@@ -1,29 +1,46 @@
 PROGRAM FirstC64;
 VAR
-   a,b, c, i, j,k,val,mainloop, time : byte;
-   x,y : byte;
-   sprite0data: IncBin("sprite1.bin");
-   charset: IncBin("test.bin","$1fff");
-   fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
+	a,b, c, i, j,k,val,mainloop, time : byte;
+	x,y : byte;
+	sprite0data: IncBin("sprite1.bin");
+	fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
 	fadeRedBlue : array [8] of byte = (00,$0f,$09,$0e,$02,$0c,$00,$0c,$09,$00,$02,$00,$0b,$05,$06,$0c); 
-	fade : array [8] of byte = (00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00); 
+	fade : array [8] of byte = (00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00,00); 
+	sidmusic1: IncSid("music2.sid");
+	charset: IncBin("test.bin","$27FF");
+	bar_0, colorIndex, colorAdd, colorSize : byte;
 
-
-   message: array[255] of byte;
+	message: array[255] of byte;
   
-   sprite_x : integer;
-   sprite_y : integer;
 
-   stars_x : array[100] of byte;	
-   stars_y : array[100] of byte;	
-   stars_dy : array[100] of byte;	
-   stars_col : array[100] of byte;	
+	sprite_x : integer;
+	sprite_y : integer;
 
-   clearval : byte;
-   scroll_x : byte;
+	stars_x : array[100] of byte;	
 
-{ $include suppe2.inc }
+	stars_y : array[100] of byte;	
+	stars_dy : array[100] of byte;	
+	stars_col : array[100] of byte;	
 
+	clearval : byte;
+	scroll_x : byte;
+
+
+
+procedure InitializeSprites();
+
+begin
+	Asm("	ldx #0");
+	sprite_x:=#160;
+	sprite_y:=#180;
+    poke(SPRITE_DATA_LOC,#0, #$0D); 
+	poke(SPRITE_DATA_LOC,#1, #$0D);
+    poke(SPRITE_BITMASK,#0, #%00011111);
+	poke(SPRITE_COLOR,#0, WHITE);
+    poke(SPRITE_COLOR,#1, YELLOW);
+    memcpy(sprite0data, $0340, #63);
+
+end;
 
 procedure SoundTest(wave_type:byte);
 begin
@@ -37,11 +54,10 @@ begin
  end;
 
 
-
 procedure PrintText(); 
 begin
-	MoveTo(#10, #24, #$04);
-	printstring(message, #0);
+//	MoveTo(#10, #24, #$04);
+//	printstring(message, #0);
 	MoveTo(#17, #24, #$04);
 	printnumber(time);
 
@@ -81,13 +97,21 @@ end;
 
 procedure WaitRaster();
 begin
-	while val<>#199 do begin
-		peek(RASTERLINE_POS, #0, val);
-	end;
-/*	while a<>#199 do begin
-		peek(RASTERLINE_POS, #0, a);
-	end;*/
+/*
+asm("
+	lda $d012 ;load the current raster line into the accumulator
+	cmp $d012 ;check if it has changed	
+	beq *-3   ;if not, jump back and check again
+");
 
+*/
+asm("
+	lda $d012
+	clc       ;make sure carry is clear
+	adc #199  ;add lines to wait
+	cmp $d012
+	bne *-3   ;check *until* we're at the target raster line
+");
 end;
 
 
@@ -97,7 +121,7 @@ procedure InitStars();
 begin
    for i:=#0 to #100 do begin
 	 rand(#0,#40,x);
-	 rand(#0,#200,y);
+	 rand(#1,#200,y);
 	 rand(#0,#4,val);
 	 rand(#1,#4,c);
 	 stars_x[i]:=x;
@@ -110,65 +134,136 @@ end;
 
 procedure UpdateStars();
 begin
-	for i:=#0 to #50 do begin
-		y:=stars_y[i];
-		y:=y/#8;
-		moveto(stars_x[i], y, #$04);
-		pokescreen(clearval, #0);
+	for i:=#0 to #10 do begin
 		stars_y[i]:=stars_y[i] + stars_dy[i];
-		if stars_y[i]>#150 then begin
-			stars_y[i]:=#0;
-			rand(#0,#40,val);
-			stars_x[i] := val;
-		end;
 
-	/*	stars_x[i]:=stars_x[i]+scroll_x;
-		if stars_x[i]=#40 then begin
-			stars_x[i]:=#0;
+		if stars_y[i]>#18*8 then begin
+			stars_y[i]:=#1;
 		end;
-		if stars_x[i]=#255 then begin
-			stars_x[i]:=#39;
-		end;
-*/
 
 		y:=stars_y[i];
 		x:=y;
+		y:=y/#8;
 		and(x,#$7);
 		x:=x+#34;
-		y:=y/#8;
+
+
 		moveto(stars_x[i], y, #$04);
+		pokescreen(clearval,#0);
+		incscreenx(#40);
 		pokescreencolor(x,stars_col[i],#0,#1);
-
-
 	end;
+	fill($06D0, clearval, #39);
 end;
 
+procedure Bars();
+procedure RasterSprite();
+
+
+procedure Update();
 begin
+	Poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
+	Poke(SCREEN_FOREGROUND_COLOR, #0, BLACK);
+
+	UpdateStars();
+	PrintText();
+	MoveSprite();
+	Call(SIDFILE_1_PLAY);
+
+	//kernelInterrupt();
+
+
+end;
+
+interrupt UpdateRaster();
+begin
+	Update();
+
+	time:=time+#1;
+	colorSize:=#4;
+	bar_0 := sine[time*#2]/#4 + #70;
+	colorAdd:=time /#4;
+	And(colorAdd, #15);
+	colorIndex :=#0;
+
+
+	RasterIRQ(RasterSprite(), bar_0);
+
+	kernelInterrupt();
+
+end;
+
+procedure RasterSprite();
+begin
+	poke(SPRITE_POS, #2, RASTERLINE_POS);
+	poke(SPRITE_POS, #3, RASTERLINE_POS);
+//	spritepos(sprite_x, RASTERLINE_POS);
+
+	RasterIRQ(UpdateRaster(), #0);
+
+
+	kernelInterrupt();
+end;
+
+
+procedure Bars();
+begin
+
+	val:=fade[colorIndex];
+	bar_0 := bar_0 + colorSize;
+	Poke(SCREEN_BACKGROUND_COLOR, #0, val);
+	Poke(SCREEN_FOREGROUND_COLOR, #0, val);
+	colorIndex:=colorIndex+#1;
+	if colorIndex<#15 then begin
+		RasterIRQ(Bars(), bar_0);
+
+	end;
+	if colorIndex>#14 then begin
+		RasterIRQ(UpdateRaster(), #0);
+		Poke(SCREEN_BACKGROUND_COLOR, #0, #0);
+		Poke(SCREEN_FOREGROUND_COLOR, #0, #0);
+	end;
+	
+//	Asm("  dec $d019");
+	kernelInterrupt();
+end;
+
+
+begin
+	
+	InitSid(SIDFILE_1_INIT);
+
 	poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
 	poke(SCREEN_BACKGROUND_COLOR, #1, BLACK);
-	poke($d018, #0, #$18);
-    poke($C202, #0,#13);
+	poke($d018, #0, #$1A);
+/*
+$D018 = %xxxx000x -> charmem is at $0000
+$D018 = %xxxx001x -> charmem is at $0800
+$D018 = %xxxx010x -> charmem is at $1000
+$D018 = %xxxx011x -> charmem is at $1800
+$D018 = %xxxx100x -> charmem is at $2000
+$D018 = %xxxx101x -> charmem is at $2800
+$D018 = %xxxx110x -> charmem is at $3000
+$D018 = %xxxx111x -> charmem is at $3800
+*/
+
+    //poke($C202, #0,#13);
 	clearval := #$20;
 	Clear();
 	mainloop:=#1;
 	time:=#0;
 
-	asm("
-	cli
-	");
-
-
-
+	
 	scroll_x:=#0;
 
+	
 	InitializeSprites();
 	InitStars();
-	while mainloop<#10 do begin
-		time:=time+#1;
-		UpdateStars();
-		PrintText();
-		MoveSprite();
-		WaitRaster();
+	DisableInterrupts();
+	RasterIRQ(UpdateRaster(), #0);
+	EnableInterrupts();
 
-	end;
+	Loop();
+
+
 END.

@@ -52,7 +52,7 @@ QString ReadFile(QString fileName, QStringList& lst) {
 void ParseFile(QString fileName) {
     QStringList lst;
     QString text = ReadFile(fileName, lst);
-    Lexer lexer = Lexer(&text, lst);
+    Lexer lexer = Lexer(text, lst);
     Parser parser = Parser(&lexer);
     Interpreter interpreter = Interpreter(&parser);
     interpreter.Interpret();

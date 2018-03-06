@@ -42,7 +42,8 @@ SOURCES += main.cpp \
     source/assembler/asmpascal.cpp \
     source/ast/nodewhileloop.cpp \
     source/ast/nodevararray.cpp \
-    source/ast/nodeasm.cpp
+    source/ast/nodeasm.cpp \
+    source/misc/sidfile.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -88,4 +89,5 @@ HEADERS += \
     source/assembler/asmpascal.h \
     source/ast/nodewhileloop.h \
     source/ast/nodevararray.h \
-    source/ast/nodeasm.h
+    source/ast/nodeasm.h \
+    source/misc/sidfile.h

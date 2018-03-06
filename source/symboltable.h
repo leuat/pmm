@@ -68,6 +68,27 @@ public:
     SymbolTable();
     static SymbolTable s;
 
+
+    int m_currentSid = 0;
+
+    void DefineSid(unsigned int initAddress, unsigned int playAddress) {
+        m_currentSid++;
+        QString s = QString::number(m_currentSid);
+
+        qDebug() << "SIDFILE_"+s+"_INIT : "  << ("$"+QString::number(initAddress,16));;
+
+        m_constants["SIDFILE_"+s+"_INIT"]->m_value->m_fVal = initAddress;
+        m_constants["SIDFILE_"+s+"_PLAY"]->m_value->m_fVal = playAddress;
+        m_constants["SIDFILE_"+s+"_INIT"]->m_value->m_strVal = "$"+QString::number(initAddress,16);
+        m_constants["SIDFILE_"+s+"_PLAY"]->m_value->m_strVal = "$"+QString::number(playAddress,16);
+        ErrorHandler::e.Message("Adding sid file with initaddress $" + QString::number(initAddress,16)
+                                +"and play address $" + QString::number(playAddress,16));
+
+
+
+    }
+
+
     static bool isInitialized;
     static void Initialize();
 

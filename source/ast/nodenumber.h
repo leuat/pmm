@@ -36,6 +36,12 @@ public:
 
     QString Build(Assembler *as) override {
         QString val = "";
+
+        if (as->m_symTab->m_constants.contains(m_op.m_value)) {
+            m_val = as->m_symTab->m_constants[m_op.m_value]->m_value->m_fVal;
+        }
+
+
         if (m_op.m_type==TokenType::BYTE)
             val = "#"+QString::number((int)m_val);
         if (m_op.m_type==TokenType::INTEGER)
@@ -43,6 +49,7 @@ public:
         if (m_op.m_type==TokenType::INTEGER_CONST)
             val = "#"+QString::number((int)m_val);
         if (m_op.m_type==TokenType::ADDRESS) {
+
             val = "$" + QString::number((int)m_val,16);
         }
 

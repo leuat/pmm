@@ -46,6 +46,10 @@ void SymbolTable::Initialize()
     m_constants["SPRITE_DATA"] = new Symbol("$0340","ADDRESS", 0x0340);
     m_constants["SID"] = new Symbol("54272","ADDRESS", 54272);
 
+    m_constants["SIDFILE_1_INIT"] = new Symbol("","ADDRESS", 0);
+    m_constants["SIDFILE_2_INIT"] = new Symbol("","ADDRESS", 0);
+    m_constants["SIDFILE_1_PLAY"] = new Symbol("","ADDRESS", 0);
+    m_constants["SIDFILE_2_PLAY"] = new Symbol("","ADDRESS", 0);
 
 }
 
@@ -58,6 +62,7 @@ void SymbolTable::InitBuiltins()
     Define(new BuiltInTypeSymbol("STRING",""));
     Define(new BuiltInTypeSymbol("ARRAY",""));
     Define(new BuiltInTypeSymbol("INCBIN",""));
+    Define(new BuiltInTypeSymbol("INCSID",""));
 
     Define(new Symbol("return",""));
     Define(new Symbol("sine", "address"));

@@ -3,13 +3,15 @@
 #include "source/syntax.h"
 
 
-NodeProcedureDecl::NodeProcedureDecl(QString m, QVector<Node *> paramDecl, Node *block) {
+NodeProcedureDecl::NodeProcedureDecl(QString m, QVector<Node *> paramDecl, Node *block, bool isInterrupt) {
     m_procName = m;
     m_block = block;
     m_paramDecl = paramDecl;
     NodeBlock* b = (NodeBlock*)block;
     for (int i=0;i<m_paramDecl.count();i++)
         b->m_decl.append(m_paramDecl[i]);
+
+    m_isInterrupt = isInterrupt;
 
 }
 
@@ -61,6 +63,9 @@ QString NodeProcedureDecl::Build(Assembler *as)
 
         as->Label(m_procName);
     }
+    if (m_isInterrupt)
+        as->Asm("dec $d019        ; acknowledge IRQ");
+
     m_block->Build(as);
     if (!isInitFunction) {
         as->Asm("rts");

@@ -13,15 +13,17 @@ class NodeProcedureDecl : public Node {
 public:
     QString m_procName;
     QVector<Node*> m_paramDecl;
+    bool m_isInterrupt;
     Node* m_block = nullptr;
 
 
     NodeProcedureDecl(QString m) {
         m_procName = m;
+        m_isInterrupt = false;
     }
 
 
-    NodeProcedureDecl(QString m, QVector<Node*> paramDecl, Node* block);
+    NodeProcedureDecl(QString m, QVector<Node*> paramDecl, Node* block, bool isInterrupt=false);
 
     void Delete() override {
         ErrorHandler::e.DebugLow("Memory: Deleting in NodeProcedureDecl", level);

@@ -9,6 +9,7 @@
 #include "source/ast/node.h"
 #include "source/ast/nodevar.h"
 #include "source/ast/nodevartype.h"
+#include "source/misc/sidfile.h"
 
 class NodeVarDecl : public Node {
 public:
@@ -31,6 +32,44 @@ public:
 
     }
 
+
+    void IncSid(Assembler* as) {
+        NodeVar* v = (NodeVar*)m_varNode;
+        NodeVarType* t = (NodeVarType*)m_typeNode;
+
+        SidFile sid;
+        sid.Load(t->m_filename, as->m_projectDir);
+        sid.Convert();
+
+        as->m_symTab->DefineSid(sid.m_initAddress, sid.m_playAddress);
+
+        as->Appendix("org $" +QString::number(sid.m_loadAddress,16),1);
+        as->Appendix(v->value,0);
+        as->Appendix("incbin \"" + as->m_projectDir + sid.m_outFile + "\"",1);
+
+    }
+
+    void IncBin(Assembler* as) {
+        NodeVar* v = (NodeVar*)m_varNode;
+        NodeVarType* t = (NodeVarType*)m_typeNode;
+        QString filename = as->m_projectDir + "/" + t->m_filename;
+        if (!QFile::exists(filename))
+            ErrorHandler::e.Error("Could not locate sid file for inclusion :" +filename);
+
+
+
+        if (t->m_position=="") {
+            as->Label(v->value);
+            as->Asm("incbin \"" + filename + "\"");
+        }
+        else {
+            as->Appendix("org " +t->m_position,1);
+            as->Appendix(v->value,0);
+            as->Appendix("incbin \"" + filename + "\"",1);
+        }
+    }
+
+
     QString Build(Assembler* as) {
 
         ExecuteSym(as->m_symTab);
@@ -41,23 +80,10 @@ public:
             as->DeclareArray(v->value, t->m_arrayVarType.m_value, t->m_op.m_intVal, t->m_data);
         }
         else
-            if (t->m_op.m_type==TokenType::INCBIN) {
-                if (t->m_position=="") {
-                    as->Label(v->value);
-                    QString filename = as->m_projectDir + "/" + t->m_filename;
-                    qDebug() << "filename: " << filename;
-                    if (!QFile::exists(filename))
-                        ErrorHandler::e.Error("Could not locate binary file for inclusion :" +filename);
-
-
-                    as->Asm("incbin \"" + filename + "\"");
-                }
-                else {
-                    as->Appendix("org " +t->m_position,1);
-                    as->Appendix(v->value,0);
-                    as->Appendix("incbin \"" + t->m_filename + "\"",1);
-                }
-            }
+            if (t->m_op.m_type==TokenType::INCBIN)
+                IncBin(as);
+            else if (t->m_op.m_type==TokenType::INCSID)
+                IncSid(as);
             else
                 as->DeclareVariable(v->value, t->value);
         return "";

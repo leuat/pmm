@@ -44,6 +44,11 @@ public:
     PVar Execute(SymbolTable* symTab, uint lvl) override;
     void PlaySound(Assembler* as);
     void IncScreenX(Assembler* as);
+    void Call(Assembler* as);
+    void InitSid(Assembler* as);
+    void DisableInterrupts(Assembler* as);
+    void EnableInterrupts(Assembler* as);
+    void RasterIRQ(Assembler* as);
 
     void LoadVar(Assembler* as, int paramNo, QString register);
     void LoadVar(Assembler* as, int paramNo);

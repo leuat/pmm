@@ -34,6 +34,8 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::INCBIN,"INCBIN"));
     reservedWords.append(Token(TokenType::STRING,"STRING"));
     reservedWords.append(Token(TokenType::ASM,"ASM"));
+    reservedWords.append(Token(TokenType::INCSID,"INCSID"));
+    reservedWords.append(Token(TokenType::INTERRUPT,"INTERRUPT"));
 
 }
 
@@ -178,6 +180,47 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
                 );
+
+    builtInFunctions["initsid"] = BuiltInFunction(
+                "initsid",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["call"] = BuiltInFunction(
+                "call",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["disableinterrupts"] = BuiltInFunction(
+                "disableinterrupts",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["enableinterrupts"] = BuiltInFunction(
+                "enableinterrupts",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["kernelinterrupt"] = BuiltInFunction(
+                "kernelinterrupt",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["loop"] = BuiltInFunction(
+                "loop",
+                QList<BuiltInFunction::Type>()
+                );
+
+
+    builtInFunctions["rasterirq"] = BuiltInFunction(
+                "rasterirq",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER
+                );
+
 }
 
 

@@ -1,5 +1,7 @@
 #include "nodebuiltinmethod.h"
 #include "nodenumber.h"
+#include "nodevar.h"
+#include "nodeprocedure.h"
 
 QMap<QString, bool> NodeBuiltinMethod::m_isInitialized;
 
@@ -10,6 +12,21 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         m_params[0]->Build(as);
         as->EndWriteln();
     }
+
+    if (m_procName.toLower()=="kernelinterrupt")
+        as->Asm("jmp $ea81        ; return to kernel interrupt routine");
+
+    if (m_procName.toLower()=="loop")
+        as->Asm("jmp * ; loop like (¤/%");
+
+    if (m_procName.toLower()=="call") {
+        Call(as);
+    }
+
+    if (m_procName.toLower()=="initsid") {
+        InitSid(as);
+    }
+
     if (m_procName.toLower()=="poke")
         Poke(as);
 
@@ -44,6 +61,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower()=="initrandom")
         InitRandom(as);
+
+    if (m_procName.toLower()=="enableinterrupts")
+        EnableInterrupts(as);
 
     if (m_procName.toLower()=="initmoveto") {
         InitMoveto(as);
@@ -85,6 +105,11 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="pokescreencolor") {
         PokeScreenColor(as, 0);
     }
+    if (m_procName.toLower()=="disableinterrupts")
+        DisableInterrupts(as);
+
+    if (m_procName.toLower()=="rasterirq")
+        RasterIRQ(as);
 
     if (m_procName.toLower()=="printchar") {
         as->ClearTerm();
@@ -218,7 +243,7 @@ void NodeBuiltinMethod::InitEightBitMul(Assembler *as)
 
     QString l = as->NewLabel("multiply_eightbit");
     as->Asm("jmp " + l);
-    as->Label("multiplier	= $02 ; some zeropage adress");
+    as->Label("multiplier .byte 0");
     as->Label("multiply_eightbit");
     as->Asm("cpx #$00");
     as->Asm("beq mul_end");
@@ -639,6 +664,96 @@ void NodeBuiltinMethod::IncScreenX(Assembler *as)
 
     as->m_labelStack["incscreenx"].pop();
 
+}
+
+void NodeBuiltinMethod::Call(Assembler *as)
+{
+    NodeNumber* num= (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (num!=nullptr) {
+        as->Term("jsr ");
+        num->Build(as);
+        as->Term();
+        return;
+    }
+    ErrorHandler::e.Error("Call currently only supports constant values", m_op.m_lineNumber);
+/*    NodeVar* num= (NodeVar*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (num!=nullptr) {
+        as->Asm("jsr $" + QString::number(num->m_val,16));
+        return;
+    }
+*/
+}
+
+void NodeBuiltinMethod::InitSid(Assembler *as)
+{
+    NodeNumber* num= (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (num!=nullptr) {
+        as->Comment("initsid");
+        as->Asm("lda #0");
+        as->Asm("tax");
+        as->Asm("tay");
+        as->Term("jsr ");
+        num->Build(as);
+        as->Term();
+
+        return;
+    }
+    ErrorHandler::e.Error("InitSid currently only supports constant values", m_op.m_lineNumber);
+
+}
+
+void NodeBuiltinMethod::DisableInterrupts(Assembler *as)
+{
+    as->Comment("Disable interrupts");
+    as->Asm("sei ");
+/*    as->Asm("ldy #$7f    ; $7f = %01111111");
+    as->Asm("sta $dc0d");
+    as->Asm("sta $dd0d");
+    as->Asm("lda #$01");
+    as->Asm("sta $d01a");
+*/
+
+    as->Asm("ldy #$7f    ; $7f = %01111111");
+    as->Asm("sty $dc0d   ; Turn off CIAs Timer interrupts");
+    as->Asm("sty $dd0d   ; Turn off CIAs Timer interrupts");
+    as->Asm("lda $dc0d   ; cancel all CIA-IRQs in queue/unprocessed");
+    as->Asm("lda $dd0d   ; cancel all CIA-IRQs in queue/unprocessed");
+
+    as->Asm("");
+}
+
+void NodeBuiltinMethod::RasterIRQ(Assembler *as)
+{
+    NodeProcedure* addr = (NodeProcedure*)dynamic_cast<NodeProcedure*>(m_params[0]);
+    if (addr==nullptr)
+        ErrorHandler::e.Error("First parameter must be interrupt procedure!", m_op.m_lineNumber);
+
+    QString name = addr->m_procedure->m_procName;
+
+    as->Comment("Set raster interrupt pointing to : " +name);
+    as->Asm("lda #$01    ; Set Interrupt Request Mask...");
+    as->Asm("sta $d01a   ; ...we want IRQ by Rasterbeam");
+    as->Asm("lda #<" + name);
+    as->Asm("ldx #>"+ name);
+    as->Asm("sta $314    ; store in $314/$315");
+    as->Asm("stx $315");
+
+    LoadVar(as,1);
+    as->Asm("sta $d012");
+
+
+}
+
+void NodeBuiltinMethod::EnableInterrupts(Assembler* as) {
+  //  as->Asm("lda $dc0d");
+  //  as->Asm("lda $dd0d");
+//    as->Asm("asl $d019");
+
+    as->Asm("lda $d011   ; Bit#0 of $d011 is basically...");
+    as->Asm("and #$7f    ; ...the 9th Bit for $d012");
+    as->Asm("sta $d011   ; we need to make sure it is set to zero ");
+
+    as->Asm("cli");
 }
 
 void NodeBuiltinMethod::LoadVar(Assembler *as, int paramNo, QString reg)

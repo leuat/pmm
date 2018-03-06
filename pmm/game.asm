@@ -7,7 +7,7 @@
 	ORG $0900
 
 FirstC64
-	jmp block8942
+	jmp block1127
 a	dc.b
 b	dc.b
 c	dc.b
@@ -32,7 +32,13 @@ fadeRedBlue
 fade
 	.byte 0, 11, 6, 12, 4, 14, 15, 1
 	.byte 1, 15, 14, 4, 12, 6, 11, 0
+	.byte 11, 6, 12, 4, 14, 15, 1, 1
+	.byte 15, 14, 4, 12, 6, 11, 0, 0
 	.byte 
+bar_0	dc.b
+colorIndex	dc.b
+colorAdd	dc.b
+colorSize	dc.b
 message	dc.b	 
 	org message+255
 	
@@ -52,7 +58,7 @@ stars_col	dc.b
 	
 clearval	dc.b
 scroll_x	dc.b
-block8942
+block1127
 	
 	
 	; ***********  Defining procedure : initeightbitmul
@@ -61,8 +67,8 @@ block8942
 	
 	jmp afterProc_initeightbitmul
 initeightbitmul
-	jmp multiply_eightbit19264
-multiplier	= $02 ; some zeropage adress
+	jmp multiply_eightbit14633
+multiplier .byte 0
 multiply_eightbit
 	cpx #$00
 	beq mul_end
@@ -86,7 +92,7 @@ mul_skip
 mul_end
 	txa
 	rts
-multiply_eightbit19264
+multiply_eightbit14633
 	rts
 afterProc_initeightbitmul
 	
@@ -145,7 +151,7 @@ afterProc_initjoystick
 	
 	jmp afterProc_initmoveto
 initmoveto
-	jmp moveto22648
+	jmp moveto28240
 screenMemory = $fb 
 screen_x .byte 0 
 screen_y .byte 0 
@@ -176,7 +182,7 @@ sydone
 sxdone
 	sta screenMemory
 	rts
-moveto22648
+moveto28240
 	rts
 afterProc_initmoveto
 	
@@ -232,14 +238,54 @@ RandomLoop
 continueRandom
 	
 	
+	; ***********  Defining procedure : initsinetable
+	;    Procedure type : Built-in function
+	;    Requires initialization : yes
+	
+	jmp initsin_continue
+sine .byte 0 
+	org sine +#255
+value .word 0
+delta .word 0
+initsin_continue
+	ldy #$3f
+	ldx #$00
+initsin_a
+	lda value
+	clc
+	adc delta
+	sta value
+	lda value+1
+	adc delta+1
+	sta value+1
+	sta sine+$c0,x
+	sta sine+$80,y
+	eor #$ff
+	sta sine+$40,x
+	sta sine+$00,y
+	lda delta
+	adc #$10   ; this value adds up to the proper amplitude
+	sta delta
+	bcc initsin_b
+	inc delta+1
+initsin_b
+	inx
+	dey
+	bpl initsin_a
+	
+	
 	; ***********  Defining procedure : InitializeSprites
 	;    Procedure type : User-defined procedure
 	
 	jmp afterProc_InitializeSprites
 InitializeSprites
-	jmp block27446
-block27446
+	jmp block1862
+block1862
 
+	; 
+	; ****** Inline assembler section
+	ldx #0
+	
 	; Assigning single variable : sprite_x
 	lda #160
 	sta sprite_x
@@ -260,7 +306,7 @@ block27446
 	sta $7f8,x
 	lda #0
 	tax
-	lda #7
+	lda #31
 	sta $d015,x
 	lda #0
 	tax
@@ -271,12 +317,12 @@ block27446
 	lda #7
 	sta $d027,x
 	ldx #0
-memcpy23805
+memcpy15127
 	lda sprite0data,x
 	sta $340,x
 	inx
 	cpx #63
-	bne memcpy23805
+	bne memcpy15127
 
 	rts
 afterProc_InitializeSprites
@@ -287,9 +333,9 @@ afterProc_InitializeSprites
 	
 	jmp afterProc_SoundTest
 SoundTest
-	jmp block15890
+	jmp block27577
 wave_type	dc.b
-block15890
+block27577
 
 	lda #15
 	sta 54272 +24
@@ -302,15 +348,15 @@ block15890
 	lda #15*#16+#6
 	sta 54272 +6
 	; Add/sub right value is variable/expression
-	jmp jmprightvar24370
-rightvar6729	.byte	0
-jmprightvar24370
+	jmp jmprightvar2340
+rightvar23817	.byte	0
+jmprightvar2340
 	lda wave_type
-	sta rightvar6729
+	sta rightvar23817
 	
 	lda #1
 	clc
-	adc rightvar6729
+	adc rightvar23817
 	
 	sta 54272 +4
 	lda wave_type
@@ -325,25 +371,9 @@ afterProc_SoundTest
 	
 	jmp afterProc_PrintText
 PrintText
-	jmp block15350
-block15350
+	jmp block10142
+block10142
 
-	lda #10
-	sta screen_x
-	lda #24
-	sta screen_y
-	lda #4
-	jsr SetScreenPosition
-	ldx #0
-printstring_call15006
-	lda message,x
-	sta print_text,x
-	inx
-	cmp #0
-	bne printstring_call15006
-	lda #0
-	tax
-	jsr printstring
 	lda #17
 	sta screen_x
 	lda #24
@@ -390,8 +420,8 @@ afterProc_PrintText
 	
 	jmp afterProc_MoveSprite
 MoveSprite
-	jmp block24393
-block24393
+	jmp block28400
+block28400
 
 	; Setting sprite position
 	lda #0
@@ -400,31 +430,31 @@ block24393
 	sta $D000,y
 	lda sprite_x+1
 	cmp #0
-	beq spritepos3548
+	beq spritepos6558
 	lda $D010
 	ora #1
 	sta $D010
-	jmp spriteposcontinue19629
-spritepos3548
+	jmp spriteposcontinue21476
+spritepos6558
 	lda $D010
 	and #254
 	sta $D010
-spriteposcontinue19629
+spriteposcontinue21476
 	iny
 	lda sprite_y
 	sta $D000,y
 	jsr callJoystick
 	; Assigning single variable : sprite_x
-	jmp jmprightvarInteger19954
-rightvarInteger24084	.byte	0
-jmprightvarInteger19954
+	jmp jmprightvarInteger16430
+rightvarInteger10935	.byte	0
+jmprightvarInteger16430
 	; 8 bit mul of power 2
 	
 	lda joystickvalue+1
 	asl
 	asl
 	
-	sta rightvarInteger24084
+	sta rightvarInteger10935
 	
 	clc
 	; integer assignment NodeVar
@@ -433,25 +463,25 @@ jmprightvarInteger19954
 	lda sprite_x
 	
 	sec
-	sbc rightvarInteger24084
-	bcs wordAdd12623
+	sbc rightvarInteger10935
+	bcs wordAdd3154
 	dex
-wordAdd12623
+wordAdd3154
 	
 	sta sprite_x
 	txa 
 	sta sprite_x+1
 	; Assigning single variable : sprite_x
-	jmp jmprightvarInteger4966
-rightvarInteger11840	.byte	0
-jmprightvarInteger4966
+	jmp jmprightvarInteger3537
+rightvarInteger21295	.byte	0
+jmprightvarInteger3537
 	; 8 bit mul of power 2
 	
 	lda joystickvalue+2
 	asl
 	asl
 	
-	sta rightvarInteger11840
+	sta rightvarInteger21295
 	
 	clc
 	; integer assignment NodeVar
@@ -460,25 +490,25 @@ jmprightvarInteger4966
 	lda sprite_x
 	
 	clc
-	adc rightvarInteger11840
-	bcc wordAdd18756
+	adc rightvarInteger21295
+	bcc wordAdd5831
 	inx
-wordAdd18756
+wordAdd5831
 	
 	sta sprite_x
 	txa 
 	sta sprite_x+1
 	; Assigning single variable : sprite_y
-	jmp jmprightvarInteger26308
-rightvarInteger13931	.byte	0
-jmprightvarInteger26308
+	jmp jmprightvarInteger2927
+rightvarInteger17922	.byte	0
+jmprightvarInteger2927
 	; 8 bit mul of power 2
 	
 	lda joystickvalue+3
 	asl
 	asl
 	
-	sta rightvarInteger13931
+	sta rightvarInteger17922
 	
 	clc
 	; integer assignment NodeVar
@@ -487,10 +517,10 @@ jmprightvarInteger26308
 	lda sprite_y
 	
 	clc
-	adc rightvarInteger13931
-	bcc wordAdd7376
+	adc rightvarInteger17922
+	bcc wordAdd15623
 	inx
-wordAdd7376
+wordAdd15623
 	
 	sta sprite_y
 	txa 
@@ -501,34 +531,34 @@ wordAdd7376
 	sta scroll_x
 	; Assigning single variable : scroll_x
 	; Add/sub right value is variable/expression
-	jmp jmprightvar32439
-rightvar16944	.byte	0
-jmprightvar32439
+	jmp jmprightvar30211
+rightvar28029	.byte	0
+jmprightvar30211
 	lda joystickvalue+2
 	
-	sta rightvar16944
+	sta rightvar28029
 	
 	lda scroll_x
 	sec
-	sbc rightvar16944
+	sbc rightvar28029
 	
 	sta scroll_x
 	lda joystickvalue+4
 	
 	cmp #1
-	bne branchProblem5537
-	jmp branchProblem221538
-branchProblem5537
-	jmp branch24626
-branchProblem221538
-	jmp block16118
-block16118
+	bne branchProblem26880
+	jmp branchProblem212253
+branchProblem26880
+	jmp branch16211
+branchProblem212253
+	jmp block3293
+block3293
 
 	lda #32
 	sta wave_type
 	jsr SoundTest
 
-branch24626
+branch16211
 
 	rts
 afterProc_MoveSprite
@@ -539,65 +569,65 @@ afterProc_MoveSprite
 	
 	jmp afterProc_Clear
 Clear
-	jmp block2082
-block2082
+	jmp block21321
+block21321
 
 	lda #6
 	ldx #0
-fill22929
+fill20785
 	sta $d800,x
 	inx
 	cpx #0
-	bne fill22929
+	bne fill20785
 	lda #6
 	ldx #0
-fill16541
+fill26528
 	sta $d900,x
 	inx
 	cpx #0
-	bne fill16541
+	bne fill26528
 	lda #6
 	ldx #0
-fill4833
+fill10443
 	sta $da00,x
 	inx
 	cpx #0
-	bne fill4833
+	bne fill10443
 	lda #6
 	ldx #0
-fill31115
+fill31000
 	sta $db00,x
 	inx
 	cpx #0
-	bne fill31115
+	bne fill31000
 	lda clearval
 	ldx #0
-fill4639
+fill10555
 	sta $400,x
 	inx
 	cpx #0
-	bne fill4639
+	bne fill10555
 	lda clearval
 	ldx #0
-fill29658
+fill24671
 	sta $500,x
 	inx
 	cpx #0
-	bne fill29658
+	bne fill24671
 	lda clearval
 	ldx #0
-fill22704
+fill9270
 	sta $600,x
 	inx
 	cpx #0
-	bne fill22704
+	bne fill9270
 	lda clearval
 	ldx #0
-fill9930
+fill7452
 	sta $700,x
 	inx
 	cpx #0
-	bne fill9930
+	bne fill7452
 
 	rts
 afterProc_Clear
@@ -608,27 +638,19 @@ afterProc_Clear
 	
 	jmp afterProc_WaitRaster
 WaitRaster
-	jmp block13977
-block13977
+	jmp block9375
+block9375
 
-while31673
-	lda val
-	cmp #199
-	beq branchProblem22386
-	jmp branchProblem25021
-branchProblem22386
-	jmp branch2306
-branchProblem25021
-	jmp block28745
-block28745
+	; 
+	; ****** Inline assembler section
 
-	lda #0
-	tax
-	lda $d012,x
-	sta val
+	lda $d012
+	clc       ;make sure carry is clear
+	adc #199  ;add lines to wait
+	cmp $d012
+	bne *-3   ;check *until* we're at the target raster line
 
-	jmp while31673
-branch2306
+	
 
 	rts
 afterProc_WaitRaster
@@ -639,15 +661,15 @@ afterProc_WaitRaster
 	
 	jmp afterProc_InitStars
 InitStars
-	jmp block26924
-block26924
+	jmp block14631
+block14631
 
 	; Assigning single variable : i
 	lda #0
 	sta i
-for19072
-	jmp block6270
-block6270
+for13640
+	jmp block8934
+block8934
 
 	lda #0
 	sta lowerRandom
@@ -655,7 +677,7 @@ block6270
 	sta upperRandom
 	jsr callRandom
 	sta x
-	lda #0
+	lda #1
 	sta lowerRandom
 	lda #200
 	sta upperRandom
@@ -705,11 +727,11 @@ block6270
 	inc i
 	lda i
 	cmp #100
-	bne forLoopFix5829
-	jmp forLoopDone26777
-forLoopFix5829
-	jmp for19072
-forLoopDone26777
+	bne forLoopFix18040
+	jmp forLoopDone7986
+forLoopFix18040
+	jmp for13640
+forLoopDone7986
 
 	rts
 afterProc_InitStars
@@ -720,22 +742,71 @@ afterProc_InitStars
 	
 	jmp afterProc_UpdateStars
 UpdateStars
-	jmp block15573
-block15573
+	jmp block28834
+block28834
 
 	; Assigning single variable : i
 	lda #0
 	sta i
-for5097
-	jmp block16512
-block16512
+for14248
+	jmp block1539
+block1539
 
+	; Assigning single variable : stars_y
+	; Add/sub right value is variable/expression
+	jmp jmprightvar12796
+rightvar28765	.byte	0
+jmprightvar12796
+	lda i
+	tax
+	lda stars_dy,x
+	
+	sta rightvar28765
+	
+	lda i
+	tax
+	lda stars_y,x
+	
+	clc
+	adc rightvar28765
+	
+	tay
+	lda i
+	tax
+	tya
+	sta stars_y,x
+	lda i
+	tax
+	lda stars_y,x
+	
+	; Binop of two constant values
+	cmp #18*$8
+	bcc branchProblem25052
+	jmp branchProblem230731
+branchProblem25052
+	jmp branch10312
+branchProblem230731
+	jmp block23987
+block23987
+
+	; Assigning single variable : stars_y
+	lda #1
+	tay
+	lda i
+	tax
+	tya
+	sta stars_y,x
+
+branch10312
 	; Assigning single variable : y
 	lda i
 	tax
 	lda stars_y,x
 	
 	sta y
+	; Assigning single variable : x
+	lda y
+	sta x
 	; Assigning single variable : y
 	; 8 bit mul of power 2
 	
@@ -745,6 +816,17 @@ block16512
 	lsr
 	
 	sta y
+	lda x
+	and #7
+	sta x
+	; Assigning single variable : x
+	; Add/sub where right value is constant number
+	lda x
+	clc
+	adc #34
+	 ; end mul var with constant
+	
+	sta x
 	lda i
 	tax
 	lda stars_x,x
@@ -757,101 +839,17 @@ block16512
 	lda clearval
 	ldy #0
 	sta (screenMemory),y
-	; Assigning single variable : stars_y
-	; Add/sub right value is variable/expression
-	jmp jmprightvar13290
-rightvar23986	.byte	0
-jmprightvar13290
-	lda i
-	tax
-	lda stars_dy,x
-	
-	sta rightvar23986
-	
-	lda i
-	tax
-	lda stars_y,x
-	
-	clc
-	adc rightvar23986
-	
-	tay
-	lda i
-	tax
-	tya
-	sta stars_y,x
-	lda i
-	tax
-	lda stars_y,x
-	
-	cmp #150
-	bcc branchProblem22355
-	jmp branchProblem224767
-branchProblem22355
-	jmp branch9161
-branchProblem224767
-	jmp block23655
-block23655
-
-	; Assigning single variable : stars_y
-	lda #0
-	tay
-	lda i
-	tax
-	tya
-	sta stars_y,x
-	lda #0
-	sta lowerRandom
 	lda #40
-	sta upperRandom
-	jsr callRandom
-	sta val
-	; Assigning single variable : stars_x
-	lda val
-	tay
-	lda i
-	tax
-	tya
-	sta stars_x,x
-
-branch9161
-	; Assigning single variable : y
-	lda i
-	tax
-	lda stars_y,x
-	
-	sta y
-	; Assigning single variable : x
-	lda y
-	sta x
-	and #7
-	sta x
-	; Assigning single variable : x
-	; Add/sub where right value is constant number
-	lda x
-	clc
-	adc #34
-	 ; end mul var with constant
-	
-	sta x
-	; Assigning single variable : y
-	; 8 bit mul of power 2
-	
-	lda y
-	lsr
-	lsr
-	lsr
-	
-	sta y
-	lda i
-	tax
-	lda stars_x,x
-	
 	sta screen_x
-	lda y
-	sta screen_y
-	lda #4
-	jsr SetScreenPosition
+	lda screenMemory
+	cpx #0
+	beq incscreenx24464
+	clc
+	adc screen_x
+	bcc incscreenx24464
+	inc screenMemory+1
+incscreenx24464
+	sta screenMemory
 	lda x
 	ldy #0
 	sta (screenMemory),y
@@ -869,16 +867,250 @@ branch9161
 
 	inc i
 	lda i
-	cmp #50
-	bne forLoopFix15574
-	jmp forLoopDone4031
-forLoopFix15574
-	jmp for5097
-forLoopDone4031
+	cmp #10
+	bne forLoopFix32557
+	jmp forLoopDone14248
+forLoopFix32557
+	jmp for14248
+forLoopDone14248
+	lda clearval
+	ldx #0
+fill29556
+	sta $6d0,x
+	inx
+	cpx #39
+	bne fill29556
 
 	rts
 afterProc_UpdateStars
+	
+	
+	; ***********  Defining procedure : Update
+	;    Procedure type : User-defined procedure
+	
+	jmp afterProc_Update
+Update
+	jmp block20170
+block20170
 
+	lda #0
+	tax
+	lda #0
+	sta $d020,x
+	lda #0
+	tax
+	lda #0
+	sta $d021,x
+	jsr UpdateStars
+	jsr PrintText
+	jsr MoveSprite
+	jsr $1806
+
+	rts
+afterProc_Update
+	
+	
+	; ***********  Defining procedure : UpdateRaster
+	;    Procedure type : User-defined procedure
+	
+	jmp afterProc_UpdateRaster
+UpdateRaster
+	dec $d019        ; acknowledge IRQ
+	jmp block5450
+block5450
+
+	jsr Update
+	; Assigning single variable : time
+	; Add/sub where right value is constant number
+	lda time
+	clc
+	adc #1
+	 ; end mul var with constant
+	
+	sta time
+	; Assigning single variable : colorSize
+	lda #4
+	sta colorSize
+	; Assigning single variable : bar_0
+	; Add/sub where right value is constant number
+	; 8 bit mul of power 2
+	
+	; 8 bit mul of power 2
+	
+	lda time
+	asl
+	
+	tax
+	lda sine,x
+	lsr
+	lsr
+	
+	clc
+	adc #70
+	 ; end mul var with constant
+	
+	sta bar_0
+	; Assigning single variable : colorAdd
+	; 8 bit mul of power 2
+	
+	lda time
+	lsr
+	lsr
+	
+	sta colorAdd
+	and #15
+	sta colorAdd
+	; Assigning single variable : colorIndex
+	lda #0
+	sta colorIndex
+	; Set raster interrupt pointing to : RasterSprite
+	lda #$01    ; Set Interrupt Request Mask...
+	sta $d01a   ; ...we want IRQ by Rasterbeam
+	lda #<RasterSprite
+	ldx #>RasterSprite
+	sta $314    ; store in $314/$315
+	stx $315
+	lda bar_0
+	sta $d012
+	jmp $ea81        ; return to kernel interrupt routine
+
+	rts
+afterProc_UpdateRaster
+	
+	
+	; ***********  Defining procedure : RasterSprite
+	;    Procedure type : User-defined procedure
+	
+	jmp afterProc_RasterSprite
+RasterSprite
+	jmp block27182
+block27182
+
+	lda #2
+	tax
+	lda $d012
+	sta $d000,x
+	lda #3
+	tax
+	lda $d012
+	sta $d000,x
+	; Set raster interrupt pointing to : UpdateRaster
+	lda #$01    ; Set Interrupt Request Mask...
+	sta $d01a   ; ...we want IRQ by Rasterbeam
+	lda #<UpdateRaster
+	ldx #>UpdateRaster
+	sta $314    ; store in $314/$315
+	stx $315
+	lda #0
+	sta $d012
+	jmp $ea81        ; return to kernel interrupt routine
+
+	rts
+afterProc_RasterSprite
+	
+	
+	; ***********  Defining procedure : Bars
+	;    Procedure type : User-defined procedure
+	
+	jmp afterProc_Bars
+Bars
+	jmp block7301
+block7301
+
+	; Assigning single variable : val
+	lda colorIndex
+	tax
+	lda fade,x
+	
+	sta val
+	; Assigning single variable : bar_0
+	; Add/sub right value is variable/expression
+	jmp jmprightvar24099
+rightvar13293	.byte	0
+jmprightvar24099
+	lda colorSize
+	sta rightvar13293
+	
+	lda bar_0
+	clc
+	adc rightvar13293
+	
+	sta bar_0
+	lda #0
+	tax
+	lda val
+	sta $d020,x
+	lda #0
+	tax
+	lda val
+	sta $d021,x
+	; Assigning single variable : colorIndex
+	; Add/sub where right value is constant number
+	lda colorIndex
+	clc
+	adc #1
+	 ; end mul var with constant
+	
+	sta colorIndex
+	cmp #15
+	bcs branchProblem32331
+	jmp branchProblem275
+branchProblem32331
+	jmp branch23332
+branchProblem275
+	jmp block31004
+block31004
+
+	; Set raster interrupt pointing to : Bars
+	lda #$01    ; Set Interrupt Request Mask...
+	sta $d01a   ; ...we want IRQ by Rasterbeam
+	lda #<Bars
+	ldx #>Bars
+	sta $314    ; store in $314/$315
+	stx $315
+	lda bar_0
+	sta $d012
+
+branch23332
+	lda colorIndex
+	cmp #14
+	bcc branchProblem14066
+	jmp branchProblem211738
+branchProblem14066
+	jmp branch19050
+branchProblem211738
+	jmp block19801
+block19801
+
+	; Set raster interrupt pointing to : UpdateRaster
+	lda #$01    ; Set Interrupt Request Mask...
+	sta $d01a   ; ...we want IRQ by Rasterbeam
+	lda #<UpdateRaster
+	ldx #>UpdateRaster
+	sta $314    ; store in $314/$315
+	stx $315
+	lda #0
+	sta $d012
+	lda #0
+	tax
+	lda #0
+	sta $d020,x
+	lda #0
+	tax
+	lda #0
+	sta $d021,x
+
+branch19050
+	jmp $ea81        ; return to kernel interrupt routine
+
+	rts
+afterProc_Bars
+
+	; initsid
+	lda #0
+	tax
+	tay
+	jsr $1903
 	lda #0
 	tax
 	lda #0
@@ -889,12 +1121,8 @@ afterProc_UpdateStars
 	sta $d020,x
 	lda #0
 	tax
-	lda #24
+	lda #26
 	sta $d018,x
-	lda #0
-	tax
-	lda #13
-	sta $c202,x
 	; Assigning single variable : clearval
 	lda #32
 	sta clearval
@@ -905,45 +1133,38 @@ afterProc_UpdateStars
 	; Assigning single variable : time
 	lda #0
 	sta time
-	; 
-	; ****** Inline assembler section
-
-	cli
-	
-	
 	; Assigning single variable : scroll_x
 	lda #0
 	sta scroll_x
 	jsr InitializeSprites
 	jsr InitStars
-while27350
-	lda mainloop
-	cmp #10
-	bcs branchProblem1150
-	jmp branchProblem216941
-branchProblem1150
-	jmp branch12052
-branchProblem216941
-	jmp block21724
-block21724
-
-	; Assigning single variable : time
-	; Add/sub where right value is constant number
-	lda time
-	clc
-	adc #1
-	 ; end mul var with constant
+	; Disable interrupts
+	sei 
+	ldy #$7f    ; $7f = %01111111
+	sty $dc0d   ; Turn off CIAs Timer interrupts
+	sty $dd0d   ; Turn off CIAs Timer interrupts
+	lda $dc0d   ; cancel all CIA-IRQs in queue/unprocessed
+	lda $dd0d   ; cancel all CIA-IRQs in queue/unprocessed
 	
-	sta time
-	jsr UpdateStars
-	jsr PrintText
-	jsr MoveSprite
-	jsr WaitRaster
-
-	jmp while27350
-branch12052
+	; Set raster interrupt pointing to : UpdateRaster
+	lda #$01    ; Set Interrupt Request Mask...
+	sta $d01a   ; ...we want IRQ by Rasterbeam
+	lda #<UpdateRaster
+	ldx #>UpdateRaster
+	sta $314    ; store in $314/$315
+	stx $315
+	lda #0
+	sta $d012
+	lda $d011   ; Bit#0 of $d011 is basically...
+	and #$7f    ; ...the 9th Bit for $d012
+	sta $d011   ; we need to make sure it is set to zero 
+	cli
+	jmp * ; loop like (¤/%
 
 	rts
-	org $1fff
+	org $1806
+sidmusic1
+	incbin "c:/users/leuat/onedrive/documents/github/pmm/pmm//_music2.dat"
+	org $27FF
 charset
-	incbin "test.bin"
+	incbin "c:/users/leuat/onedrive/documents/github/pmm/pmm///test.bin"

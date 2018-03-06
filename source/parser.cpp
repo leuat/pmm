@@ -355,9 +355,12 @@ Node *Parser::FindProcedure()
             if (m_currentToken.m_type==TokenType::COMMA)
                 Eat(TokenType::COMMA);
         }
+        if (!m_procedures.contains(procName))
+            ErrorHandler::e.Error("Could not find procedure :" + procName, m_currentToken.m_lineNumber);
 
-        Eat(TokenType::RPAREN);
         NodeProcedureDecl* p = (NodeProcedureDecl*)m_procedures[procName];
+        Eat(TokenType::RPAREN);
+
         //p->SetParameters(paramList);
 
         return new NodeProcedure(p, paramList, t);
@@ -368,6 +371,10 @@ Node *Parser::FindProcedure()
 
 Node *Parser::Block(bool useOwnSymTab)
 {
+
+    if (m_currentToken.m_type!=TokenType::VAR  && m_currentToken.m_type!=TokenType::BEGIN)
+        return nullptr;
+
     return new NodeBlock(Declarations(), CompoundStatement(), useOwnSymTab);
 }
 
@@ -425,9 +432,11 @@ QVector<Node*> Parser::Declarations()
             Eat(TokenType::SEMI);
         }
     }
-    while (m_currentToken.m_type==TokenType::PROCEDURE) {
+    while (m_currentToken.m_type==TokenType::PROCEDURE || m_currentToken.m_type==TokenType::INTERRUPT) {
 
-        Eat(TokenType::PROCEDURE);
+        bool isInterrupt= (m_currentToken.m_type==TokenType::PROCEDURE)?false:true;
+
+        Eat(m_currentToken.m_type);
         QString procName = m_currentToken.m_value;
         Eat(TokenType::ID);
         //exit(1);
@@ -441,12 +450,16 @@ QVector<Node*> Parser::Declarations()
 
         Eat(TokenType::SEMI);
         Node* block = Block(true);
-        Node* procDecl = new NodeProcedureDecl(procName, paramDecl, block);
+        if (block==nullptr)
+            qDebug() << "Procedure decl: " << procName;
+        Node* procDecl = new NodeProcedureDecl(procName, paramDecl, block, isInterrupt);
         //decl.append(procDecl);
-        Eat(TokenType::SEMI);
+        if (block!=nullptr)
+            Eat(TokenType::SEMI);
 
         m_procedures[procName] = procDecl;
-        m_proceduresOnly.append(procDecl);
+        if (block!=nullptr)
+            m_proceduresOnly.append(procDecl);
 
     }
 
@@ -489,7 +502,7 @@ Node *Parser::TypeSpec()
 {
     Token t = m_currentToken;
 
-    if (m_currentToken.m_type == TokenType::INCBIN) {
+    if (m_currentToken.m_type == TokenType::INCBIN || m_currentToken.m_type == TokenType::INCSID) {
         Eat();
         Eat(TokenType::LPAREN);
         QString binFile = m_currentToken.m_value;
@@ -569,7 +582,7 @@ Node *Parser::BuiltinFunction()
             QString s = "Error using builtin function " + procName + " \n";
             s += "Requires " + QString::number(noParams) + " parameters but has " + QString::number(paramList.count());
 
-            ErrorHandler::e.Error(s);
+            ErrorHandler::e.Error(s, m_currentToken.m_lineNumber);
         }
 
         return new NodeBuiltinMethod(procName,paramList);
