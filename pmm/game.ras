@@ -2,7 +2,7 @@ PROGRAM FirstC64;
 VAR
 	a,b, c, i, j,k,val,mainloop, time : byte;
 	x,y : byte;
-	sprite0data: IncBin("sprite1.bin");
+	sprite0data: IncBin("data/sprite1.bin");
 	fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
 	fadeRedBlue : array [8] of byte = (00,$0f,$09,$0e,$02,$0c,$00,$0c,$09,$00,$02,$00,$0b,$05,$06,$0c); 
 	fade : array [8] of byte = (00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00,00); 
@@ -38,7 +38,7 @@ begin
     poke(SPRITE_BITMASK,#0, #%00011111);
 	poke(SPRITE_COLOR,#0, WHITE);
     poke(SPRITE_COLOR,#1, YELLOW);
-    memcpy(sprite0data, $0340, #63);
+    memcpy(sprite0data, #0, $0340, #63);
 
 end;
 
@@ -49,7 +49,7 @@ begin
 
 //
 //
-	PlaySound(#15, #10, #0*#16+#0, #15*#16 + #6, #1 +wave_type, wave_type);
+	PlaySound(SID_CHANNEL1, #15, #10, #0*#16+#0, #15*#16 + #6, #1 +wave_type, wave_type);
 
  end;
 
@@ -162,8 +162,8 @@ procedure RasterSprite();
 
 procedure Update();
 begin
-	Poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
-	Poke(SCREEN_FOREGROUND_COLOR, #0, BLACK);
+	Poke(SCREEN_BG_COL, #0, BLACK);
+	Poke(SCREEN_FG_COL, #0, BLACK);
 
 	UpdateStars();
 	PrintText();
@@ -187,7 +187,7 @@ begin
 	colorIndex :=#0;
 
 
-	RasterIRQ(RasterSprite(), bar_0);
+	RasterIRQ(Bars(), bar_0);
 
 	kernelInterrupt();
 
@@ -211,8 +211,8 @@ begin
 
 	val:=fade[colorIndex];
 	bar_0 := bar_0 + colorSize;
-	Poke(SCREEN_BACKGROUND_COLOR, #0, val);
-	Poke(SCREEN_FOREGROUND_COLOR, #0, val);
+	Poke(SCREEN_BG_COL, #0, val);
+	Poke(SCREEN_FG_COL, #0, val);
 	colorIndex:=colorIndex+#1;
 	if colorIndex<#15 then begin
 		RasterIRQ(Bars(), bar_0);
@@ -220,8 +220,8 @@ begin
 	end;
 	if colorIndex>#14 then begin
 		RasterIRQ(UpdateRaster(), #0);
-		Poke(SCREEN_BACKGROUND_COLOR, #0, #0);
-		Poke(SCREEN_FOREGROUND_COLOR, #0, #0);
+		Poke(SCREEN_BG_COL, #0, #0);
+		Poke(SCREEN_FG_COL, #0, #0);
 	end;
 	
 //	Asm("  dec $d019");
@@ -233,8 +233,8 @@ begin
 	
 	InitSid(SIDFILE_1_INIT);
 
-	poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
-	poke(SCREEN_BACKGROUND_COLOR, #1, BLACK);
+	poke(SCREEN_BG_COL, #0, BLACK);
+	poke(SCREEN_FG_COL, #1, BLACK);
 	poke($d018, #0, #$1A);
 /*
 $D018 = %xxxx000x -> charmem is at $0000

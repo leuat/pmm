@@ -57,6 +57,7 @@ public:
 
     void Optimise() override;
     void OptimisePassStaLda();
+    void OptimiseJumps();
     QString getLine(int i);
     QString getNextLine(int i, int &j);
     QString getToken(QString, int t);

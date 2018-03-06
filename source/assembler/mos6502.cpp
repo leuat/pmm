@@ -284,6 +284,7 @@ void AsmMOS6502::EndForLoop(QString endVal)
 void AsmMOS6502::Optimise()
 {
     OptimisePassStaLda();
+    OptimiseJumps();
 }
 
 void AsmMOS6502::OptimisePassStaLda()
@@ -292,18 +293,12 @@ void AsmMOS6502::OptimisePassStaLda()
     int j;
     for (int i=0;i<m_source.count()-1;i++) {
         QString l0 = getLine(i);
-
-
-
         if (l0.contains("sta")) {
             QString l1 = getNextLine(i,j);
             if (l0==l1) {
                 m_removeLines.append(j);
                 continue;
             }
-
-
-
             QString var = getToken(l0,1);
             if (getToken(l1,1)==var && getToken(l1,0)=="lda") {
 
@@ -311,11 +306,34 @@ void AsmMOS6502::OptimisePassStaLda()
                 i++;
                 continue;
             }
-
-
         }
     }
     RemoveLines();
+}
+
+void AsmMOS6502::OptimiseJumps()
+{
+    m_removeLines.clear();
+    int j;
+    for (int i=0;i<m_source.count()-1;i++) {
+        QString l0 = getLine(i);
+        if (l0.contains("jmp ")) {
+            QString l1 = getNextLine(i,j);
+            QString lbl0 = getToken(l0, 1);
+            if (l1.toLower().contains(lbl0.toLower()))
+            {
+                qDebug() << "Removing:";
+                qDebug() << " " + l0;
+                qDebug() << " " + l1;
+                //m_removeLines.append(i);
+                //m_removeLines.append(j);
+                i++;
+                continue;
+            }
+        }
+    }
+    RemoveLines();
+
 }
 
 QString AsmMOS6502::getLine(int i)

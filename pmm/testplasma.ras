@@ -3,7 +3,7 @@ PROGRAM FirstC64;
 VAR
    a, b, c, i, j,k,val,mainloop, idx, time,c2x, c2y,ax, ay : byte;
    x,y,scrollx,shiftx, shifty : byte;
-   sprite0data: IncBin("sprite1.bin");
+   sprite0data: IncBin("data/sprite1.bin");
    charset: IncBin("test.bin","$1fff");
    fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
 	fadeRedBlue : array [8] of byte = (00,$0f,$09,$0e,$02,$0c,$00,$0c,$09,$00,$02,$00,$0b,$05,$06,$0c); 
@@ -48,7 +48,7 @@ begin
 		moveto(#1,y, #$04);
 		val:=siny[y];
 		//peek(siny, y, val);
-		for x:=#1 to #10 do begin
+		for x:=#1 to #20 do begin
 			k:=sinx[x] +val;
 
 		 	k:=k/#8;
@@ -76,7 +76,7 @@ begin
     poke(SPRITE_BITMASK,#0, #%00000111);
 	poke(SPRITE_COLOR,#0, WHITE);
     poke(SPRITE_COLOR,#1, YELLOW);
-    memcpy(sprite0data, $0340, #63);
+    memcpy(sprite0data, #0, $0340, #63);
 
 end;
 
@@ -123,9 +123,8 @@ begin
 	a:=#4;
 	b:=#4;
 	a:=b*#3;
-	poke(SCREEN_BACKGROUND_COLOR, #0, a);
-	poke(SCREEN_BACKGROUND_COLOR, #1, BLACK);
- 	poke(SCREEN_BACKGROUND_COLOR, #0, BLACK);
+	poke(SCREEN_BG_COL, #0, a);
+	poke(SCREEN_BG_COL, #1, BLACK);
 	poke($d018, #0, #$18);
     poke($C202, #0,#13);
 
