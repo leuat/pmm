@@ -1,0 +1,212 @@
+program RasterInterruptsAndSid;
+var
+	time, mainloop,a,b,i,j, idx, color : byte;
+	bar_0, colorIndex, colorAdd : byte;
+	bar_s : array[4] of byte = (
+	0, 5, 12, 20);
+	currentBar, tmp, nextCount, nextColorIndex, diff : byte;
+	barCols : array[4] of byte = (0,1,3,4);
+	barStartColor : array[4] of byte = (0,0,0,0);
+	barCount : array[4] of byte = (0,0,0,0);
+	loopIndex : array[4] of byte = (0,1,2,3);
+	currentIndex : byte;
+	noBars : byte;
+ 	fade : array [8] of byte = 
+(00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00,
+ 11,6,12,4,14,15,1,1,15,14,4,12,6,11,11,00); 
+
+	
+
+procedure Bars();
+procedure Bars2();
+procedure SetupBars();
+procedure SetupBarStats();
+
+procedure UpdateScreen();
+begin
+	//Poke(SCREEN_BG_COL, #0, BLACK);
+	//Poke(SCREEN_FG_COL, #0, BLACK);
+
+//	Call(SIDFILE_1_PLAY);
+
+end;
+
+interrupt UpdateRaster();
+var 
+	val:byte;
+begin
+	UpdateScreen();
+
+	time:=time+#1;
+/*
+	bar_s[#0] := sine[time*#2]/#2 + #100;
+	bar_s[#1] := sine[time*#2 + #30]/#2 + #100;
+	bar_s[#2] := sine[time*#2 + #60]/#2 + #100;
+	bar_s[#3] := sine[time*#2]/#2 + #40;
+
+	barCols[#0]:=#0;
+	barCols[#1]:=#1;
+
+
+	noBars:=#2;
+
+	loopIndex[#0]:=#0;
+	loopIndex[#1]:=#1;
+	loopIndex[#2]:=#2;
+	loopIndex[#3]:=#3;
+
+
+	colorAdd:=time /#4;
+	And(colorAdd, #15);
+	colorIndex :=#0;
+
+	
+//	RasterIRQ(Bars(), bar_s[#0]);
+	colorIndex:=#0;
+	currentIndex:=#0;
+	SetupBars();
+
+	currentIndex:=#0;
+	SetupBarStats();
+
+	currentIndex:=#0;
+//	Bars();
+	*/
+	Bars2();
+	
+	kernelInterrupt();
+
+end;
+
+
+procedure Bars2();
+begin
+	WaitForRaster(#0);
+	for i:=#5 to #50 do begin
+		j:=i + time;
+		and(j,#15);
+		val:=fade[j];
+
+		Poke(SCREEN_BG_COL, #0, val);
+		WaitNoRaster(#1);
+
+	end;
+
+end;
+
+
+procedure SetupBarStats();
+begin
+	currentBar:=loopIndex[currentIndex];
+	val := loopIndex[currentIndex+#1];
+
+	a:=bar_s[currentBar];
+	b:=bar_s[val];
+	diff := (b - a);
+
+
+	if currentIndex<>noBars then begin
+
+	if diff<#34 then begin
+		//peek($d012, #0, a);
+		b:=barCount[currentBar];
+		b:=b*#2 +#4;
+		bar_s[val]:=bar_s[currentBar] + b;
+		barCount[val]:=diff/#2 +#2;
+		barStartColor[val]:=#15-diff/#2;
+	end;
+	end;
+
+	currentIndex:=currentIndex+#1;
+	if currentIndex<noBars then begin
+		SetupBarStats();
+	end;
+
+end;
+
+
+procedure SetupBars();
+begin
+
+	a:=bar_s[currentIndex];
+	if a>bar_s[currentIndex+#1] then begin
+		val:=loopIndex[currentIndex];
+		loopIndex[currentIndex]:=loopIndex[currentIndex+#1];
+		loopIndex[currentIndex+#1]:=val;
+	end;
+
+	currentBar:=loopIndex[currentIndex];
+
+	barCount[currentBar]:=#15;
+	barStartColor[currentBar]:=#0;
+
+
+	currentIndex:=currentIndex+#1;
+
+	if currentIndex<noBars-#1 then begin
+		SetupBars();
+	end;
+end;
+
+
+procedure Bars();
+begin
+
+	currentBar:=loopIndex[currentIndex];
+	
+	a:=bar_s[currentBar];
+	WaitForRaster(a);
+	colorIndex:=barStartColor[currentBar];
+	b:=barCount[currentBar];
+	for i:=#1 to b do begin
+		val:=fade[colorIndex];//+ barCols[currentBar];
+		Poke(SCREEN_BG_COL, #0, val);
+		Poke(SCREEN_FG_COL, #0, val);
+		colorIndex:=colorIndex+#1;
+		WaitNoRaster(#1);
+//		barCount[currentBar]:=barCount[currentBar]-#1;
+		
+	end;
+	Poke(SCREEN_BG_COL, #0, #0);
+	Poke(SCREEN_FG_COL, #0, #0);
+
+/*	a:=bar_s[currentBar];
+	currentIndex:=currentIndex+#1;
+	currentBar:=loopIndex[currentIndex];
+	b:=bar_s[currentBar];
+	diff := (b - a);
+	if diff<#34 then begin
+		peek($d012, #0, a);
+		bar_s[currentBar]:=a+#2;
+		barCount:=diff/#2;
+	end;
+*/
+
+	currentIndex:=currentIndex+#1;
+	if currentIndex < noBars then begin
+		Bars();
+	end;
+	
+end;
+
+
+begin
+	
+//	InitSid(SIDFILE_1_INIT);
+
+	poke(SCREEN_BG_COL, #0, BLACK);
+	poke(SCREEN_FG_COL, #1, BLACK);
+
+	ClearScreen(#$20, SCREEN_CHAR_LOC);
+
+	mainloop:=#1;
+	time:=#0;
+	
+	
+	DisableInterrupts();
+	RasterIRQ(UpdateRaster(), #199);
+	EnableInterrupts();
+
+	Loop();
+
+end.

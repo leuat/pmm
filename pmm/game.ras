@@ -14,10 +14,9 @@ VAR
   
 
 	sprite_x : integer;
-	sprite_y : integer;
+	sprite_y : byte;
 
 	stars_x : array[100] of byte;	
-
 	stars_y : array[100] of byte;	
 	stars_dy : array[100] of byte;	
 	stars_col : array[100] of byte;	
@@ -59,7 +58,7 @@ begin
 //	MoveTo(#10, #24, #$04);
 //	printstring(message, #0);
 	MoveTo(#17, #24, #$04);
-	printnumber(time);
+	printnumber(joystickbutton);
 
 end;
 
@@ -68,14 +67,16 @@ begin
 	spritepos(sprite_x, sprite_y, #0, #$01, #$FE);
 	Joystick();
 
-	sprite_x := sprite_x - joystickvalue[#1]*#4;
-	sprite_x := sprite_x + joystickvalue[#2]*#4;
-	sprite_y := sprite_y + joystickvalue[#3]*#4;
+    asm("   ldx #0 ; bug add");
+	sprite_x := sprite_x - joystickleft*#4;
+	sprite_x := sprite_x + joystickright*#4;
+	sprite_y := sprite_y + joystickdown*#4;
+	sprite_y := sprite_y - joystickup*#4;
 	
-	scroll_x:= joystickvalue[#1];
-	scroll_x:= scroll_x- joystickvalue[#2];
+	//scroll_x:= joystickvalue[#1];
+	//scroll_x:= scroll_x- joystickvalue[#2];
 
-	if joystickvalue[#4]=#1 then begin
+	if joystickup=#1 then begin
 		SoundTest(#32);
 	end;
 
@@ -84,45 +85,20 @@ end;
 
 procedure Clear();
 begin
-	fill($D800, BLUE,#0);
-	fill($D900, BLUE,#0);
-	fill($DA00, BLUE,#0);
-	fill($DB00, BLUE,#0);
-	fill($0400, clearval,#0);
-	fill($0500, clearval,#0);
-	fill($0600, clearval,#0);
-	fill($0700, clearval,#0);
-
+	ClearScreen(#$20, SCREEN_CHAR_LOC);
+	ClearScreen(GREEN, SCREEN_COL_LOC);
 end;
 
-procedure WaitRaster();
-begin
-/*
-asm("
-	lda $d012 ;load the current raster line into the accumulator
-	cmp $d012 ;check if it has changed	
-	beq *-3   ;if not, jump back and check again
-");
-
-*/
-asm("
-	lda $d012
-	clc       ;make sure carry is clear
-	adc #199  ;add lines to wait
-	cmp $d012
-	bne *-3   ;check *until* we're at the target raster line
-");
-end;
 
 
 
 
 procedure InitStars();
 begin
-   for i:=#0 to #100 do begin
-	 rand(#0,#40,x);
-	 rand(#1,#200,y);
-	 rand(#0,#4,val);
+   for i:=#0 to #50 do begin
+	 rand(#1,#39,x);
+	 rand(#1,#160,y);
+	 rand(#0,#6,val);
 	 rand(#1,#4,c);
 	 stars_x[i]:=x;
 	 stars_y[i]:=y;
@@ -134,12 +110,12 @@ end;
 
 procedure UpdateStars();
 begin
-	for i:=#0 to #10 do begin
-		stars_y[i]:=stars_y[i] + stars_dy[i];
+	for i:=#0 to #40 do begin
 
-		if stars_y[i]>#18*8 then begin
+		if stars_y[i]>#22*#8 then begin
 			stars_y[i]:=#1;
 		end;
+		stars_y[i]:=stars_y[i] + stars_dy[i];
 
 		y:=stars_y[i];
 		x:=y;
@@ -151,13 +127,14 @@ begin
 		moveto(stars_x[i], y, #$04);
 		pokescreen(clearval,#0);
 		incscreenx(#40);
-		pokescreencolor(x,stars_col[i],#0,#1);
+		pokescreen(x,#0);
+		moveto(stars_x[i], y+#1, #$D8);
+		pokescreen(stars_col[i],#0);
+
 	end;
-	fill($06D0, clearval, #39);
+	fill($0400 + #40*#23, clearval, #40);
 end;
 
-procedure Bars();
-procedure RasterSprite();
 
 
 procedure Update();
@@ -186,46 +163,8 @@ begin
 	And(colorAdd, #15);
 	colorIndex :=#0;
 
-
-	RasterIRQ(Bars(), bar_0);
-
 	kernelInterrupt();
 
-end;
-
-procedure RasterSprite();
-begin
-	poke(SPRITE_POS, #2, RASTERLINE_POS);
-	poke(SPRITE_POS, #3, RASTERLINE_POS);
-//	spritepos(sprite_x, RASTERLINE_POS);
-
-	RasterIRQ(UpdateRaster(), #0);
-
-
-	kernelInterrupt();
-end;
-
-
-procedure Bars();
-begin
-
-	val:=fade[colorIndex];
-	bar_0 := bar_0 + colorSize;
-	Poke(SCREEN_BG_COL, #0, val);
-	Poke(SCREEN_FG_COL, #0, val);
-	colorIndex:=colorIndex+#1;
-	if colorIndex<#15 then begin
-		RasterIRQ(Bars(), bar_0);
-
-	end;
-	if colorIndex>#14 then begin
-		RasterIRQ(UpdateRaster(), #0);
-		Poke(SCREEN_BG_COL, #0, #0);
-		Poke(SCREEN_FG_COL, #0, #0);
-	end;
-	
-//	Asm("  dec $d019");
-	kernelInterrupt();
 end;
 
 

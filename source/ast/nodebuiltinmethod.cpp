@@ -1,6 +1,7 @@
 #include "nodebuiltinmethod.h"
 #include "nodenumber.h"
 #include "nodevar.h"
+#include "nodestring.h"
 #include "nodeprocedure.h"
 
 QMap<QString, bool> NodeBuiltinMethod::m_isInitialized;
@@ -32,14 +33,20 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="poke")
         Poke(as);
 
+    if (m_procName.toLower()=="swap")
+        Swap(as);
+
     if (m_procName.toLower()=="clearscreen")
         ClearScreen(as);
 
     if (m_procName.toLower()=="peek")
         Peek(as);
 
-    if (m_procName.toLower()=="waitraster")
-        WaitRaster(as);
+    if (m_procName.toLower()=="waitforraster")
+        WaitForRaster(as);
+
+    if (m_procName.toLower()=="waitnoraster")
+        WaitNoRasterLines(as);
 
     if (m_procName.toLower()=="memcpy")
         MemCpy(as);
@@ -178,6 +185,7 @@ void NodeBuiltinMethod::Poke(Assembler* as)
 
 void NodeBuiltinMethod::Peek(Assembler* as)
 {
+    as->Comment("Peek");
     LoadVar(as, 1);
     as->Asm("tax");
     LoadVar(as,0,"x");
@@ -317,22 +325,28 @@ void NodeBuiltinMethod::InitPrintString(Assembler *as)
     m_isInitialized["initprintstring"] = true;
 
     as->ClearTerm();
-    as->Label("print_text dc \"HEISANN\",0");
-    as->Asm("org print_text +#100");
+    as->Label("print_text = $fd");
+    as->Label("print_number_text .dc \"    \",0");
     as->Label("printstring");
     as->Asm("ldy #0");
     as->Label("printstringloop");
-    as->Asm("lda print_text,x");
+    as->Asm("lda (print_text),y");
     as->Asm("cmp #0");
     as->Asm("beq printstring_done");
+    as->Asm("cmp #64");
+    as->Asm("bcc printstring_skip");
+
     as->Asm("sec");
     as->Asm("sbc #64");
 //    as->Asm("cmp #28");
 //    as->Asm("bcs printstring_skip");
+    as->Label("printstring_skip");
     as->Asm("sta (screenMemory),y");
- //   as->Label("printstring_skip");
     as->Asm("iny");
-    as->Asm("inx");
+    as->Asm("dex");
+    as->Asm("cpx #0");
+    as->Asm("beq printstring_done");
+
     as->Asm("jmp printstringloop");
     as->Label("printstring_done");
 
@@ -357,7 +371,7 @@ void NodeBuiltinMethod::PrintNumber(Assembler *as)
     as->Asm("sbc #$39");
     as->Label("printnumber_l1");
     as->Asm("adc #$30 + #64");
-    as->Asm("sta print_text,x");
+    as->Asm("sta print_number_text,x");
     as->Asm("inx");
     as->Asm("tya");
     as->Asm("and #$F0");
@@ -373,12 +387,19 @@ void NodeBuiltinMethod::PrintNumber(Assembler *as)
     as->Label("printnumber_l2");
 
     as->Asm("adc #$30 + #64");
-    as->Asm("sta print_text,x");
+    as->Asm("sta print_number_text,x");
     as->Asm("inx");
     as->Asm("lda #0");
-    as->Asm("sta print_text,x");
+    as->Asm("sta print_number_text,x");
 
     as->Asm("ldx #0");
+
+    as->Asm("lda #<print_number_text");
+    as->Asm("ldy #>print_number_text");
+    as->Asm("sta print_text+0");
+    as->Asm("sty print_text+1");
+
+
     as->Asm("jsr printstring");
 
     as->PopLabel("printnumber_call");
@@ -387,25 +408,45 @@ void NodeBuiltinMethod::PrintNumber(Assembler *as)
 void NodeBuiltinMethod::PrintString(Assembler *as)
 {
     QString lbl= as->NewLabel("printstring_call");
+    QString lbl2= as->NewLabel("printstring_text");
+    NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
+    NodeString* str = (NodeString*)dynamic_cast<NodeString*>(m_params[0]);
 
-    as->Asm("ldx #0");
-    as->Label(lbl);
+    if (str==nullptr && var==nullptr)
+        ErrorHandler::e.Error("PrintString must take variable or string constant");
 
-    as->Term("lda ");
-    m_params[0]->Build(as);
-    as->Term(",x", true);
-    as->Asm("sta print_text,x");
-    as->Asm("inx");
-    as->Asm("cmp #0");
-    as->Asm("bne " + lbl);
-    as->Term("");
+    QString varName = "";
+    if (var!=nullptr)
+        varName = var->value;
+
+
+    if (str!=nullptr) {
+        as->Asm("jmp " + lbl);
+        varName = lbl2;
+        as->Label(varName + "\t.dc \"" + str->m_val+"\",0");
+    }
+
+    if (str!=nullptr)
+        as->Label(lbl);
+    as->Asm("clc");
+    as->Comment("TEST");
+    as->Asm("lda #<" +varName);
+    as->Term("adc ");
     m_params[1]->Build(as);
     as->Term();
-    as->Asm("tax");
+    as->Asm("ldy #>" +varName);
+    as->Asm("sta print_text+0");
+    as->Asm("sty print_text+1");
 
+
+//    LoadVar(as, 1);
+ //   as->Asm("tay");
+    LoadVar(as, 2);
+    as->Asm("tax");
     as->Asm("jsr printstring");
 
     as->PopLabel("printstring_call");
+    as->PopLabel("printstring_text");
 
 }
 
@@ -479,7 +520,8 @@ void NodeBuiltinMethod::PokeScreenColor(Assembler *as, int hiAddress)
     as->Asm("tax");
     as->Asm("adc #$D4");
     as->Asm("sta screenMemory+1");
-    LoadVar(as, 1);
+    //LoadVar(as, 1);
+   as->Asm("lda #$F2");
     as->Asm("sta (screenMemory),y");
     for (int i=0;i<num->m_val-1;i++) {
         as->Asm("dey");
@@ -811,7 +853,38 @@ void NodeBuiltinMethod::ClearScreen(Assembler *as)
     as->PopLabel("clearloop");
 }
 
-void NodeBuiltinMethod::WaitRaster(Assembler *as)
+void NodeBuiltinMethod::WaitNoRasterLines(Assembler *as)
+{
+   /* QString var = "";
+    QString lbl = as->NewLabel("waitnoraster");
+    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (num!=nullptr)
+            var = "#" + num->HexValue();
+    NodeVar* nvar = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
+    if (nvar!=nullptr)
+            var = nvar->value;
+
+    if (var=="")
+        ErrorHandler::e.Error("WaitNoRasterLines: parameter must be either constant or variable, not expression", m_op.m_lineNumber);
+
+*/
+    as->Comment("Wait for no of raster lines");
+  //  as->Label(lbl);
+    LoadVar(as, 0);
+    as->Asm("clc ");
+    as->Asm("adc $d012");
+    //as->Asm("adc " + var);
+    as->Asm("cmp $d012");
+    as->Asm("bne *-3" );
+
+
+//    as->PopLabel("waitnoraster");
+}
+
+
+
+
+void NodeBuiltinMethod::WaitForRaster(Assembler *as)
 {
     as->Comment("wait for raster");
     LoadVar(as, 0,"", "ldx ");
@@ -848,6 +921,30 @@ void NodeBuiltinMethod::SetSpriteLoc(Assembler *as)
 
 }
 
+void NodeBuiltinMethod::Swap(Assembler *as)
+{
+    NodeVar* vars[2];
+    for (int i=0;i<2;i++) {
+        NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[i]);
+        if (var==nullptr)
+            ErrorHandler::e.Error("Swap error: both parameters must be variables");
+        vars[i]=var;
+    }
+    as->Comment("Swap variables");
+//    as->Asm("lda " + vars[0]->value);
+    LoadVar(as, 0);
+    as->Asm("tay ");
+    LoadVar(as, 1);
+//    SaveVar(as, 0);
+    vars[0]->StoreVariable(as);
+    LoadVar(as, 0);
+    as->Asm("tya");
+    vars[1]->StoreVariable(as);
+    //as->Asm("sta " + vars[1]->value+ ",x");
+
+
+}
+
 void NodeBuiltinMethod::EnableInterrupts(Assembler* as) {
   //  as->Asm("lda $dc0d");
   //  as->Asm("lda $dd0d");
@@ -859,6 +956,21 @@ void NodeBuiltinMethod::EnableInterrupts(Assembler* as) {
 
     as->Asm("cli");
 }
+
+void NodeBuiltinMethod::SaveVar(Assembler *as, int paramNo, QString reg, QString extra)
+{
+    as->ClearTerm();
+    if (extra=="")
+        as->Term("sta ");
+    else
+        as->Term(extra);
+    m_params[paramNo]->Build(as);
+    if (reg!="")
+        reg = "," + reg;
+    as->Term(reg, true);
+
+}
+
 
 void NodeBuiltinMethod::LoadVar(Assembler *as, int paramNo, QString reg, QString lda)
 {
@@ -893,25 +1005,49 @@ void NodeBuiltinMethod::VerifyInitialized(QString method, QString initmethod)
 
 void NodeBuiltinMethod::InitJoystick(Assembler *as)
 {
-    as->Label("joystickvalue .byte 0,0,0,0,4");
+
+    as->Asm("jmp callJoystick");
+    as->Label("joystickup .byte 0");
+    as->Label("joystickdown .byte 0");
+    as->Label("joystickleft .byte 0");
+    as->Label("joystickright .byte 0");
+    as->Label("joystickbutton .byte 0");
     as->Label("callJoystick");
-    as->Asm("lda #0");
-    as->Asm("sta joystickvalue+1");
-    as->Asm("sta joystickvalue+2");
-    as->Asm("sta joystickvalue+3");
-    as->Asm("sta joystickvalue+4");
+/*
+
+    as->Asm("lda $dc00 ;read joystick port 2");
+    as->Asm("lsr       ;get switch bits");
+    as->Asm("ror joystickup   ;switch_history = switch_history/2 + 128*current_switch_state");
+    as->Asm("lsr       ;update the other switches' history the same way");
+    as->Asm("ror joystickdown");
+    as->Asm("lsr");
+    as->Asm("ror joystickleft");
+    as->Asm("lsr");
+    as->Asm("ror joystickright");
+    as->Asm("lsr");
+    as->Asm("ror joystickbutton");
+//    as->Asm("rts*/
+
 /*    as->Asm("lda joystickvalue");
     as->Asm("cmp $dc00");
     as->Asm("beq callJoystick_end");
     as->Asm("lda  $dc00      ; store new value in memory location 2.");
     as->Asm("sta joystickvalue");
 */
+
+    as->Asm("lda #0");
+    as->Asm("sta joystickup");
+    as->Asm("sta joystickdown");
+    as->Asm("sta joystickleft");
+    as->Asm("sta joystickright");
+    as->Asm("sta joystickbutton");
+
     // UP
     as->Asm("lda #%00000001 ; mask joystick up movement");
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne joystick_down       ; zero flag is not set -> skip to down");
-    as->Asm("lda #255");
-    as->Asm("sta joystickvalue+3");
+    as->Asm("lda #1");
+    as->Asm("sta joystickup");
 
     as->Label("joystick_down");
     // DOWN
@@ -920,7 +1056,7 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne joystick_left       ; zero flag is not set -> skip to down");
     as->Asm("lda #1");
-    as->Asm("sta joystickvalue+3");
+    as->Asm("sta joystickdown");
     // LEFT
 
     as->Label("joystick_left");
@@ -929,7 +1065,7 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne joystick_right       ; zero flag is not set -> skip to down");
     as->Asm("lda #1");
-    as->Asm("sta joystickvalue+1");
+    as->Asm("sta joystickleft");
 
     // RIGHT
     as->Label("joystick_right");
@@ -938,7 +1074,7 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne joystick_button       ; zero flag is not set -> skip to down");
     as->Asm("lda #1");
-    as->Asm("sta joystickvalue+2");
+    as->Asm("sta joystickright");
 
     as->Label("joystick_button");
     // BUTTON
@@ -947,7 +1083,7 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("bit $dc00      ; bitwise AND with address 56320");
     as->Asm("bne callJoystick_end       ; zero flag is not set -> skip to down");
     as->Asm("lda #1");
-    as->Asm("sta joystickvalue+4");
+    as->Asm("sta joystickbutton");
 
 
     as->Label("callJoystick_end");
@@ -955,13 +1091,3 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
 
 }
 
-void NodeBuiltinMethod::SaveVar(Assembler *as, int paramNo, QString reg)
-{
-    as->ClearTerm();
-    as->Term("sta ");
-    m_params[paramNo]->Build(as);
-    if (reg!="")
-        reg = "," + reg;
-    as->Term(reg, true);
-
-}

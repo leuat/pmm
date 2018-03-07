@@ -636,7 +636,8 @@ Node* Parser::Expr()
 {
     Node* node = Term();
 
-    while (m_currentToken.m_type == TokenType::Type::PLUS || m_currentToken.m_type == TokenType::Type::MINUS) {
+    while (m_currentToken.m_type == TokenType::Type::PLUS || m_currentToken.m_type == TokenType::Type::MINUS
+            || m_currentToken.m_type == TokenType::Type::BITAND || m_currentToken.m_type == TokenType::Type::BITOR) {
         Token t = m_currentToken;
 
         Eat(m_currentToken.m_type);

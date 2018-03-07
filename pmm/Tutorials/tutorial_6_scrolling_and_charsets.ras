@@ -1,0 +1,66 @@
+program Tutorial6;
+var
+	xscroll, x, val: byte;
+	textshift: byte;
+	text: string;
+	time: byte;
+	colorIndex:byte;
+	fade : array [16] of byte = 
+	(00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00,00); 
+
+
+procedure PrintText();
+begin
+	moveto(#2,#22, #$04);
+	PrintString("                                WHY AM I DOING THIS WHEN I SHOULD SLEEP? I DIDN'T GO TO WORK TODAY SO I HAVE TO GO TOMORROW                                 " , 
+		textshift, #36);
+	moveto(#2,#22, #$D8);
+	colorIndex:=colorIndex+#1;
+
+	for x:=#0 to #36 do begin
+		val:=fade[(x-colorIndex)&#15];
+		pokescreen(val, #0);
+		incscreenx(#1);
+
+	end;
+end;
+
+
+interrupt UpdateRaster();
+begin
+	time:=time+#1;
+	x:=time&#7;
+	if x=#0 then begin
+		textshift:=textshift+ #1;
+	end;
+	xscroll:=(xscroll+#1)&#7;
+
+	waitForRaster(#22*#10);
+	Scroll(#8-xscroll);
+	waitForRaster(#24*#10);
+	Scroll(#0);
+	PrintText();
+	
+	kernelinterrupt();
+end;
+
+
+procedure Setup();
+begin
+	ClearScreen(#$20, SCREEN_CHAR_LOC);
+	Poke(SCREEN_BG_COL, #0, BLACK);
+	Poke(SCREEN_FG_COL, #0, BLACK);
+
+end;
+
+begin
+	Setup();
+
+
+	DisableInterrupts();
+	RasterIRQ(UpdateRaster(), #0);
+	EnableInterrupts();
+
+	Loop();
+
+end.

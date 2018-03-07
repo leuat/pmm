@@ -97,6 +97,7 @@ begin
 		MoveSoundEffect(x);
 	end;
 
+	asm(";feil");
 	if joystickvalue[#4]=#1 then begin
 		ShootSoundEffect(SID_SAW, #15);
 		bullet_x:=sprite_x;
@@ -127,7 +128,6 @@ begin
 	poke(SCREEN_FG_COL, #0, BLACK);
 	ClearScreen(#$20, SCREEN_CHAR_LOC);
 
-	DrawScreen();
 
 	mainloop:=#1;
 	time:=#0;
@@ -142,7 +142,7 @@ begin
 		
 		MoveSprite();
 		MoveBullet();
-		WaitRaster(#0);
+		WaitForRaster(#0);
 	end;
 
 END.

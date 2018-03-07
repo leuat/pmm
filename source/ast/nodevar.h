@@ -44,16 +44,28 @@ public:
 
     void LoadByteArray(Assembler *as) {
         // Optimizer: if expression is number, just return direct
+        as->Comment("Load Byte array");
         NodeNumber* number = dynamic_cast<NodeNumber*>(m_expr);
         if (number!=nullptr) { // IS NUMBER optimize}
-            as->Asm("lda " + value + "+"+ QString::number(number->m_val));
+            QString v = value + "+"+ QString::number(number->m_val);
+            if (as->m_term=="")
+                as->Asm("lda " + v);
+            else as->Term(v);
         }
         else {
+            QString m = as->m_term;
+
             as->ClearTerm();
+            as->Asm("pha");
             m_expr->Build(as);
             as->Term();
             as->Asm("tax");
-            as->Asm("lda " + value+",x");
+            as->Asm("pla");
+
+            if (m=="")
+                m="lda ";
+            as->Asm(m+  value+",x");
+
         }
     }
 
@@ -78,8 +90,7 @@ public:
         }
         if (t == TokenType::INTEGER) {
             as->Asm("Integer assignment in nodevar WTF");
-            as->Asm("lda " +value);
-            as->Asm("tax");
+            as->Asm("ldx " +value);
             as->Asm("lda " +value+"+1");
             return;
         }
@@ -88,7 +99,7 @@ public:
     }
 
     void StoreVariable(Assembler* as) override {
-
+        as->Comment("VarNode StoreVariable");
         if (as->m_symTab->Lookup(value)==nullptr)
             ErrorHandler::e.Error("Could not find variable '" +value +"' for storing.", m_op.m_lineNumber);
 
@@ -98,12 +109,12 @@ public:
                 as->Asm("sta " + value + "+"+ QString::number(number->m_val));
             }
             else {
-                as->Asm("tay");
+                as->Asm("pha");
                 as->ClearTerm();
                 m_expr->Build(as);
                 as->Term();
                 as->Asm("tax");
-                as->Asm("tya");
+                as->Asm("pla");
                 as->Asm("sta " + value+",x");
             }
             return;
@@ -129,12 +140,14 @@ public:
     QString Build(Assembler *as) override {
         QString  val = value;
         Pmm::Data::d.lineNumber = m_op.m_lineNumber;
+        qDebug() << " AS";
         Symbol* s = as->m_symTab->LookupVariables(value);
+        qDebug() << s;
         if (s==nullptr) {
             ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?", m_op.m_lineNumber);
         }
         if (m_expr!=nullptr) {
-            as->ClearTerm();
+
             LoadByteArray(as);
         }
         else {

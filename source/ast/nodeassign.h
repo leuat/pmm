@@ -80,9 +80,15 @@ public:
             AssignString(as);
             return v->value;
         }
+        qDebug() << "Node Assign";
+        if (m_right==nullptr)
+            ErrorHandler::e.Error("Node assign: right hand must be expression", m_op.m_lineNumber);
         m_right->Build(as);
+        qDebug() << "B";
         as->Term();
+        qDebug() << "C";
         v->StoreVariable(as);
+        qDebug() << "DONE";
         return v->value;
     }
 

@@ -45,26 +45,32 @@ QString NodeConditional::Build(Assembler *as) {
         as->Label(labelOutside);
 
     as->ClearTerm();
-    as->Term("lda ");
-    m_a->Build(as);
-    as->Term();
-    as->Term("cmp ");
     m_b->Build(as);
     as->Term();
+    as->Term("cmp ");
+    m_a->Build(as);
+    as->Term();
 
-    if (m_op.m_type==TokenType::EQUALS)
-        as->Asm("bne " + labelb1);
     if (m_op.m_type==TokenType::NOTEQUALS)
+        as->Asm("bne " + labelb1);
+    if (m_op.m_type==TokenType::EQUALS)
         as->Asm("beq " + labelb1);
     if (m_op.m_type==TokenType::GREATER)
         as->Asm("bcc " + labelb1);
     if (m_op.m_type==TokenType::LESS)
         as->Asm("bcs " + labelb1);
 
+    as->Asm("jmp " + label);
+    /*
+
     as->Asm("jmp " + labelb2);
     as->Label(labelb1); // This means skip inside
     as->Asm("jmp " + label);
     as->Label(labelb2);
+
+    */
+    as->Label(labelb1); // This means skip inside
+
     m_block->Build(as);
 
     if (m_isWhileLoop)

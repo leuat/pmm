@@ -280,6 +280,15 @@ Token Lexer::GetNextToken()
             Advance();
             return Token(TokenType::MINUS, "-");
         }
+        if (m_currentChar=="&") {
+            Advance();
+            return Token(TokenType::BITAND, "&");
+        }
+        if (m_currentChar=="|") {
+            Advance();
+            return Token(TokenType::BITOR, "|");
+        }
+
         if (m_currentChar=="*") {
             Advance();
             return Token(TokenType::MUL, "*");

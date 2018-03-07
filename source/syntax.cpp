@@ -141,6 +141,7 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["printstring"] = BuiltInFunction(
                 "printstring",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::STRING << BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
                 );
 
 
@@ -230,13 +231,28 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER
                 );
 
-    builtInFunctions["waitraster"] = BuiltInFunction(
-                "waitraster",
+    builtInFunctions["waitforraster"] = BuiltInFunction(
+                "waitforraster",
                 QList<BuiltInFunction::Type>()
                 <<BuiltInFunction::Type::INTEGER
                 );
+
+    builtInFunctions["waitnoraster"] = BuiltInFunction(
+                "waitnoraster",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                );
+
+
     builtInFunctions["setspriteloc"] = BuiltInFunction(
                 "setspriteloc",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["swap"] = BuiltInFunction(
+                "swap",
                 QList<BuiltInFunction::Type>()
                 <<BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER

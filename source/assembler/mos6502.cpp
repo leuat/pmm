@@ -148,6 +148,15 @@ void AsmMOS6502::BinOP(TokenType::Type t)
         Asm("sec");
         m_term = "sbc ";
     }
+
+    if (t == TokenType::BITAND) {
+        m_term = "and ";
+    }
+
+    if (t == TokenType::BITOR) {
+        m_term = "ora ";
+    }
+
 }
 
 void AsmMOS6502::Poke(bool start)

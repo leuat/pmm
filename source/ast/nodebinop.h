@@ -120,6 +120,10 @@ public:
                 as->Term("/");
             if (m_op.m_type==TokenType::MUL)
                 as->Term("*");
+            if (m_op.m_type==TokenType::BITAND)
+                as->Term("&");
+            if (m_op.m_type==TokenType::BITOR)
+                as->Term("|");
 
             m_right->Build(as);
 
@@ -195,6 +199,8 @@ public:
             else {
                 as->Comment("Add/sub right value is variable/expression");
 
+
+
                 QString lbl = as->NewLabel("rightvar");
                 QString lblJmp = as->NewLabel("jmprightvar");
                 as->Asm("jmp " + lblJmp);
@@ -232,7 +238,10 @@ public:
             as->Write(lbl +"\t.byte\t0");
             as->Label(lblJmp);
             as->ClearTerm();
+            qDebug() << " A: " << m_right->m_op.getType();
+
             m_right->Build(as);
+            qDebug() << " B";
             as->Term();
             as->Asm("sta " +lbl);
             as->Term();
@@ -250,12 +259,11 @@ public:
             }
             else {
                 as->Asm("bcs "+lblword);
-
                 as->Asm("dex");
             }
             as->Label(lblword);
 
-            as->m_labelStack["wordAdd"].pop();
+            as->PopLabel("wordAdd");
 
             as->PopLabel("rightvarInteger");
             as->PopLabel("jmprightvarInteger");

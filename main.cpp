@@ -49,7 +49,7 @@ QString ReadFile(QString fileName, QStringList& lst) {
 }
 
 
-void ParseFile(QString fileName) {
+/*void ParseFile(QString fileName) {
     QStringList lst;
     QString text = ReadFile(fileName, lst);
     Lexer lexer = Lexer(text, lst);
@@ -58,10 +58,10 @@ void ParseFile(QString fileName) {
     interpreter.Interpret();
 
 }
-
+*/
 int main(int argc, char *argv[])
 {
     ErrorHandler::e.m_level = ErrorHandler::e.DEBUG_LOW;
     ErrorHandler::e.m_level = ErrorHandler::e.ERROR_ONLY;
-    ParseFile("..\\pmm\\pmm\\test.ras");
+    //ParseFile("..\\pmm\\pmm\\test.ras");
 }
