@@ -86,7 +86,7 @@ begin
 //	b:=time;
 
 
-	spritepos(sprite_x, sprite_y, #0, #$01, #$FE);
+/*	spritepos(sprite_x, sprite_y, #0, #$01, #$FE);
 	Joystick();
 
 	sprite_x := sprite_x - joystickvalue[#1]*#4;
@@ -101,7 +101,7 @@ begin
 //		printstring("BUTTON", #0);
 
 	end;
-
+*/
 
 end;
 
@@ -109,7 +109,7 @@ end;
 procedure PrintText(); 
 begin
 	MoveTo(#10, #24, #$04);
-	printstring(message, #0);
+	printstring(message, #0,#40);
 	MoveTo(#17, #24, #$04);
 	printnumber(time);
 

@@ -39,9 +39,10 @@ begin
 			random_color := random_values[index];
 			// restrict to 0-16
 			random_color := random_color/#16;
+
 			for x:=#5 to #35 do begin
 				// Sets both screen and color values
-				PokeScreenColor(random_values[index], random_color, #0, #1);
+				PokeScreen(random_values[index],  #0);
 				// increases screen X counter
 				incscreenx(#1);
 				// Increase by some random non-repeatable prime

@@ -7,7 +7,7 @@ var
 	currentBar, barCount : byte;
  	fade : array [8] of byte = 
 (00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00,00); 
-	//sidfile: incsid("song.sid");
+	sidfile: incsid("song.sid");
 	
 
 
@@ -18,7 +18,7 @@ begin
 	Poke(SCREEN_BG_COL, #0, BLACK);
 	Poke(SCREEN_FG_COL, #0, BLACK);
 
-	//Call(SIDFILE_1_PLAY);
+	Call(SIDFILE_1_PLAY);
 	Fill($D800 + #40*#15, fade[(time/#4) & #15], #40);
 	Fill($D800 + #40*#17, fade[(time/#4 + #5) & #15], #40);
 
@@ -87,7 +87,7 @@ end;
 
 
 begin
-	//InitSid(SIDFILE_1_INIT);
+	InitSid(SIDFILE_1_INIT);
 
 	poke(SCREEN_BG_COL, #0, BLACK);
 	poke(SCREEN_FG_COL, #1, BLACK);

@@ -82,23 +82,24 @@ begin
 	spritepos(sprite_x, sprite_y, #0, #$01, #$FE);
 	Joystick();
 
-	sprite_x := sprite_x - joystickvalue[#1]*#2;
-	sprite_x := sprite_x + joystickvalue[#2]*#2;
-	sprite_y := sprite_y + joystickvalue[#3]*#2;
+	sprite_x := sprite_x - joystickleft*#2;
+	sprite_x := sprite_x + joystickright*#2;
+	sprite_y := sprite_y + joystickdown*#2;
+	sprite_y := sprite_y - joystickup*#2;
 
 	rand(#15, #45, x);
-	if joystickvalue[#1]<>#0 then begin
+	if joystickleft<>#0 then begin
 		MoveSoundEffect(x);
 	end;
-	if joystickvalue[#2]<>#0 then begin
+	if joystickright<>#0 then begin
 		MoveSoundEffect(x);
 	end;
-	if joystickvalue[#3]<>#0 then begin
+	if joystickup<>#0 then begin
 		MoveSoundEffect(x);
 	end;
 
 	asm(";feil");
-	if joystickvalue[#4]=#1 then begin
+	if joystickbutton=#1 then begin
 		ShootSoundEffect(SID_SAW, #15);
 		bullet_x:=sprite_x;
 		bullet_y:=sprite_y;

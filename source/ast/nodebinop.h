@@ -102,70 +102,71 @@ public:
     }
 
 
-    QString Build(Assembler *as) override {
+    void BothPureNumbersBinOp(Assembler* as) {
+        NodeNumber *a = (NodeNumber*)dynamic_cast<const NodeNumber*>(m_left);
+        NodeNumber *b = (NodeNumber*)dynamic_cast<const NodeNumber*>(m_right);
+        //BothConstants(as);
+        as->Comment("Binop of two constant values");
+        m_left->Build(as);
+        if (m_op.m_type==TokenType::PLUS)
+            as->Term("+");
+        if (m_op.m_type==TokenType::MINUS)
+            as->Term("-");
+        if (m_op.m_type==TokenType::DIV)
+            as->Term("/");
+        if (m_op.m_type==TokenType::MUL)
+            as->Term("*");
+        if (m_op.m_type==TokenType::BITAND)
+            as->Term("&");
+        if (m_op.m_type==TokenType::BITOR)
+            as->Term("|");
 
-        // First check if both are consants:
+        m_right->Build(as);
+    }
 
-        if (isPureNumeric()) {
-            NodeNumber *a = (NodeNumber*)dynamic_cast<const NodeNumber*>(m_left);
-            NodeNumber *b = (NodeNumber*)dynamic_cast<const NodeNumber*>(m_right);
-            //BothConstants(as);
-            as->Comment("Binop of two constant values");
-            m_left->Build(as);
-            if (m_op.m_type==TokenType::PLUS)
-                as->Term("+");
-            if (m_op.m_type==TokenType::MINUS)
-                as->Term("-");
-            if (m_op.m_type==TokenType::DIV)
-                as->Term("/");
-            if (m_op.m_type==TokenType::MUL)
-                as->Term("*");
-            if (m_op.m_type==TokenType::BITAND)
-                as->Term("&");
-            if (m_op.m_type==TokenType::BITOR)
-                as->Term("|");
 
-            m_right->Build(as);
+    void RightIsPureNumericMulDiv(Assembler* as) {
+        int val = ((NodeNumber*)m_right)->m_val;
 
-            return "";
+
+        int cnt = getShiftCount(val);
+        if (cnt == -1 ) {
+            if (m_op.m_type == TokenType::MUL)
+                EightBitMul(as);
+            else
+                ErrorHandler::e.Error("Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
+            return;
         }
+        as->Comment("8 bit mul of power 2");
+
+        QString command = "";
+        if (m_op.m_type == TokenType::DIV)
+            command = "lsr";
+        if (m_op.m_type == TokenType::MUL)
+            command = "asl";
 
 
+        as->Asm("");
+        m_left->LoadVariable(as);
+        for (int i=0;i<cnt;i++)
+            as->Asm(command);
 
-        if (m_op.m_type==TokenType::MUL || m_op.m_type==TokenType::DIV) {
-            if (m_right->isPureNumeric())  {
-                int val = ((NodeNumber*)m_right)->m_val;
+    }
 
-
-
-                //check power of two
-                int cnt = getShiftCount(val);
-                if (cnt == -1 ) {
-                    if (m_op.m_type == TokenType::MUL)
-                        EightBitMul(as);
-                    else
-                        ErrorHandler::e.Error("Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
-                    return "";
-                }
-                as->Comment("8 bit mul of power 2");
-
-                QString command = "";
-                if (m_op.m_type == TokenType::DIV)
-                    command = "lsr";
-                if (m_op.m_type == TokenType::MUL)
-                    command = "asl";
-
-
-                as->Asm("");
-                m_left->LoadVariable(as);
-                for (int i=0;i<cnt;i++)
-                    as->Asm(command);
-                return "";
-
-            }
-
-            ErrorHandler::e.Error("Binary operation */ not implemented for this type yet...");
+    void HandleMulDiv(Assembler* as) {
+        if (m_right->isPureNumeric())  {
+            RightIsPureNumericMulDiv(as);
+            return;
         }
+        if (m_op.m_type==TokenType::MUL) {
+            EightBitMul(as);
+            return;
+        }
+        ErrorHandler::e.Error("Binary operation / not implemented for this type yet...");
+    }
+
+
+    void HandleRestBinOp(Assembler* as) {
         bool isWord = false;
         QString varName="";
 
@@ -193,13 +194,11 @@ public:
                 as->BinOP(m_op.m_type);
                 m_right->Build(as);
                 as->Term();
-                as->Term(" ; end mul var with constant", true);
+                as->Term(" ; end add / sub var with constant", true);
 
             }
             else {
                 as->Comment("Add/sub right value is variable/expression");
-
-
 
                 QString lbl = as->NewLabel("rightvar");
                 QString lblJmp = as->NewLabel("jmprightvar");
@@ -211,11 +210,7 @@ public:
                 as->Term();
                 as->Asm("sta " +lbl);
                 as->Term();
-                /*if (dynamic_cast<NodeVar* >(m_left)!=nullptr) {
-                    as->Term("lda ");
-                    m_left->Build(as);
-                    as->Term();
-                }*/
+
                 m_left->Build(as);
                 as->Term();
 
@@ -226,6 +221,8 @@ public:
             }
         }
         else {
+            // Word handling
+
             as->m_labelStack["wordAdd"].push();
             QString lblword = as->getLabel("wordAdd");
 
@@ -238,10 +235,9 @@ public:
             as->Write(lbl +"\t.byte\t0");
             as->Label(lblJmp);
             as->ClearTerm();
-            qDebug() << " A: " << m_right->m_op.getType();
 
             m_right->Build(as);
-            qDebug() << " B";
+
             as->Term();
             as->Asm("sta " +lbl);
             as->Term();
@@ -268,6 +264,24 @@ public:
             as->PopLabel("rightvarInteger");
             as->PopLabel("jmprightvarInteger");
         }
+
+    }
+
+    QString Build(Assembler *as) override {
+
+        // First check if both are consants:
+
+        if (isPureNumeric()) {
+            BothPureNumbersBinOp(as);
+            return "";
+        }
+
+        if (m_op.m_type==TokenType::MUL || m_op.m_type==TokenType::DIV) {
+            HandleMulDiv(as);
+            return "";
+        }
+        HandleRestBinOp(as);
+        // The rest is only plus and minus, and etc
         return "";
     }
 
