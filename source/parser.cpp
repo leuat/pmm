@@ -208,18 +208,55 @@ Node *Parser::Statement()
 }
 Node *Parser::Conditional(bool isWhileLoop)
 {
-    Node* a = Expr();
 
-    Token compareToken = m_currentToken;
-    Eat(compareToken.m_type);
+    QVector<Node*> left, right;
+    QVector<Token> compareTokens, conditionals;
 
-    Node* b= Expr();
+    // Start
+    bool done=false;
 
-    Eat(m_currentToken.m_type);
+    while (!done) {
+        done=true;
+
+        Node* a = Expr();
+
+        Token compareToken = m_currentToken;
+        Eat(compareToken.m_type);
+
+        Node* b= Expr();
+
+
+        // END
+        left.append(a);
+        right.append(b);
+        compareTokens.append(compareToken);
+/*        if (conditionals.count()==0)
+            conditionals.append(Token(TokenType::AND, "First and"));
+*/
+
+        if (m_currentToken.m_type==TokenType::AND || m_currentToken.m_type==TokenType::OR) {
+            conditionals.append(m_currentToken);
+
+            Eat(m_currentToken.m_type);
+
+            done=false;
+        }
+
+    }
+    if (m_currentToken.m_type==TokenType::THEN || m_currentToken.m_type==TokenType::DO)
+        Eat(m_currentToken.m_type);
+    else
+        ErrorHandler::e.Error("Expected THEN or DO after conditional", m_currentToken.m_lineNumber);
 
     Node* block = Block(false);
 
-    return new NodeConditional(compareToken, a,b,block, isWhileLoop);
+    Node* nodeElse = nullptr;
+    if (m_currentToken.m_type==TokenType::ELSE) {
+        Eat(TokenType::ELSE);
+        nodeElse = Block(false);
+    }
+
+    return new NodeConditional(compareTokens, left,right,block, isWhileLoop, conditionals, nodeElse);
 }
 
 
@@ -236,7 +273,7 @@ QVector<Node*> Parser::StatementList()
 
     }
     if (m_currentToken.m_type==TokenType::ID)
-        ErrorHandler::e.Error("Parser::Statementlist : Token should not be ID");
+        ErrorHandler::e.Error("Parser::Statementlist SYNTAX ERROR : Token should not be ID", m_currentToken.m_lineNumber);
 
 
     return results;
@@ -245,6 +282,15 @@ QVector<Node*> Parser::StatementList()
 
 Node *Parser::CompoundStatement()
 {
+    if (m_currentToken.m_type!=TokenType::BEGIN) {
+        // Single statement
+        Node* n =  Statement();
+  //      Eat(TokenType::SEMI);
+    //    qDebug() << m_currentToken.getType();
+      //  qDebug() << m_currentToken.m_value;
+
+        return n;
+    }
     Eat(TokenType::BEGIN);
     QVector<Node*> nodes = StatementList();
     Eat(TokenType::END);
@@ -252,7 +298,7 @@ Node *Parser::CompoundStatement()
     for (Node* n: nodes)
         root->children.append(n);
 
-
+//    qDebug() << "from begin block : " +m_currentToken.getType();
     return root;
 
 }
@@ -280,7 +326,7 @@ Node* Parser::Factor()
     Token t = m_currentToken;
 
     if (t.m_type==TokenType::TEOF)
-        ErrorHandler::e.Error("Syntax errror", m_currentToken.m_lineNumber);
+        ErrorHandler::e.Error("Syntax error", m_currentToken.m_lineNumber);
 
 
     if (t.m_type == TokenType::INTEGER_CONST || t.m_type ==TokenType::REAL_CONST
@@ -386,8 +432,12 @@ Node *Parser::FindProcedure()
 Node *Parser::Block(bool useOwnSymTab)
 {
 
-    if (m_currentToken.m_type!=TokenType::VAR  && m_currentToken.m_type!=TokenType::BEGIN)
+/*    if (m_currentToken.m_type!=TokenType::VAR  && m_currentToken.m_type!=TokenType::BEGIN)
         return nullptr;
+*/
+    if (m_currentToken.m_type==TokenType::PROCEDURE)
+        return nullptr;
+//    qDebug() << m_currentToken.getType() << " " << m_currentToken.m_value;
 
     return new NodeBlock(Declarations(), CompoundStatement(), useOwnSymTab);
 }

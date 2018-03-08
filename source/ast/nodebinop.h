@@ -81,17 +81,24 @@ public:
 
 
     void EightBitMul(Assembler* as) {
+
+        QString mulVar = as->NewLabel("mulRightVar");
+        QString mulVarJmp = as->NewLabel("mulRightVarJmp");
+
         as->Comment("8 bit mul");
         as->ClearTerm();
-        as->Term("lda ");
         m_left->Build(as);
-        as->Term();
-        as->Term("ldx ");
+        as->Term(); // lda z
+        as->Asm("pha");
+        as->Comment("Load right hand side");
         m_right->Build(as);
-        as->Term();
-        as->Asm("jsr multiply_eightbit");
-        as->Asm("txa");
+        as->Asm("tax");
+        as->Asm("pla");
 
+        as->Term();
+
+        as->Asm("jsr multiply_eightbit");
+        as->Asm("txa"); // result in a
 
     }
 

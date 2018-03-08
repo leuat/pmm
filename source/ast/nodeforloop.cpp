@@ -30,11 +30,39 @@ QString NodeForLoop::Build(Assembler *as) {
         to = QString::number(((NodeNumber*)m_b)->m_val);
     if (dynamic_cast<const NodeVar*>(m_b) != nullptr)
         to = ((NodeVar*)m_b)->value;
-    if (m_b->m_op.m_type==TokenType::INTEGER ||m_b->m_op.m_type==TokenType::INTEGER_CONST )
-        to = "#" + to;
+  //  if (m_b->m_op.m_type==TokenType::INTEGER ||m_b->m_op.m_type==TokenType::INTEGER_CONST )
+  //      to = "#" + to;
     as->StartForLoop(var, to);
     m_block->Build(as);
 
-    as->EndForLoop(to);
+//    as->EndForLoop(m_b);
+    as->m_stack["for"].pop();
+    QString loopForFix = as->NewLabel("forLoopFix");
+    QString loopDone = as->NewLabel("forLoopDone");
+
+    as->Asm("inc " + as->m_stack["for"].current());
+
+//    if (Syntax::s.isNumeric(endVal))
+//        endVal = "#" + endVal;
+    m_b->Build(as);
+    as->Term();
+    as->Asm("cmp " + as->m_stack["for"].current());
+    as->Asm("bne "+loopForFix);
+    as->Asm("jmp "+loopDone);
+    as->Label(loopForFix);
+    as->Asm("jmp " + as->getLabel("for"));
+
+    as->Label(loopDone);
+
+    as->m_labelStack["for"].pop();
+    as->m_labelStack["forLoopFix"].pop();
+    as->m_labelStack["forLoopDone"].pop();
+
+ //   qDebug() << label2;
+  //  qDebug() << labelDone;
+
+
+
+ //   qDebug() << "loop: " << m_stack["for"].current();
     return "";
 }

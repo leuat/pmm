@@ -1,33 +1,214 @@
 program UnitTest;
 var  
-	x,y,i,val, ok: byte; 
+	x,y,z,i,val, ok: byte; 
+	screeny : byte;
 	arr : array[#255] of byte;
 	iarr : array[#255] of integer;
 	str : string;
 	
 
+procedure incScreen();
+begin
+	screeny:=screeny+#1;
+	if screeny>#23 then
+		screeny := #0;
 
-procedure Test1();
+	MoveTo(#0, screeny, #$04);
+
+end;
+
+
+
+procedure TestConditionals();
+begin
+	x:=#0;
+	y:=#10;
+	z:=#20;
+	if y<#20 then 
+		PrintString("CONDITIONAL1 = OK", #0, #40)
+	else
+		PrintString("CONDITIONAL1 = FAILED ****************** ", #0, #40);
+
+	incScreen();	
+
+	if x=#0 then 
+		PrintString("CONDITIONAL2 = OK", #0, #40)
+	else
+		PrintString("CONDITIONAL2 = FAILED ****************** ", #0, #40);
+
+	incScreen();	
+
+	if y>#5 then 
+		PrintString("CONDITIONAL3 = OK", #0, #40)
+	else
+		PrintString("CONDITIONAL3 = FAILED ****************** ", #0, #40);
+	incScreen();	
+
+	if y<>#5 then 
+		PrintString("CONDITIONAL3 = OK", #0, #40)
+	else
+		PrintString("CONDITIONAL3 = FAILED ****************** ", #0, #40);
+	incScreen();	
+
+	if y=#5 or x<>#5 then 
+		PrintString("CONDITIONAL4 = OK", #0, #40)
+	else
+		PrintString("CONDITIONAL4 = FAILED ****************** ", #0, #40);
+
+	incScreen();	
+
+	if y>#5 and x=#0 then 
+		PrintString("CONDITIONAL5 = OK", #0, #40)
+	else
+		PrintString("CONDITIONAL5 = FAILED ****************** ", #0, #40);
+
+	incScreen();
+
+	if y=#10 and x=#0 and z=#20 then 
+		PrintString("CONDITIONAL6 = OK", #0, #40)
+	else
+		PrintString("CONDITIONAL6 = FAILED ****************** ", #0, #40);
+	incScreen();
+
+	if y=#5 or x=#23 or z<>#10 then 
+		PrintString("CONDITIONAL7 = OK", #0, #40)
+	else
+		PrintString("CONDITIONAL7 = FAILED ****************** ", #0, #40);
+
+	if x=#1 or y=#10 then 
+		PrintString("CONDITIONAL8 = OK", #0, #40)
+	else
+		PrintString("CONDITIONAL8 = FAILED ****************** ", #0, #40);
+
+
+	incScreen();
+	
+
+end;
+
+procedure TestMul();
 begin
 
 	ok:=#1;
 
 	x:=#2;
+	y:=#3;
+	z:=#2;
 	// ((3*(6+1)) + 2*2) & 7 = 25 & 7 = 1
 
 //	val:=((x*(#2*x+#1)) + #2*#2) & #7; // should be 3*3=9%7 = 2;
-	val:=(x*(x*#2)); // should be 3*3=9%7 = 2;
-	if val=#12 then begin
-		printstring("ASSIGN X OK IS 2",#0,#40);
-	end;
+//	val:=(x*(x*#2)); // should be 3*3=9%7 = 2;
+	val:=x;
+	if val=#2 then printstring("ASSIGN1 OK ",#0,#40)
+	else printString("ASSING 1 FAILED ****************", #0, #40);
+	val:=x*x;
+	incScreen();
+	if val=#4 then printstring("ASSIGN2 OK ",#0,#40)
+	else printString("ASSING 2 FAILED ****************", #0, #40);
+	incScreen();
+
+	val:=x*(x+#1);
+	if val=#6 then printstring("ASSIGN3 OK ",#0,#40)
+	else printString("ASSING 3 FAILED ****************", #0, #40);
+
+	incScreen();
+
+	val:=x*(x*#2+#1); // 2*(2*2+1)= (2*5) = 10
+	if val=#10 then printstring("ASSIGN4 OK ",#0,#40)
+	else printString("ASSING 4 FAILED ****************", #0, #40);
+	incScreen();
+
+	val:=x*y*z; // 2*(2*2+3)*3= (2*7)*3 = 42
+	if val=#12 then printstring("ASSIGN5 OK ",#0,#40)
+	else printString("ASSING 5 FAILED ****************", #0, #40);
+	incScreen();
+
+	val:=x*(y+#2)*(z*#2-#1); // 2*(3+2)*(2*2-1)  = 2*5*3=30
+	if val=#30 then printstring("ASSIGN6 OK ",#0,#40)
+	else printString("ASSING 6 FAILED ****************", #0, #40);
+	incScreen();
 
 end;
+
+procedure TestWhile();
+begin
+	x:=#10;
+	val:=#0;
+	while x<>#1 do begin
+		x:=x-#1;
+		val:=val+#1;
+	end;
+
+	if val=#9 then
+		printstring("WHILE1 OK ",#0,#40)
+	else
+		printstring("WHILE1 FAILED ******************** ",#0,#40);
+
+
+	incScreen();
+
+end;
+
+procedure TestFor();
+begin
+	for x:=#0 to #10 do begin
+		arr[x]:=x;
+	end;
+
+	val:=#0;
+	for x:=#0 to #3 do begin
+		val:=val+x;
+	end;
+	if val<>#6 then
+		printstring("FOR1 OK ",#0,#40)
+	else
+		printstring("FOR1 FAILED ******************** ",#0,#40);
+	x:=#5;
+	val:=#0;
+	incScreen();
+	for x:=#0 to x*x do begin
+		val:=val+#1;
+	end;
+
+	if val<>#25 then
+		printstring("FOR2 OK ",#0,#40)
+	else
+		printstring("FOR2 FAILED ******************** ",#0,#40);
+
+	incScreen();
+
+	for x:=#0 to x*x do begin
+		val:=val+#1;
+	end;
+
+
+	arr[#4]:=#3;
+	x:=#2;
+	val:=#0;
+	for x:=#5 to arr[x*#3] do begin
+		val:=val+#1;
+	end;
+
+	if val<>#8 then
+		printstring("FOR3 OK ",#0,#40)
+	else
+		printstring("FOR3 FAILED ******************** ",#0,#40);
+
+	incScreen();
+
+
+	
+end;
+
 
 
 begin
 	ClearScreen(#$20, SCREEN_CHAR_LOC);
 	MoveTo(#0, #0, #$04);
-	Test1();
+	TestConditionals();
+	TestWhile();
+	TestMul();
+	TestFor();
 
 
 	Loop();

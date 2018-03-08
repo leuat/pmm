@@ -50,18 +50,20 @@ public:
     }
 
    QString Build(Assembler* as) {
-       as->VarDeclHeader();
+       //as->VarDeclHeader();
+       QString label = as->NewLabel("block");
+       as->Asm("jmp " + label);
        bool blockLabel = false;
         for (Node* n: m_decl) {
             if (!blockLabel)
                 if (dynamic_cast<NodeVarDecl*>(n)==nullptr) {
-                    as->Label(as->getLabel("block"));
+                    as->Label(label);
                     blockLabel = true;
                 }
             n->Build(as);
         }
         if (!blockLabel)
-            as->Label(as->getLabel("block"));
+            as->Label(label);
         if (m_compoundStatement!=nullptr)
             m_compoundStatement->Build(as);
 

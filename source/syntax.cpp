@@ -36,6 +36,9 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::ASM,"ASM"));
     reservedWords.append(Token(TokenType::INCSID,"INCSID"));
     reservedWords.append(Token(TokenType::INTERRUPT,"INTERRUPT"));
+    reservedWords.append(Token(TokenType::ELSE,"ELSE"));
+    reservedWords.append(Token(TokenType::OR,"OR"));
+    reservedWords.append(Token(TokenType::AND,"AND"));
 
 }
 

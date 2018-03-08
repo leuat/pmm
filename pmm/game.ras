@@ -76,7 +76,7 @@ begin
 	//scroll_x:= joystickvalue[#1];
 	//scroll_x:= scroll_x- joystickvalue[#2];
 
-	if joystickup=#1 then begin
+	if joystickbutton=#1 then begin
 		SoundTest(#32);
 	end;
 
@@ -110,7 +110,7 @@ end;
 
 procedure UpdateStars();
 begin
-	for i:=#0 to #40 do begin
+	for i:=#0 to #20 do begin
 
 		if stars_y[i]>#22*#8 then begin
 			stars_y[i]:=#1;
@@ -119,8 +119,8 @@ begin
 
 		y:=stars_y[i];
 		x:=y;
-		y:=y/#8;
-		and(x,#$7);
+		y:=(y/#8);
+		x:=x&#$7;
 		x:=x+#34;
 
 
@@ -160,7 +160,7 @@ begin
 	colorSize:=#4;
 	bar_0 := sine[time*#2]/#4 + #70;
 	colorAdd:=time /#4;
-	And(colorAdd, #15);
+	colorAdd:=colorAdd &#15;
 	colorIndex :=#0;
 
 	kernelInterrupt();

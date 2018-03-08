@@ -88,15 +88,12 @@ begin
 	sprite_y := sprite_y - joystickup*#2;
 
 	rand(#15, #45, x);
-	if joystickleft<>#0 then begin
+	if joystickleft=#1 or joystickright=#1 then
 		MoveSoundEffect(x);
-	end;
-	if joystickright<>#0 then begin
+	if joystickup<>#0 or joystickdown <>#0 then
 		MoveSoundEffect(x);
-	end;
-	if joystickup<>#0 then begin
-		MoveSoundEffect(x);
-	end;
+ 
+
 
 	asm(";feil");
 	if joystickbutton=#1 then begin

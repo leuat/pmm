@@ -2,7 +2,7 @@
 
 
 PVar NodeConditional::Execute(SymbolTable *symTab, uint lvl) {
-    Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
+/*    Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
     level = lvl+1;
     ErrorHandler::e.DebugLow("Calling Conditional Node",level);
     PVar a = m_a->Execute(symTab, level);
@@ -24,64 +24,120 @@ PVar NodeConditional::Execute(SymbolTable *symTab, uint lvl) {
     if (m_op.m_type==TokenType::LESS)
         if ((a<b))
             m_block->Execute(symTab, level);
-
+*/
     return PVar();
 
 }
 
+void NodeConditional::ConditionalTryFail(Assembler* as, QString labelFailed, int i)
+{
+    as->ClearTerm();
+    m_b[i]->Build(as);
+    as->Term();
+    as->Term("cmp ");
+    m_a[i]->Build(as);
+    as->Term();
+
+    if (m_compares[i].m_type==TokenType::EQUALS)
+        as->Asm("bne " + labelFailed);
+    if (m_compares[i].m_type==TokenType::NOTEQUALS)
+        as->Asm("beq " + labelFailed);
+    if (m_compares[i].m_type==TokenType::LESS)
+        as->Asm("bcc " + labelFailed);
+    if (m_compares[i].m_type==TokenType::GREATER)
+        as->Asm("bcs " + labelFailed);
+}
+
+void NodeConditional::ConditionalTrySuccess(Assembler* as, QString labelSuccess, int i)
+{
+    as->ClearTerm();
+    m_b[i]->Build(as);
+    as->Term();
+    as->Term("cmp ");
+    m_a[i]->Build(as);
+    as->Term();
+
+    if (m_compares[i].m_type==TokenType::NOTEQUALS)
+        as->Asm("bne " + labelSuccess);
+    if (m_compares[i].m_type==TokenType::EQUALS)
+        as->Asm("beq " + labelSuccess);
+    if (m_compares[i].m_type==TokenType::GREATER)
+        as->Asm("bcc " + labelSuccess);
+    if (m_compares[i].m_type==TokenType::LESS)
+        as->Asm("bcs " + labelSuccess);
+}
+
+
+
 QString NodeConditional::Build(Assembler *as) {
 
 
-    as->m_labelStack["branch"].push();
-    as->m_labelStack["while"].push();
-    as->m_labelStack["branchProblem"].push();
-    as->m_labelStack["branchProblem2"].push();
-    QString label = as->getLabel("branch");
-    QString labelOutside = as->getLabel("while");
-    QString labelb1 = as->getLabel("branchProblem");
-    QString labelb2 = as->getLabel("branchProblem2");
+    QString labelStartOverAgain = as->NewLabel("while");
+    QString lblstartTrueBlock = as->NewLabel("ConditionalTrueBlock");
+
+    QString labelElse = as->NewLabel("elseblock");
+    QString labelElseDone = as->NewLabel("elsedoneblock");
+    QString labelFailed = as->NewLabel("conditionalfailed");
 
     if (m_isWhileLoop)
-        as->Label(labelOutside);
+        as->Label(labelStartOverAgain);
 
-    as->ClearTerm();
-    m_b->Build(as);
-    as->Term();
-    as->Term("cmp ");
-    m_a->Build(as);
-    as->Term();
+    // Loop through all conditionals
 
-    if (m_op.m_type==TokenType::NOTEQUALS)
-        as->Asm("bne " + labelb1);
-    if (m_op.m_type==TokenType::EQUALS)
-        as->Asm("beq " + labelb1);
-    if (m_op.m_type==TokenType::GREATER)
-        as->Asm("bcc " + labelb1);
-    if (m_op.m_type==TokenType::LESS)
-        as->Asm("bcs " + labelb1);
+    if (m_conditionals.count()==0)
+        ConditionalTryFail(as, labelFailed, 0);
+    else
+    {
+    for (int i=0;i<m_conditionals.count();i++) {
 
-    as->Asm("jmp " + label);
-    /*
+        if (m_conditionals[i].m_type == TokenType::AND) {
+            ConditionalTryFail(as, labelFailed, i);
+            ConditionalTryFail(as, labelFailed, i+1);
+        }
+        if (m_conditionals[i].m_type == TokenType::OR) {
+            ConditionalTrySuccess(as, lblstartTrueBlock, i);
+            ConditionalTrySuccess(as, lblstartTrueBlock, i+1);
+            if (i==m_conditionals.count()-1)
+                as->Asm("jmp " + labelFailed);
+        }
+    }
 
-    as->Asm("jmp " + labelb2);
-    as->Label(labelb1); // This means skip inside
-    as->Asm("jmp " + label);
-    as->Label(labelb2);
-
-    */
-    as->Label(labelb1); // This means skip inside
+    }
+    // if all is OK, jump right to start block
+    as->Asm("jmp " + lblstartTrueBlock); // All conditionals checked out!
+    // Failed label
+    as->Label(labelFailed);
+    // Do we have an else block?
+    if (m_elseBlock!=nullptr)
+        as->Asm("jmp " + labelElse); // All conditionals false: skip to end (or else block)
+    // If just plain conditional, jump to end
+    as->Asm("jmp " + labelElseDone);
+    // Start main block
+    as->Label(lblstartTrueBlock); // This means skip inside
 
     m_block->Build(as);
+    if (m_elseBlock!=nullptr)
+        as->Asm("jmp " + labelElseDone);
 
+    // If while loop, return to beginning of conditionals
     if (m_isWhileLoop)
-        as->Asm("jmp " + labelOutside);
+        as->Asm("jmp " + labelStartOverAgain);
 
-    as->Label(label);
+    // An else block?
+    if (m_elseBlock!=nullptr) {
+        as->Label(labelElse);
+        m_elseBlock->Build(as);
 
-    as->m_labelStack["while"].pop();
-    as->m_labelStack["branch"].pop();
-    as->m_labelStack["branchProblem"].pop();
-    as->m_labelStack["branchProblem2"].pop();
+    }
+    as->Label(labelElseDone); // Jump here if not
+
+    as->PopLabel("while");
+    as->PopLabel("ConditionalTrueBlock");
+    as->PopLabel("elseblock");
+    as->PopLabel("elsedoneblock");
+    as->PopLabel("conditionalfailed");
+
+
 
     return "";
 }

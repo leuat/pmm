@@ -310,7 +310,7 @@ void AsmMOS6502::OptimisePassStaLda()
             }
             QString var = getToken(l0,1);
             if (getToken(l1,1)==var && getToken(l1,0)=="lda") {
-
+                qDebug() << "Removing: " << l1 << " on line " << j;
                 m_removeLines.append(j);
                 i++;
                 continue;
@@ -329,13 +329,14 @@ void AsmMOS6502::OptimiseJumps()
         if (l0.contains("jmp ")) {
             QString l1 = getNextLine(i,j);
             QString lbl0 = getToken(l0, 1);
+            //qDebug() << lbl0 << " vs " << l1 ;
             if (l1.toLower().contains(lbl0.toLower()))
             {
-                qDebug() << "Removing:";
-                qDebug() << " " + l0;
-                qDebug() << " " + l1;
-                //m_removeLines.append(i);
-                //m_removeLines.append(j);
+                //qDebug() << "Removing:";
+                //qDebug() << " " + l0;
+                //qDebug() << " " + l1;
+                m_removeLines.append(i);
+                m_removeLines.append(j);
                 i++;
                 continue;
             }
@@ -347,7 +348,7 @@ void AsmMOS6502::OptimiseJumps()
 
 QString AsmMOS6502::getLine(int i)
 {
-    QString s = m_source[i].trimmed().toLower().simplified();
+    QString s = m_source[i].trimmed().toLower().simplified().remove("\n");
     return s;
 }
 
@@ -356,10 +357,17 @@ QString AsmMOS6502::getNextLine(int i, int &j)
     bool ok = false;
     i=i+1;
     QString line ="";
-    while (i<m_source.count() && getLine(i)=="") {
+
+    while (i<m_source.count() && (
+           getLine(i).remove(" ")=="" ||
+           getLine(i).remove(" ")=="\t" ||
+           getLine(i).remove(" ").remove("\t").startsWith(";")==true)) {
+        //if (getLine(i).contains(";"))
+    //            qDebug() << getLine(i);
         i++;
     }
     j=i;
+//    qDebug() << "RET: " << getLine(i);
     return getLine(i);
 
 }
@@ -376,7 +384,7 @@ void AsmMOS6502::RemoveLines()
 {
     int k=0;
     for (int i: m_removeLines) {
-        qDebug() << "Removing line " << (i) << " : " << getLine(i-k);
+        //qDebug() << "Removing line " << (i) << " : " << getLine(i-k);
         m_source.removeAt(i-k);
         k++;
     }

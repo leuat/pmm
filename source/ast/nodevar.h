@@ -140,9 +140,7 @@ public:
     QString Build(Assembler *as) override {
         QString  val = value;
         Pmm::Data::d.lineNumber = m_op.m_lineNumber;
-        qDebug() << " AS";
         Symbol* s = as->m_symTab->LookupVariables(value);
-        qDebug() << s;
         if (s==nullptr) {
             ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?", m_op.m_lineNumber);
         }
