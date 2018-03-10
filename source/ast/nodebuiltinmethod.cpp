@@ -54,7 +54,13 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         as->Asm("sta $d016");
 
     }
+    if (m_procName.toLower()=="hidebordery") {
+        as->Comment("Hide y border");
+        as->Asm("lda $d011");
+        as->Asm("and #$f7  ; change bit 4");
+        as->Asm("sta $d011");
 
+    }
     if (m_procName.toLower() =="settextmode") {
         as->Comment("Regular text mode ");
         as->Asm("lda $D011");
@@ -64,6 +70,13 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower() =="setbank") {
         SetBank(as);
     }
+
+    if (m_procName.toLower() == "copyhalfscreen")
+        CopyHalfScreen(as);
+
+    if (m_procName.toLower() == "copyfullscreen")
+        CopyFullScreen(as);
+
     if (m_procName.toLower() =="setbitmapmode") {
         as->Comment("Bitmap mode ");
         as->Asm("lda #$3b");
@@ -95,8 +108,11 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower()=="rand")
         Rand(as);
-    if (m_procName.toLower() == "scroll")
-       Scroll(as);
+    if (m_procName.toLower() == "scrollx")
+       ScrollX(as);
+
+    if (m_procName.toLower() == "scrolly")
+       ScrollY(as);
 
     if (m_procName.toLower() == "incscreenx")
             IncScreenX(as);
@@ -232,14 +248,23 @@ void NodeBuiltinMethod::Peek(Assembler* as)
 void NodeBuiltinMethod::MemCpy(Assembler* as)
 {
     //as->ClearTerm();
-    NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
-    if (var==nullptr) {
-        ErrorHandler::e.Error("First parameter must be variable", m_op.m_lineNumber);
+/*    NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
+    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (var==nullptr && num==nullptr) {
+        ErrorHandler::e.Error("First parameter must be variable or number", m_op.m_lineNumber);
     }
-    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
-    if (num==nullptr) {
+    QString addr = "";
+    if (num!=nullptr)
+        addr = num->HexValue();
+    if (var!=nullptr)
+        addr = var->value;
+
+    NodeNumber* num2 = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
+    if (num2==nullptr) {
         ErrorHandler::e.Error("Second parameter must be pure numeric", m_op.m_lineNumber);
     }
+*/
+
 
 
     as->Comment("memcpy");
@@ -247,7 +272,14 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     as->Asm("ldx #0");
     as->Label(lbl);
     //LoadVar(as, 0, "x");
-    as->Asm("lda " + var->value + " + #" + num->HexValue() + ",x");
+    //as->Asm("lda " + addr + " + #" + num2->HexValue() + ",x");
+    as->ClearTerm();
+    /*as->Term("lda ");
+    m_params[0]->Build(as);
+    as->Term(",x",true);
+    */
+    LoadVar(as,0, "x");
+
     SaveVar(as, 2, "x");
     as->Asm("inx");
     as->Term("cpx ");
@@ -629,7 +661,7 @@ void NodeBuiltinMethod::Fill(Assembler *as)
 }
 
 
-void NodeBuiltinMethod::Scroll(Assembler *as)
+void NodeBuiltinMethod::ScrollX(Assembler *as)
 {
     LoadVar(as, 0);
    // as->Asm("dec $d019");
@@ -640,6 +672,20 @@ void NodeBuiltinMethod::Scroll(Assembler *as)
     m_params[0]->Build(as);
     as->Term();
     as->Asm("sta $d016");
+
+}
+
+void NodeBuiltinMethod::ScrollY(Assembler *as)
+{
+    LoadVar(as, 0);
+   // as->Asm("dec $d019");
+    as->Asm("lda $d011  ");
+    as->Asm("and #$F8"); // 8 = 1000
+    as->Asm("clc");
+    as->Term("adc ");
+    m_params[0]->Build(as);
+    as->Term();
+    as->Asm("sta $d011");
 
 }
 
@@ -1101,6 +1147,101 @@ void NodeBuiltinMethod::CopyImageColorData(Assembler *as)
     as->Asm("bne " + lbl);
 
     as->PopLabel("copyimageloop");
+
+}
+
+void NodeBuiltinMethod::CopyHalfScreen(Assembler *as)
+{
+    as->Comment("Copy half screen unrolled 500 bytes = 12.5*40");
+
+    QString lbl = as->NewLabel("halfcopyloop");
+    QString lbl2 = as->NewLabel("halfcopyloop2");
+
+    // Copy last bit first
+  /*  as->Asm("ldx #20");
+    as->Label(lbl2);
+    as->Term("lda ");
+    m_params[0]->Build(as);
+    as->Term(" + #40*#12-#1,x", true);
+    as->Term("sta ");
+    m_params[1]->Build(as);
+    as->Term(" + #40*#12-#1,x", true);
+    as->Asm("dex");
+    as->Asm("bne "+lbl2);
+
+*/
+    NodeNumber * lines = dynamic_cast<NodeNumber*>(m_params[2]);
+    if (lines==nullptr)
+        ErrorHandler::e.Error("CopyImageColorData : parameter 3 must be a constant number!");
+
+    NodeNumber *inverted = dynamic_cast<NodeNumber*>(m_params[3]);
+    if (inverted==nullptr)
+        ErrorHandler::e.Error("CopyImageColorData : parameter 4 must be a constant number!");
+
+    as->Asm("ldx #40");
+    as->Label(lbl);
+
+
+    int cnt = lines->m_val;
+
+    QString shift = "";
+    for (int i=0;i<cnt;i++) {
+        if (inverted->m_val==1)
+            shift = "" +QString::number(((cnt-1-i)*40)) +" -1 ";
+        else
+            shift = "" +QString::number(((i)*40)) +" -1 ";
+
+        as->ClearTerm();
+        as->Term("lda ");
+        m_params[0]->Build(as);
+        as->Term(" + "+shift+",x", true);
+        as->Term("sta ");
+        m_params[1]->Build(as);
+        as->Term(" + "+shift+",x", true);
+    }
+    // Afterwards, copy last 25 bytes
+    as->Asm("dex");
+    as->Asm("bne "+lbl);
+
+    // Param 0: from
+    // Param 1: to
+
+    as->PopLabel("halfcopyloop");
+    as->PopLabel("halfcopyloop2");
+
+}
+
+void NodeBuiltinMethod::CopyFullScreen(Assembler *as)
+{
+    as->Comment("Copy screen unrolled 1000 bytes");
+
+    QString lbl = as->NewLabel("fullcopyloop");
+    QString lbl2 = as->NewLabel("fullcopyloop2");
+    QString lblDone = as->NewLabel("fullcopydone");
+
+    as->Asm("ldx #40");
+    as->Label(lbl);
+    for (int i=0;i<25;i++) {
+//        QString shift = "" +QString::number(((24-i)*40)) +" -1 ";
+        QString shift = "" +QString::number(((24-i)*40)) +" -1 ";
+
+        as->ClearTerm();
+        as->Term("lda ");
+        m_params[0]->Build(as);
+        as->Term(" + "+shift+",x", true);
+        as->Term("sta ");
+        m_params[1]->Build(as);
+        as->Term(" + "+shift+",x", true);
+    }
+    // Afterwards, copy last 25 bytes
+    as->Asm("dex");
+    as->Asm("beq "+lblDone);
+    as->Asm("jmp " + lbl);
+    as->Label(lblDone);
+
+    as->PopLabel("fullcopyloop");
+    as->PopLabel("fullcopyloop2");
+    as->PopLabel("fullcopydone");
 
 }
 

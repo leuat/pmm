@@ -123,14 +123,37 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER<< BuiltInFunction::Type::INTEGER
                 );
 
-    builtInFunctions["scroll"] = BuiltInFunction(
-                "scroll",
+    builtInFunctions["scrollx"] = BuiltInFunction(
+                "scrollx",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["scrolly"] = BuiltInFunction(
+                "scrolly",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
                 );
 
     builtInFunctions["incscreenx"] = BuiltInFunction(
                 "incscreenx",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["hidebordery"] = BuiltInFunction(
+                "hidebordery",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["copyhalfscreen"] = BuiltInFunction(
+                "copyhalfscreen",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
+                );
+    builtInFunctions["copyfullscreen"] = BuiltInFunction(
+                "copyfullscreen",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
                 );
 
     builtInFunctions["sin"] = BuiltInFunction(

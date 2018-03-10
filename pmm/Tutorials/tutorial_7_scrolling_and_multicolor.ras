@@ -51,7 +51,7 @@ begin
 		// Keep until rasterline hits text line
 		peek(RASTERLINE_POS, #0, y);
 		val:=sine[y*#8 + wobbleShift]/#32;
-		scroll(val);
+		scrollx(val);
 		waitnoraster(#1);
 	end;
 
@@ -67,14 +67,14 @@ begin
 	poke(VIC_DATA_LOC, #0, #$1A);
 
 	// scroll this area
-	Scroll(#8-xscroll);
+	Scrollx(#8-xscroll);
 	// wait for rasterline to hit near bottom
 	waitForRaster(#25*#10);
 	// switch back to bank #1 and set multi color mode again
 
 	setbank(VIC_BANK1);
 
-	Scroll(#0); 
+	Scrollx(#0); 
 	setmulticolormode();
 	setbitmapmode();
 

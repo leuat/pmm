@@ -1,0 +1,169 @@
+program Tutorial8;
+var  
+   index, scroll, time, a, val, color, colorShift,i : byte; 
+   currentBank : byte;
+   mainChar: IncBin("test.bin","$27FF");
+   fade : array [16] of byte = (11,6,6,12,4,14,15,1,1,15,14,4,12,6,6,11); 
+	
+
+
+procedure CopyScreen(ul_:byte);
+begin
+	if currentBank=#0 then begin
+		if ul_=#0 then
+			copyhalfscreen($0400 + 520, $4400 + 40 + 520,#12, #1)
+		else
+			copyhalfscreen($0400, $4400 + 40, #13, #1);
+
+	end;
+	if currentBank=#1 then begin
+		if ul_=#0 then 
+			copyhalfscreen($4400+520, $0400 + 40 + 520, #12, #1)
+		else
+			copyhalfscreen($4400, $0400 + 40,#13, #1);
+	end;
+
+end;
+
+
+
+
+procedure CopyColor(ul2_:byte);
+var
+   temp_colorCopy : array[40] of byte;
+begin
+	if ul2_=#0 then begin
+		// First, copy the missing line
+		memcpy($D800 + 40*13, #0, temp_colorCopy, #40);
+		copyhalfscreen($D800, $D800+40,#13, #1);
+	end
+	else begin 
+		copyhalfscreen($D800+14*40 , $D800+15*40,#11,#1);
+		memcpy(temp_colorCopy, #0, $D800 + 14*40, #40);
+
+	end;
+
+end;
+
+procedure SwitchBank();
+begin
+	if currentBank=#0 then 
+		SetBank(VIC_BANK1)
+	else 
+		SetBank(VIC_BANK0);
+
+	poke(VIC_DATA_LOC, #0, #$1A);
+
+	currentBank:=(currentBank+#1)&#1;
+
+
+
+end;
+
+
+
+procedure PrintLine();
+begin
+	for i:=#0 to #40 do begin
+		rand(#0, #255, val);
+		val:=val/#32+#64;
+//		val:=sine[(a*#4 + time)]/#16 + #64;
+		if currentBank=#1 then
+			poke($0400, i, val)
+		else
+			poke($4400, i, val);
+		
+	end;
+
+end;
+
+procedure printColor();
+begin
+	colorShift:=#0;
+	color:=fade[(time/#16 + colorShift)&#15];
+	for i:=#0 to #40 do begin
+//		rand(#0, #255, colorShift);
+	//	colorShift:=colorShift/#64;
+		poke($D800,i,color);
+	end;
+
+end;
+
+
+procedure VerticalScroll();
+begin
+		scroll:=(scroll+#1)&#7;
+
+		if scroll=#0 then begin
+			WaitForRaster(#150);
+			CopyColor(#0);
+		end;
+
+
+		waitForRaster(#250);
+		if scroll=#0 then SwitchBank();
+		if scroll=#1 then CopyScreen(#1);
+		if scroll=#4 then CopyScreen(#0);
+
+
+
+		if scroll=#0 then begin
+			CopyColor(#1);
+			printColor();
+		end;	
+		scrolly(scroll);
+
+		if scroll=#7 then PrintLine();
+
+end;
+
+
+
+interrupt Update();
+begin
+	time:=time+#1;
+	a:=(time*#4)&#1;
+
+	if a=#0 then 
+		VerticalScroll();
+
+
+	kernelinterrupt();
+end;
+
+procedure Setup();
+begin
+	// Copy charset to bank 1
+	memcpy($27FF, #0, $27FF+$4000, #0);
+	memcpy($28FF, #0, $27FF+$4100, #0);
+	memcpy($29FF, #0, $27FF+$4200, #0);
+	memcpy($2AFF, #0, $27FF+$4300, #0);
+	
+	poke(SCREEN_BG_COL, #0, #0);
+	poke(SCREEN_FG_COL, #0, #0);
+
+// Hide x border
+/*	asm("
+	lda #$00 ;to enter 38 colomn mode 
+	and #$f7 ;change 4th bit to a 1 
+	sta $d016
+");*/
+	hideBorderY(#0);
+
+
+end;
+
+
+begin
+	time:=#0;	
+	currentBank:=#0;
+	Setup();
+	ClearScreen(#$20, SCREEN_CHAR_LOC);
+	ClearScreen(#$00, SCREEN_COL_LOC);
+	poke(VIC_DATA_LOC, #0, #$1A);
+
+	disableinterrupts();
+	RasterIRQ(Update(), #1);
+	enableinterrupts();
+
+end.

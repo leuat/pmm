@@ -38,7 +38,8 @@ public:
     void Fill(Assembler* as);
     void PrintNumber(Assembler* as);
     void PrintString(Assembler* as);
-    void Scroll(Assembler* as);
+    void ScrollX(Assembler* as);
+    void ScrollY(Assembler* as);
     void Joystick(Assembler* as);
     void BitOp(Assembler* as, int type);
     PVar Execute(SymbolTable* symTab, uint lvl) override;
@@ -57,6 +58,9 @@ public:
     void MemCpyLarge(Assembler* as);
     void SetBank(Assembler* as);
     void CopyImageColorData(Assembler* as);
+    void CopyHalfScreen(Assembler* as);
+    void CopyFullScreen(Assembler* as);
+
 
     void LoadVar(Assembler* as, int paramNo, QString register, QString load="");
     void LoadVar(Assembler* as, int paramNo);
