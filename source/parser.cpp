@@ -80,6 +80,7 @@ void Parser::VerifyToken(Token t)
 }
 
 
+
 Node *Parser::Variable()
 {
     Node* n = nullptr;
@@ -137,6 +138,7 @@ Node *Parser::AssignStatement()
 
 
     if (m_currentToken.m_type!=TokenType::ASSIGN) {
+//        qDebug() << m_currentToken;
         ErrorHandler::e.Error("Could not find variable or procedure '" + t.m_value+  "'", t.m_lineNumber);
     }
     Eat(TokenType::ASSIGN);
@@ -372,10 +374,55 @@ Node* Parser::Term()
     return node;
 }
 
-Node* Parser::Parse()
+
+void Parser::Preprocess()
 {
     m_lexer->Initialize();
+    m_lexer->m_ignorePreprocessor = false;
     m_currentToken = m_lexer->GetNextToken();
+    qDebug() << "Start!";
+    while (m_currentToken.m_type!=TokenType::TEOF) {
+        if (m_currentToken.m_type == TokenType::PREPROCESSOR) {
+            qDebug() << m_currentToken.m_value;
+            if (m_currentToken.m_value=="include") {
+                Eat(TokenType::PREPROCESSOR);
+                QString filename =m_lexer->m_path +"/"+ m_currentToken.m_value;
+
+                QString text = m_lexer->loadTextFile(filename);
+                int ln=m_lexer->getLineNumber(m_currentToken.m_value);
+                m_lexer->m_text.insert(m_lexer->m_pos, text);
+                m_lexer->m_includeFiles.append(
+                            FilePart(filename,ln, ln+ text.split("\n").count()));
+
+                Eat(TokenType::STRING);
+                //Eat(TokenType::SEMI);
+                //IncludeFile(filename);
+            }
+
+        }
+
+        Eat(m_currentToken.m_type);
+    }
+    qDebug() << m_lexer->m_text;
+
+    qDebug() << "Done preprocessor";
+//    qDebug() << "FIRST TYPE " << m_currentToken.getType();
+
+}
+
+Node* Parser::Parse()
+{
+    // Call preprocessor for include files etc
+    m_lexer->m_text = m_lexer->m_orgText;
+    Preprocess();
+
+    m_lexer->Initialize();
+    m_lexer->m_ignorePreprocessor = true;
+    m_currentToken = m_lexer->GetNextToken();
+   /* qDebug() << m_lexer->m_pos;
+    qDebug() << m_lexer->m_currentChar;
+    qDebug() << m_currentToken.getType();
+*/
     //qDebug() <<m_lexer->m_text[0];
     SymbolTable::Initialize();
     InitBuiltinFunctions();

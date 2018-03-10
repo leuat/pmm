@@ -19,6 +19,7 @@ public:
     bool Build(Type, QString projDir);
     void SaveBuild(QString filename);
     void HandleError(FatalErrorException fe, QString se);
+    void FindLineNumberAndFile(int inLe, QString& file, int& outle);
 };
 
 #endif // INTERPRETER_H

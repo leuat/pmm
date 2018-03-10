@@ -4,12 +4,23 @@
 #include <iostream>
 using namespace std;
 
+int Lexer::getLineNumber(QString find)
+{
+    QStringList  l= m_text.split("\n");
+    for (int i=0;i<l.count();i++)
+        if (l[i].contains(find))
+            return i;
+
+    return -1;
+}
+
 Lexer::Lexer()
 {
 
 }
 
-void Lexer::IncludeFiles()
+
+/*void Lexer::IncludeFiles()
 {
     QRegExp rx("\\{\\s*\\$include.*\\}", Qt::CaseInsensitive);
     QStringList list;
@@ -18,20 +29,15 @@ void Lexer::IncludeFiles()
     m_text = m_orgText;
    // return;
     while ((pos = rx.indexIn(m_orgText, pos)) != -1) {
-/*        qDebug() <<rx.cap(0);
-        qDebug() << pos << " with " << rx.matchedLength();*/
         QString filename= rx.cap(0).toLower().remove("{").remove("}").remove("$include").trimmed();
-        qDebug() << "FIle " << filename;
         QString include = loadTextFile(m_path +"/" +filename);
-        qDebug() << "File loaded!";
-//        newText.remove(pos, rx.matchedLength());
+        int ln = getLineNumber(rx.cap(0));
+        m_includeFiles.append(FilePart(m_path +"/" +filename,ln, ln+ include.split("\n").count()));
         newText.replace(rx.cap(0), include);
         pos += rx.matchedLength();
     }
     m_text = newText;
-//    qDebug() << newText;
-//    exit(1);
-}
+}*/
 
 void Lexer::Advance()
 {
@@ -84,13 +90,18 @@ void Lexer::SkipUntilNewLine()
 QString Lexer::loadTextFile(QString filename)
 {
     QFile file(filename);
+
     if(!file.open( QIODevice::ReadOnly|QIODevice::Text ) ) {
         ErrorHandler::e.Error("Could not open file for inclusion: " + filename);
     }
     QTextStream in(&file);
     QString text ="";
-    while(!in.atEnd())
-        text+= in.readLine();
+    while(!in.atEnd()) {
+        text+= in.readLine() + "\n ";
+
+    }
+    text = text.remove("\t");
+//    qDebug() << text;
     return text;
 }
 
@@ -154,6 +165,18 @@ Token Lexer::_Id()
 
 }
 
+Token Lexer::Preprocessor()
+{
+    QString result="";
+    while (!m_finished && Syntax::s.isAlnum(m_currentChar)) {
+        result +=m_currentChar;
+        Advance();
+
+    }
+    return Token(TokenType::PREPROCESSOR, result.toLower());
+
+}
+
 Token Lexer::String()
 {
     QString result="";
@@ -177,8 +200,11 @@ QString Lexer::peek()
 
 void Lexer::Initialize()
 {
-    IncludeFiles();
+    Pmm::Data::d.lineNumber = 0;
+    m_finished = false;
     m_currentChar = m_text[0];
+    m_pos = 0;
+    m_localPos = 0;
 }
 
 Token Lexer::GetNextToken()
@@ -213,6 +239,16 @@ Token Lexer::GetNextToken()
         if (m_currentChar=="\"") {
             Advance();
             return String();
+        }
+
+        if (m_currentChar=="@") {
+            Advance();
+            if (m_ignorePreprocessor) {
+                SkipUntilNewLine();
+                continue;
+            }
+            else
+                return Preprocessor();
         }
 
         if (m_currentChar=="[") {
@@ -308,7 +344,7 @@ Token Lexer::GetNextToken()
         if (m_currentChar==".") {
             Advance();
             Advance();
-            m_text = m_text.replace("\n", "");
+            //m_text = m_text.replace("\n", "");
             return Token(TokenType::DOT, ".");
         }
         ErrorHandler::e.Error( "Error parsing: " + m_currentChar );
@@ -316,5 +352,5 @@ Token Lexer::GetNextToken()
 
 
     }
-    return Token(TokenType::TEOF, "");
+    return Token(TokenType::TEOF, "EOF");
 }

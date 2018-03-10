@@ -41,6 +41,8 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::AND,"AND"));
     reservedWords.append(Token(TokenType::POINTER,"POINTER"));
     reservedWords.append(Token(TokenType::AT,"AT"));
+    reservedWords.append(Token(TokenType::INCLUDE,"INCLUDE"));
+    reservedWords.append(Token(TokenType::DEFINE,"DEFINE"));
 
 }
 
@@ -283,6 +285,7 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["setspriteloc"] = BuiltInFunction(
                 "setspriteloc",
                 QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER
                 );

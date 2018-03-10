@@ -248,7 +248,7 @@ void NodeBuiltinMethod::Peek(Assembler* as)
 void NodeBuiltinMethod::MemCpy(Assembler* as)
 {
     //as->ClearTerm();
-/*    NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
+    NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
     NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
     if (var==nullptr && num==nullptr) {
         ErrorHandler::e.Error("First parameter must be variable or number", m_op.m_lineNumber);
@@ -263,7 +263,7 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     if (num2==nullptr) {
         ErrorHandler::e.Error("Second parameter must be pure numeric", m_op.m_lineNumber);
     }
-*/
+
 
 
 
@@ -272,13 +272,13 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     as->Asm("ldx #0");
     as->Label(lbl);
     //LoadVar(as, 0, "x");
-    //as->Asm("lda " + addr + " + #" + num2->HexValue() + ",x");
+    as->Asm("lda " + addr + " + #" + num2->HexValue() + ",x");
     as->ClearTerm();
     /*as->Term("lda ");
     m_params[0]->Build(as);
     as->Term(",x",true);
     */
-    LoadVar(as,0, "x");
+  //  LoadVar(as,0, "x");
 
     SaveVar(as, 2, "x");
     as->Asm("inx");
@@ -988,16 +988,24 @@ void NodeBuiltinMethod::SetSpriteLoc(Assembler *as)
     if (num2==nullptr)
         ErrorHandler::e.Error("SetSpriteLoc parameter 0 must be constant");
 
+    NodeNumber* num3 = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[2]);
+    if (num3==nullptr)
+        ErrorHandler::e.Error("SetSpriteLoc parameter 2 (bank) must be constant 0-3");
+
+    QString bank=  "$"+QString::number((int)(num3->m_val*0x4000),16);
+
+
     as->Comment("Set sprite location");
     LoadVar(as,0);
     as->Asm("tax");
     LoadVar(as,1);
 //    SaveVar(as,0,"x");
-    as->Asm("sta $07f8,x");
+    as->Asm("sta $07f8 + "+bank+",x");
 
     int newLoc = 64*num->m_val;
+    qDebug() << newLoc;
     QString c = "SPRITE_LOC" +QString::number((int)num2->m_val+1);
-    qDebug() << c;
+    qDebug() << "sprite num : " << ("$" + QString::number((int)(newLoc),16)) << " with value " << c;
     as->m_symTab->m_constants[c]->m_value->m_fVal = newLoc;
     as->m_symTab->m_constants[c]->m_value->m_strVal = "$" + QString::number((int)(newLoc),16);
 

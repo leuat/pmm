@@ -29,9 +29,9 @@ public:
 
     QMap<QString, Node*> m_procedures;
     QVector<Node*> m_proceduresOnly;
-
     Lexer* m_lexer;
     Token m_currentToken;
+
     Parser();
     Parser(Lexer* l) {
         m_lexer = l;
@@ -43,9 +43,12 @@ public:
     void Delete();
 
     void Eat(TokenType::Type t);
-
     void VerifyToken(Token t);
 
+
+    void Preprocess();
+
+    Node* Parse();
     Node* Variable();
     Node* Empty();
     Node* AssignStatement();
@@ -56,13 +59,13 @@ public:
     Node* Factor();
     Node* Expr();
     Node* Term();
-    Node* Parse();
     Node* FindProcedure();
     Node* Block(bool useOwnSymTab);
     QVector<Node*> Parameters();
     Node* ForLoop();
 //    Node* WhileLoop();
     Node* String();
+
     Node* Conditional(bool isWhileLoop=false);
 //    QVector<Node*> Procedure();
     QVector<Node*> Declarations();

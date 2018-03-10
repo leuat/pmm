@@ -8,18 +8,38 @@
 
 #include "errorhandler.h"
 
+class FilePart {
+public:
+    QString m_name;
+    int m_startLine, m_endLine;
+    FilePart() {}
+    FilePart(QString name, int s, int e) {
+        m_startLine = s;
+        m_endLine = e;
+        m_name = name;
+    }
+};
+
+
 class Lexer
 {
-    QString m_currentChar;
-    uint m_pos = 0;
 
 public:
+    QString m_currentChar;
+    uint m_pos = 0;
     bool m_finished = false;
     QString m_orgText = "";
     QString m_text = "";
     uint m_localPos = 0;
     QStringList m_lines;
     QString m_path;
+    QVector<FilePart> m_includeFiles;
+    bool m_ignorePreprocessor;
+
+
+
+    int getLineNumber(QString find);
+
     Lexer();
     Lexer(QString text, QStringList lines, QString path) {
         m_orgText = text;
@@ -27,10 +47,10 @@ public:
         m_path = path;
         m_currentChar = m_text[m_pos];
         m_lines = lines;
+        m_ignorePreprocessor = true;
         Pmm::Data::d.Init();
     }
 
-    void IncludeFiles();
     void Error(QString text);
     void Advance();
     void SkipWhiteSpace();
@@ -39,6 +59,7 @@ public:
     QString loadTextFile(QString filename);
     Token Number();
     Token _Id();
+    Token Preprocessor();
     Token String();
     QString peek();
     void Initialize();

@@ -1,5 +1,5 @@
 #include "interpreter.h"
-
+#include <QDebug>
 Interpreter::Interpreter(Parser* p)
 {
     m_parser = p;
@@ -80,13 +80,50 @@ void Interpreter::SaveBuild(QString filename)
 void Interpreter::HandleError(FatalErrorException fe, QString e)
 {
     QString msg = "";
-    QString line = "on line: " + QString::number(fe.linenr+1);
+    int linenr = fe.linenr;
+    QString file = "";
+    FindLineNumberAndFile(fe.linenr, file, linenr);
+    //linenr = fe.linenr;
+
+
+    QString line = "on line: " + QString::number(linenr+1);
+    if (file!="")
+        msg+="In file : " + file + "\n";
     msg +="\nFatal error " + line;
-    if (fe.linenr<m_parser->m_lexer->m_lines.count())
-        msg+="\nSource: " + m_parser->m_lexer->m_lines[fe.linenr];
+    if (linenr<m_parser->m_lexer->m_lines.count())
+        msg+="\nSource: " + m_parser->m_lexer->m_lines[linenr];
     msg+="\n\nMessage: ";
-    Pmm::Data::d.lineNumber = fe.linenr+1;
+    Pmm::Data::d.lineNumber = linenr+1;
 
     ErrorHandler::e.CatchError(fe, e + msg);
 
+}
+
+void Interpreter::FindLineNumberAndFile(int inLe, QString& file, int& outle)
+{
+    file="";
+    outle = inLe;
+    if (m_parser->m_lexer->m_includeFiles.count()==0) {
+        return;
+    }
+
+    int cur = inLe;
+
+    qDebug() << "input line number: " << inLe;
+    qDebug() << "Start line: " << m_parser->m_lexer->m_includeFiles[0].m_startLine;
+    if (cur<=m_parser->m_lexer->m_includeFiles[0].m_startLine) {
+        return;
+    }
+
+
+    for (FilePart fp: m_parser->m_lexer->m_includeFiles) {
+        if (inLe >= fp.m_startLine && inLe<fp.m_endLine) {
+            file = fp.m_name;
+            outle = inLe - fp.m_startLine;
+            return;
+        }
+        qDebug() << "Include file size : " << (fp.m_endLine-fp.m_startLine);
+        cur=cur - (fp.m_endLine-fp.m_startLine);
+    }
+    outle = cur;
 }
