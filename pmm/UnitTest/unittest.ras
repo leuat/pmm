@@ -197,6 +197,19 @@ begin
 	incScreen();
 
 
+/*	for x:=#0 to arr[#10] do begin
+		val:=val+#1;
+	end;
+
+	if val<>#8 then
+		printstring("FOR3 OK ",#0,#40)
+	else
+		printstring("FOR3 FAILED ******************** ",#0,#40);
+
+	incScreen();
+*/
+
+
 	
 end;
 

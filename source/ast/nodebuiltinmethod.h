@@ -54,6 +54,9 @@ public:
     void WaitNoRasterLines(Assembler* as);
     void SetSpriteLoc(Assembler* as);
     void Swap(Assembler* as);
+    void MemCpyLarge(Assembler* as);
+    void SetBank(Assembler* as);
+    void CopyImageColorData(Assembler* as);
 
     void LoadVar(Assembler* as, int paramNo, QString register, QString load="");
     void LoadVar(Assembler* as, int paramNo);

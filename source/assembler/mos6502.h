@@ -23,7 +23,7 @@ public:
 
     void Program(QString name) override;
     void EndProgram() override;
-    void DeclareArray(QString name, QString type, int count, QStringList lst) override;
+    void DeclareArray(QString name, QString type, int count, QStringList lst, QString pos) override;
 
 
     void VarDeclHeader();

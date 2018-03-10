@@ -7,7 +7,7 @@
 	ORG $0900
 
 UnitTest
-	jmp block19149
+	jmp block41
 x	dc.b
 y	dc.b
 z	dc.b
@@ -17,12 +17,10 @@ ok	dc.b
 screeny	dc.b
 arr	dc.b	 
 	org arr+255
-	
 iarr	dc.w	 
 	org iarr+255
-	
 str	dc.b
-block19149
+block41
 	
 	
 	; ***********  Defining procedure : initeightbitmul
@@ -31,7 +29,7 @@ block19149
 	
 	jmp afterProc_initeightbitmul
 initeightbitmul
-	jmp multiply_eightbit3730
+	jmp multiply_eightbit18467
 multiplier .byte 0
 multiply_eightbit
 	cpx #$00
@@ -56,7 +54,7 @@ mul_skip
 mul_end
 	txa
 	rts
-multiply_eightbit3730
+multiply_eightbit18467
 	rts
 afterProc_initeightbitmul
 	
@@ -67,7 +65,7 @@ afterProc_initeightbitmul
 	
 	jmp afterProc_initmoveto
 initmoveto
-	jmp moveto2244
+	jmp moveto6334
 screenMemory = $fb 
 screen_x .byte 0 
 screen_y .byte 0 
@@ -98,7 +96,7 @@ sydone
 sxdone
 	sta screenMemory
 	rts
-moveto2244
+moveto6334
 	rts
 afterProc_initmoveto
 	
@@ -150,16 +148,16 @@ incScreen
 	sta screeny
 	lda #23
 	cmp screeny
-	bcs conditionalfailed19552
-	jmp ConditionalTrueBlock14118
-conditionalfailed19552
-	jmp elsedoneblock26363
-ConditionalTrueBlock14118
+	bcs conditionalfailed26962
+	jmp ConditionalTrueBlock15724
+conditionalfailed26962
+	jmp elsedoneblock29358
+ConditionalTrueBlock15724
 	; Assigning single variable : screeny
 	lda #0
 	; VarNode StoreVariable
 	sta screeny
-elsedoneblock26363
+elsedoneblock29358
 	lda #0
 	sta screen_x
 	lda screeny
@@ -191,374 +189,374 @@ TestConditionals
 	sta z
 	lda #20
 	cmp y
-	bcc conditionalfailed14398
-	jmp ConditionalTrueBlock6747
-conditionalfailed14398
-	jmp elseblock7511
-	jmp elsedoneblock5869
-ConditionalTrueBlock6747
-	jmp printstring_call7103
-printstring_text27352	.dc "CONDITIONAL1 = OK",0
-printstring_call7103
+	bcc conditionalfailed491
+	jmp ConditionalTrueBlock23281
+conditionalfailed491
+	jmp elseblock16827
+	jmp elsedoneblock9961
+ConditionalTrueBlock23281
+	jmp printstring_call11942
+printstring_text4827	.dc "CONDITIONAL1 = OK",0
+printstring_call11942
 	clc
 	; TEST
-	lda #<printstring_text27352
+	lda #<printstring_text4827
 	adc #0
-	ldy #>printstring_text27352
+	ldy #>printstring_text4827
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock5869
-elseblock7511
-	jmp printstring_call28053
-printstring_text13043	.dc "CONDITIONAL1 = FAILED ****************** ",0
-printstring_call28053
+	jmp elsedoneblock9961
+elseblock16827
+	jmp printstring_call32391
+printstring_text14604	.dc "CONDITIONAL1 = FAILED ****************** ",0
+printstring_call32391
 	clc
 	; TEST
-	lda #<printstring_text13043
+	lda #<printstring_text14604
 	adc #0
-	ldy #>printstring_text13043
+	ldy #>printstring_text14604
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock5869
+elsedoneblock9961
 	jsr incScreen
 	lda #0
 	cmp x
-	bne conditionalfailed9850
-	jmp ConditionalTrueBlock31088
-conditionalfailed9850
-	jmp elseblock1563
-	jmp elsedoneblock25834
-ConditionalTrueBlock31088
-	jmp printstring_call7240
-printstring_text21911	.dc "CONDITIONAL2 = OK",0
-printstring_call7240
+	bne conditionalfailed17421
+	jmp ConditionalTrueBlock153
+conditionalfailed17421
+	jmp elseblock292
+	jmp elsedoneblock12382
+ConditionalTrueBlock153
+	jmp printstring_call19718
+printstring_text19895	.dc "CONDITIONAL2 = OK",0
+printstring_call19718
 	clc
 	; TEST
-	lda #<printstring_text21911
+	lda #<printstring_text19895
 	adc #0
-	ldy #>printstring_text21911
+	ldy #>printstring_text19895
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock25834
-elseblock1563
-	jmp printstring_call5651
-printstring_text28580	.dc "CONDITIONAL2 = FAILED ****************** ",0
-printstring_call5651
+	jmp elsedoneblock12382
+elseblock292
+	jmp printstring_call21726
+printstring_text14771	.dc "CONDITIONAL2 = FAILED ****************** ",0
+printstring_call21726
 	clc
 	; TEST
-	lda #<printstring_text28580
+	lda #<printstring_text14771
 	adc #0
-	ldy #>printstring_text28580
+	ldy #>printstring_text14771
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock25834
+elsedoneblock12382
 	jsr incScreen
 	lda #5
 	cmp y
-	bcs conditionalfailed5220
-	jmp ConditionalTrueBlock27616
-conditionalfailed5220
-	jmp elseblock29876
-	jmp elsedoneblock19178
-ConditionalTrueBlock27616
-	jmp printstring_call22348
-printstring_text26798	.dc "CONDITIONAL3 = OK",0
-printstring_call22348
+	bcs conditionalfailed26299
+	jmp ConditionalTrueBlock1869
+conditionalfailed26299
+	jmp elseblock19912
+	jmp elsedoneblock25667
+ConditionalTrueBlock1869
+	jmp printstring_call9894
+printstring_text28703	.dc "CONDITIONAL3 = OK",0
+printstring_call9894
 	clc
 	; TEST
-	lda #<printstring_text26798
+	lda #<printstring_text28703
 	adc #0
-	ldy #>printstring_text26798
+	ldy #>printstring_text28703
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock19178
-elseblock29876
-	jmp printstring_call31635
-printstring_text16857	.dc "CONDITIONAL3 = FAILED ****************** ",0
-printstring_call31635
+	jmp elsedoneblock25667
+elseblock19912
+	jmp printstring_call31322
+printstring_text30333	.dc "CONDITIONAL3 = FAILED ****************** ",0
+printstring_call31322
 	clc
 	; TEST
-	lda #<printstring_text16857
+	lda #<printstring_text30333
 	adc #0
-	ldy #>printstring_text16857
+	ldy #>printstring_text30333
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock19178
+elsedoneblock25667
 	jsr incScreen
 	lda #5
 	cmp y
-	beq conditionalfailed19420
-	jmp ConditionalTrueBlock1662
-conditionalfailed19420
-	jmp elseblock18902
-	jmp elsedoneblock28262
-ConditionalTrueBlock1662
-	jmp printstring_call19022
-printstring_text9273	.dc "CONDITIONAL3 = OK",0
-printstring_call19022
+	beq conditionalfailed28253
+	jmp ConditionalTrueBlock4664
+conditionalfailed28253
+	jmp elseblock15141
+	jmp elsedoneblock7711
+ConditionalTrueBlock4664
+	jmp printstring_call25547
+printstring_text27644	.dc "CONDITIONAL3 = OK",0
+printstring_call25547
 	clc
 	; TEST
-	lda #<printstring_text9273
+	lda #<printstring_text27644
 	adc #0
-	ldy #>printstring_text9273
+	ldy #>printstring_text27644
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock28262
-elseblock18902
-	jmp printstring_call12686
-printstring_text28888	.dc "CONDITIONAL3 = FAILED ****************** ",0
-printstring_call12686
+	jmp elsedoneblock7711
+elseblock15141
+	jmp printstring_call32757
+printstring_text20037	.dc "CONDITIONAL3 = FAILED ****************** ",0
+printstring_call32757
 	clc
 	; TEST
-	lda #<printstring_text28888
+	lda #<printstring_text20037
 	adc #0
-	ldy #>printstring_text28888
+	ldy #>printstring_text20037
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock28262
+elsedoneblock7711
 	jsr incScreen
 	lda #5
 	cmp y
-	beq ConditionalTrueBlock31717
+	beq ConditionalTrueBlock8723
 	lda #5
 	cmp x
-	bne ConditionalTrueBlock31717
-	jmp conditionalfailed11267
-	jmp ConditionalTrueBlock31717
-conditionalfailed11267
-	jmp elseblock1892
-	jmp elsedoneblock13698
-ConditionalTrueBlock31717
-	jmp printstring_call65
-printstring_text10389	.dc "CONDITIONAL4 = OK",0
-printstring_call65
+	bne ConditionalTrueBlock8723
+	jmp conditionalfailed778
+	jmp ConditionalTrueBlock8723
+conditionalfailed778
+	jmp elseblock9741
+	jmp elsedoneblock27529
+ConditionalTrueBlock8723
+	jmp printstring_call3035
+printstring_text22190	.dc "CONDITIONAL4 = OK",0
+printstring_call3035
 	clc
 	; TEST
-	lda #<printstring_text10389
+	lda #<printstring_text22190
 	adc #0
-	ldy #>printstring_text10389
+	ldy #>printstring_text22190
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock13698
-elseblock1892
-	jmp printstring_call25619
-printstring_text16081	.dc "CONDITIONAL4 = FAILED ****************** ",0
-printstring_call25619
+	jmp elsedoneblock27529
+elseblock9741
+	jmp printstring_call288
+printstring_text30106	.dc "CONDITIONAL4 = FAILED ****************** ",0
+printstring_call288
 	clc
 	; TEST
-	lda #<printstring_text16081
+	lda #<printstring_text30106
 	adc #0
-	ldy #>printstring_text16081
+	ldy #>printstring_text30106
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock13698
+elsedoneblock27529
 	jsr incScreen
 	lda #5
 	cmp y
-	bcs conditionalfailed14589
+	bcs conditionalfailed27446
 	lda #0
 	cmp x
-	bne conditionalfailed14589
-	jmp ConditionalTrueBlock29130
-conditionalfailed14589
-	jmp elseblock13028
-	jmp elsedoneblock18631
-ConditionalTrueBlock29130
-	jmp printstring_call18630
-printstring_text19172	.dc "CONDITIONAL5 = OK",0
-printstring_call18630
+	bne conditionalfailed27446
+	jmp ConditionalTrueBlock8942
+conditionalfailed27446
+	jmp elseblock19264
+	jmp elsedoneblock22648
+ConditionalTrueBlock8942
+	jmp printstring_call15890
+printstring_text6729	.dc "CONDITIONAL5 = OK",0
+printstring_call15890
 	clc
 	; TEST
-	lda #<printstring_text19172
+	lda #<printstring_text6729
 	adc #0
-	ldy #>printstring_text19172
+	ldy #>printstring_text6729
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock18631
-elseblock13028
-	jmp printstring_call6407
-printstring_text12295	.dc "CONDITIONAL5 = FAILED ****************** ",0
-printstring_call6407
+	jmp elsedoneblock22648
+elseblock19264
+	jmp printstring_call15350
+printstring_text15006	.dc "CONDITIONAL5 = FAILED ****************** ",0
+printstring_call15350
 	clc
 	; TEST
-	lda #<printstring_text12295
+	lda #<printstring_text15006
 	adc #0
-	ldy #>printstring_text12295
+	ldy #>printstring_text15006
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock18631
+elsedoneblock22648
 	jsr incScreen
 	lda #10
 	cmp y
-	bne conditionalfailed26177
+	bne conditionalfailed12623
 	lda #0
 	cmp x
-	bne conditionalfailed26177
+	bne conditionalfailed12623
 	lda #0
 	cmp x
-	bne conditionalfailed26177
+	bne conditionalfailed12623
 	lda #20
 	cmp z
-	bne conditionalfailed26177
-	jmp ConditionalTrueBlock29681
-conditionalfailed26177
-	jmp elseblock18490
-	jmp elsedoneblock26610
-ConditionalTrueBlock29681
-	jmp printstring_call25236
-printstring_text6459	.dc "CONDITIONAL6 = OK",0
-printstring_call25236
+	bne conditionalfailed12623
+	jmp ConditionalTrueBlock24393
+conditionalfailed12623
+	jmp elseblock3548
+	jmp elsedoneblock19629
+ConditionalTrueBlock24393
+	jmp printstring_call19954
+printstring_text18756	.dc "CONDITIONAL6 = OK",0
+printstring_call19954
 	clc
 	; TEST
-	lda #<printstring_text6459
+	lda #<printstring_text18756
 	adc #0
-	ldy #>printstring_text6459
+	ldy #>printstring_text18756
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock26610
-elseblock18490
-	jmp printstring_call16840
-printstring_text27633	.dc "CONDITIONAL6 = FAILED ****************** ",0
-printstring_call16840
+	jmp elsedoneblock19629
+elseblock3548
+	jmp printstring_call4966
+printstring_text7376	.dc "CONDITIONAL6 = FAILED ****************** ",0
+printstring_call4966
 	clc
 	; TEST
-	lda #<printstring_text27633
+	lda #<printstring_text7376
 	adc #0
-	ldy #>printstring_text27633
+	ldy #>printstring_text7376
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock26610
+elsedoneblock19629
 	jsr incScreen
 	lda #5
 	cmp y
-	beq ConditionalTrueBlock23893
+	beq ConditionalTrueBlock26308
 	lda #23
 	cmp x
-	beq ConditionalTrueBlock23893
+	beq ConditionalTrueBlock26308
 	lda #23
 	cmp x
-	beq ConditionalTrueBlock23893
+	beq ConditionalTrueBlock26308
 	lda #10
 	cmp z
-	bne ConditionalTrueBlock23893
-	jmp conditionalfailed12993
-	jmp ConditionalTrueBlock23893
-conditionalfailed12993
-	jmp elseblock22630
-	jmp elsedoneblock20274
-ConditionalTrueBlock23893
-	jmp printstring_call32203
-printstring_text17461	.dc "CONDITIONAL7 = OK",0
-printstring_call32203
+	bne ConditionalTrueBlock26308
+	jmp conditionalfailed24626
+	jmp ConditionalTrueBlock26308
+conditionalfailed24626
+	jmp elseblock16944
+	jmp elsedoneblock32439
+ConditionalTrueBlock26308
+	jmp printstring_call5537
+printstring_text21538	.dc "CONDITIONAL7 = OK",0
+printstring_call5537
 	clc
 	; TEST
-	lda #<printstring_text17461
+	lda #<printstring_text21538
 	adc #0
-	ldy #>printstring_text17461
+	ldy #>printstring_text21538
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock20274
-elseblock22630
-	jmp printstring_call19662
-printstring_text22307	.dc "CONDITIONAL7 = FAILED ****************** ",0
-printstring_call19662
+	jmp elsedoneblock32439
+elseblock16944
+	jmp printstring_call2082
+printstring_text22929	.dc "CONDITIONAL7 = FAILED ****************** ",0
+printstring_call2082
 	clc
 	; TEST
-	lda #<printstring_text22307
+	lda #<printstring_text22929
 	adc #0
-	ldy #>printstring_text22307
+	ldy #>printstring_text22929
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock20274
+elsedoneblock32439
 	lda #1
 	cmp x
-	beq ConditionalTrueBlock31151
+	beq ConditionalTrueBlock4833
 	lda #10
 	cmp y
-	beq ConditionalTrueBlock31151
-	jmp conditionalfailed16717
-	jmp ConditionalTrueBlock31151
-conditionalfailed16717
-	jmp elseblock18423
-	jmp elsedoneblock8890
-ConditionalTrueBlock31151
-	jmp printstring_call28703
-printstring_text5566	.dc "CONDITIONAL8 = OK",0
-printstring_call28703
+	beq ConditionalTrueBlock4833
+	jmp conditionalfailed29658
+	jmp ConditionalTrueBlock4833
+conditionalfailed29658
+	jmp elseblock31115
+	jmp elsedoneblock4639
+ConditionalTrueBlock4833
+	jmp printstring_call9930
+printstring_text13977	.dc "CONDITIONAL8 = OK",0
+printstring_call9930
 	clc
 	; TEST
-	lda #<printstring_text5566
+	lda #<printstring_text13977
 	adc #0
-	ldy #>printstring_text5566
+	ldy #>printstring_text13977
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock8890
-elseblock18423
-	jmp printstring_call23661
-printstring_text22659	.dc "CONDITIONAL8 = FAILED ****************** ",0
-printstring_call23661
+	jmp elsedoneblock4639
+elseblock31115
+	jmp printstring_call31673
+printstring_text22386	.dc "CONDITIONAL8 = FAILED ****************** ",0
+printstring_call31673
 	clc
 	; TEST
-	lda #<printstring_text22659
+	lda #<printstring_text22386
 	adc #0
-	ldy #>printstring_text22659
+	ldy #>printstring_text22386
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock8890
+elsedoneblock4639
 	jsr incScreen
 
 	rts
@@ -593,41 +591,41 @@ TestMul
 	sta val
 	lda #2
 	cmp val
-	bne conditionalfailed16840
-	jmp ConditionalTrueBlock32651
-conditionalfailed16840
-	jmp elseblock32765
-	jmp elsedoneblock19601
-ConditionalTrueBlock32651
-	jmp printstring_call1497
-printstring_text27283	.dc "ASSIGN1 OK ",0
-printstring_call1497
+	bne conditionalfailed5829
+	jmp ConditionalTrueBlock26924
+conditionalfailed5829
+	jmp elseblock19072
+	jmp elsedoneblock6270
+ConditionalTrueBlock26924
+	jmp printstring_call15573
+printstring_text5097	.dc "ASSIGN1 OK ",0
+printstring_call15573
 	clc
 	; TEST
-	lda #<printstring_text27283
+	lda #<printstring_text5097
 	adc #0
-	ldy #>printstring_text27283
+	ldy #>printstring_text5097
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock19601
-elseblock32765
-	jmp printstring_call18058
-printstring_text8421	.dc "ASSING 1 FAILED ****************",0
-printstring_call18058
+	jmp elsedoneblock6270
+elseblock19072
+	jmp printstring_call23986
+printstring_text13290	.dc "ASSING 1 FAILED ****************",0
+printstring_call23986
 	clc
 	; TEST
-	lda #<printstring_text8421
+	lda #<printstring_text13290
 	adc #0
-	ldy #>printstring_text8421
+	ldy #>printstring_text13290
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock19601
+elsedoneblock6270
 	; Assigning single variable : val
 	; 8 bit mul
 	lda x
@@ -644,41 +642,41 @@ elsedoneblock19601
 	jsr incScreen
 	lda #4
 	cmp val
-	bne conditionalfailed12504
-	jmp ConditionalTrueBlock3271
-conditionalfailed12504
-	jmp elseblock4287
-	jmp elsedoneblock27999
-ConditionalTrueBlock3271
-	jmp printstring_call2138
-printstring_text10700	.dc "ASSIGN2 OK ",0
-printstring_call2138
+	bne conditionalfailed4031
+	jmp ConditionalTrueBlock24767
+conditionalfailed4031
+	jmp elseblock23655
+	jmp elsedoneblock15574
+ConditionalTrueBlock24767
+	jmp printstring_call27350
+printstring_text1150	.dc "ASSIGN2 OK ",0
+printstring_call27350
 	clc
 	; TEST
-	lda #<printstring_text10700
+	lda #<printstring_text1150
 	adc #0
-	ldy #>printstring_text10700
+	ldy #>printstring_text1150
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock27999
-elseblock4287
-	jmp printstring_call2461
-printstring_text12118	.dc "ASSING 2 FAILED ****************",0
-printstring_call2461
+	jmp elsedoneblock15574
+elseblock23655
+	jmp printstring_call21724
+printstring_text13966	.dc "ASSING 2 FAILED ****************",0
+printstring_call21724
 	clc
 	; TEST
-	lda #<printstring_text12118
+	lda #<printstring_text13966
 	adc #0
-	ldy #>printstring_text12118
+	ldy #>printstring_text13966
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock27999
+elsedoneblock15574
 	jsr incScreen
 	; Assigning single variable : val
 	; 8 bit mul
@@ -700,41 +698,41 @@ elsedoneblock27999
 	sta val
 	lda #6
 	cmp val
-	bne conditionalfailed3760
-	jmp ConditionalTrueBlock24459
-conditionalfailed3760
-	jmp elseblock11622
-	jmp elsedoneblock14398
-ConditionalTrueBlock24459
-	jmp printstring_call12935
-printstring_text10481	.dc "ASSIGN3 OK ",0
-printstring_call12935
+	bne conditionalfailed12287
+	jmp ConditionalTrueBlock18007
+conditionalfailed12287
+	jmp elseblock11337
+	jmp elsedoneblock15457
+ConditionalTrueBlock18007
+	jmp printstring_call10383
+printstring_text14945	.dc "ASSIGN3 OK ",0
+printstring_call10383
 	clc
 	; TEST
-	lda #<printstring_text10481
+	lda #<printstring_text14945
 	adc #0
-	ldy #>printstring_text10481
+	ldy #>printstring_text14945
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock14398
-elseblock11622
-	jmp printstring_call19567
-printstring_text18493	.dc "ASSING 3 FAILED ****************",0
-printstring_call19567
+	jmp elsedoneblock15457
+elseblock11337
+	jmp printstring_call32209
+printstring_text9758	.dc "ASSING 3 FAILED ****************",0
+printstring_call32209
 	clc
 	; TEST
-	lda #<printstring_text18493
+	lda #<printstring_text9758
 	adc #0
-	ldy #>printstring_text18493
+	ldy #>printstring_text9758
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock14398
+elsedoneblock15457
 	jsr incScreen
 	; Assigning single variable : val
 	; 8 bit mul
@@ -760,41 +758,41 @@ elsedoneblock14398
 	sta val
 	lda #10
 	cmp val
-	bne conditionalfailed21476
-	jmp ConditionalTrueBlock10538
-conditionalfailed21476
-	jmp elseblock7670
-	jmp elsedoneblock20538
-ConditionalTrueBlock10538
-	jmp printstring_call24917
-printstring_text16371	.dc "ASSIGN4 OK ",0
-printstring_call24917
+	bne conditionalfailed16413
+	jmp ConditionalTrueBlock24946
+conditionalfailed16413
+	jmp elseblock27506
+	jmp elsedoneblock13030
+ConditionalTrueBlock24946
+	jmp printstring_call900
+printstring_text32591	.dc "ASSIGN4 OK ",0
+printstring_call900
 	clc
 	; TEST
-	lda #<printstring_text16371
+	lda #<printstring_text32591
 	adc #0
-	ldy #>printstring_text16371
+	ldy #>printstring_text32591
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock20538
-elseblock7670
-	jmp printstring_call5752
-printstring_text13758	.dc "ASSING 4 FAILED ****************",0
-printstring_call5752
+	jmp elsedoneblock13030
+elseblock27506
+	jmp printstring_call1655
+printstring_text17410	.dc "ASSING 4 FAILED ****************",0
+printstring_call1655
 	clc
 	; TEST
-	lda #<printstring_text13758
+	lda #<printstring_text17410
 	adc #0
-	ldy #>printstring_text13758
+	ldy #>printstring_text17410
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock20538
+elsedoneblock13030
 	jsr incScreen
 	; Assigning single variable : val
 	; 8 bit mul
@@ -820,41 +818,41 @@ elsedoneblock20538
 	sta val
 	lda #12
 	cmp val
-	bne conditionalfailed30548
-	jmp ConditionalTrueBlock3034
-conditionalfailed30548
-	jmp elseblock12759
-	jmp elsedoneblock10393
-ConditionalTrueBlock3034
-	jmp printstring_call18792
-printstring_text16193	.dc "ASSIGN5 OK ",0
-printstring_call18792
+	bne conditionalfailed24350
+	jmp ConditionalTrueBlock27595
+conditionalfailed24350
+	jmp elseblock4041
+	jmp elsedoneblock3602
+ConditionalTrueBlock27595
+	jmp printstring_call30836
+printstring_text9374	.dc "ASSIGN5 OK ",0
+printstring_call30836
 	clc
 	; TEST
-	lda #<printstring_text16193
+	lda #<printstring_text9374
 	adc #0
-	ldy #>printstring_text16193
+	ldy #>printstring_text9374
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock10393
-elseblock12759
-	jmp printstring_call30137
-printstring_text17103	.dc "ASSING 5 FAILED ****************",0
-printstring_call30137
+	jmp elsedoneblock3602
+elseblock4041
+	jmp printstring_call4596
+printstring_text24021	.dc "ASSING 5 FAILED ****************",0
+printstring_call4596
 	clc
 	; TEST
-	lda #<printstring_text17103
+	lda #<printstring_text24021
 	adc #0
-	ldy #>printstring_text17103
+	ldy #>printstring_text24021
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock10393
+elsedoneblock3602
 	jsr incScreen
 	; Assigning single variable : val
 	; 8 bit mul
@@ -894,41 +892,41 @@ elsedoneblock10393
 	sta val
 	lda #30
 	cmp val
-	bne conditionalfailed3879
-	jmp ConditionalTrueBlock7498
-conditionalfailed3879
-	jmp elseblock989
-	jmp elsedoneblock15248
-ConditionalTrueBlock7498
-	jmp printstring_call11149
-printstring_text30931	.dc "ASSIGN6 OK ",0
-printstring_call11149
+	bne conditionalfailed26418
+	jmp ConditionalTrueBlock4734
+conditionalfailed26418
+	jmp elseblock53
+	jmp elsedoneblock1999
+ConditionalTrueBlock4734
+	jmp printstring_call6900
+printstring_text3788	.dc "ASSIGN6 OK ",0
+printstring_call6900
 	clc
 	; TEST
-	lda #<printstring_text30931
+	lda #<printstring_text3788
 	adc #0
-	ldy #>printstring_text30931
+	ldy #>printstring_text3788
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock15248
-elseblock989
-	jmp printstring_call30875
-printstring_text25598	.dc "ASSING 6 FAILED ****************",0
-printstring_call30875
+	jmp elsedoneblock1999
+elseblock53
+	jmp printstring_call467
+printstring_text3728	.dc "ASSING 6 FAILED ****************",0
+printstring_call467
 	clc
 	; TEST
-	lda #<printstring_text25598
+	lda #<printstring_text3728
 	adc #0
-	ldy #>printstring_text25598
+	ldy #>printstring_text3728
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock15248
+elsedoneblock1999
 	jsr incScreen
 
 	rts
@@ -949,14 +947,14 @@ TestWhile
 	lda #0
 	; VarNode StoreVariable
 	sta val
-while25436
+while24648
 	lda #1
 	cmp x
-	beq conditionalfailed1731
-	jmp ConditionalTrueBlock24599
-conditionalfailed1731
-	jmp elsedoneblock1443
-ConditionalTrueBlock24599
+	beq conditionalfailed14310
+	jmp ConditionalTrueBlock22483
+conditionalfailed14310
+	jmp elsedoneblock2421
+ConditionalTrueBlock22483
 
 	; Assigning single variable : x
 	; Add/sub where right value is constant number
@@ -977,45 +975,45 @@ ConditionalTrueBlock24599
 	; VarNode StoreVariable
 	sta val
 
-	jmp while25436
-elsedoneblock1443
+	jmp while24648
+elsedoneblock2421
 	lda #9
 	cmp val
-	bne conditionalfailed10816
-	jmp ConditionalTrueBlock4434
-conditionalfailed10816
-	jmp elseblock9385
-	jmp elsedoneblock23967
-ConditionalTrueBlock4434
-	jmp printstring_call16704
-printstring_text29866	.dc "WHILE1 OK ",0
-printstring_call16704
+	bne conditionalfailed18935
+	jmp ConditionalTrueBlock9514
+conditionalfailed18935
+	jmp elseblock14309
+	jmp elsedoneblock7616
+ConditionalTrueBlock9514
+	jmp printstring_call20600
+printstring_text5249	.dc "WHILE1 OK ",0
+printstring_call20600
 	clc
 	; TEST
-	lda #<printstring_text29866
+	lda #<printstring_text5249
 	adc #0
-	ldy #>printstring_text29866
+	ldy #>printstring_text5249
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock23967
-elseblock9385
-	jmp printstring_call30308
-printstring_text28223	.dc "WHILE1 FAILED ******************** ",0
-printstring_call30308
+	jmp elsedoneblock7616
+elseblock14309
+	jmp printstring_call31556
+printstring_text22798	.dc "WHILE1 FAILED ******************** ",0
+printstring_call31556
 	clc
 	; TEST
-	lda #<printstring_text28223
+	lda #<printstring_text22798
 	adc #0
-	ldy #>printstring_text28223
+	ldy #>printstring_text22798
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock23967
+elsedoneblock7616
 	jsr incScreen
 
 	rts
@@ -1032,7 +1030,7 @@ TestFor
 	lda #0
 	; VarNode StoreVariable
 	sta x
-for30792
+for6224
 
 	; Assigning single variable : arr
 	lda x
@@ -1046,11 +1044,11 @@ for30792
 	inc x
 	lda #10
 	cmp x
-	bne forLoopFix10048
-	jmp forLoopDone32469
-forLoopFix10048
-	jmp for30792
-forLoopDone32469
+	bne forLoopFix5844
+	jmp forLoopDone32609
+forLoopFix5844
+	jmp for6224
+forLoopDone32609
 	; Assigning single variable : val
 	lda #0
 	; VarNode StoreVariable
@@ -1059,19 +1057,19 @@ forLoopDone32469
 	lda #0
 	; VarNode StoreVariable
 	sta x
-for13930
+for14989
 
 	; Assigning single variable : val
 	; Add/sub right value is variable/expression
-	jmp jmprightvar16090
-rightvar19814	.byte	0
-jmprightvar16090
+	jmp jmprightvar20485
+rightvar3195	.byte	0
+jmprightvar20485
 	lda x
-	sta rightvar19814
+	sta rightvar3195
 	
 	lda val
 	clc
-	adc rightvar19814
+	adc rightvar3195
 	
 	; VarNode StoreVariable
 	sta val
@@ -1079,48 +1077,48 @@ jmprightvar16090
 	inc x
 	lda #3
 	cmp x
-	bne forLoopFix5427
-	jmp forLoopDone23743
-forLoopFix5427
-	jmp for13930
-forLoopDone23743
+	bne forLoopFix3093
+	jmp forLoopDone14343
+forLoopFix3093
+	jmp for14989
+forLoopDone14343
 	lda #6
 	cmp val
-	beq conditionalfailed506
-	jmp ConditionalTrueBlock10599
-conditionalfailed506
-	jmp elseblock16474
-	jmp elsedoneblock7195
-ConditionalTrueBlock10599
-	jmp printstring_call17589
-printstring_text9858	.dc "FOR1 OK ",0
-printstring_call17589
+	beq conditionalfailed7448
+	jmp ConditionalTrueBlock1587
+conditionalfailed7448
+	jmp elseblock29314
+	jmp elsedoneblock9503
+ConditionalTrueBlock1587
+	jmp printstring_call13458
+printstring_text6618	.dc "FOR1 OK ",0
+printstring_call13458
 	clc
 	; TEST
-	lda #<printstring_text9858
+	lda #<printstring_text6618
 	adc #0
-	ldy #>printstring_text9858
+	ldy #>printstring_text6618
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock7195
-elseblock16474
-	jmp printstring_call17889
-printstring_text11447	.dc "FOR1 FAILED ******************** ",0
-printstring_call17889
+	jmp elsedoneblock9503
+elseblock29314
+	jmp printstring_call19796
+printstring_text14798	.dc "FOR1 FAILED ******************** ",0
+printstring_call19796
 	clc
 	; TEST
-	lda #<printstring_text11447
+	lda #<printstring_text14798
 	adc #0
-	ldy #>printstring_text11447
+	ldy #>printstring_text14798
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock7195
+elsedoneblock9503
 	; Assigning single variable : x
 	lda #5
 	; VarNode StoreVariable
@@ -1134,7 +1132,7 @@ elsedoneblock7195
 	lda #0
 	; VarNode StoreVariable
 	sta x
-for40
+for15281
 
 	; Assigning single variable : val
 	; Add/sub where right value is constant number
@@ -1158,54 +1156,54 @@ for40
 	txa
 	
 	cmp x
-	bne forLoopFix9364
-	jmp forLoopDone17975
-forLoopFix9364
-	jmp for40
-forLoopDone17975
+	bne forLoopFix20798
+	jmp forLoopDone28009
+forLoopFix20798
+	jmp for15281
+forLoopDone28009
 	lda #25
 	cmp val
-	beq conditionalfailed12570
-	jmp ConditionalTrueBlock30066
-conditionalfailed12570
-	jmp elseblock26412
-	jmp elsedoneblock6840
-ConditionalTrueBlock30066
-	jmp printstring_call25395
-printstring_text28641	.dc "FOR2 OK ",0
-printstring_call25395
+	beq conditionalfailed24179
+	jmp ConditionalTrueBlock18538
+conditionalfailed24179
+	jmp elseblock12292
+	jmp elsedoneblock6038
+ConditionalTrueBlock18538
+	jmp printstring_call29657
+printstring_text7958	.dc "FOR2 OK ",0
+printstring_call29657
 	clc
 	; TEST
-	lda #<printstring_text28641
+	lda #<printstring_text7958
 	adc #0
-	ldy #>printstring_text28641
+	ldy #>printstring_text7958
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock6840
-elseblock26412
-	jmp printstring_call17651
-printstring_text21109	.dc "FOR2 FAILED ******************** ",0
-printstring_call17651
+	jmp elsedoneblock6038
+elseblock12292
+	jmp printstring_call19815
+printstring_text22888	.dc "FOR2 FAILED ******************** ",0
+printstring_call19815
 	clc
 	; TEST
-	lda #<printstring_text21109
+	lda #<printstring_text22888
 	adc #0
-	ldy #>printstring_text21109
+	ldy #>printstring_text22888
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock6840
+elsedoneblock6038
 	jsr incScreen
 	; Assigning single variable : x
 	lda #0
 	; VarNode StoreVariable
 	sta x
-for8187
+for19156
 
 	; Assigning single variable : val
 	; Add/sub where right value is constant number
@@ -1229,11 +1227,11 @@ for8187
 	txa
 	
 	cmp x
-	bne forLoopFix21085
-	jmp forLoopDone23390
-forLoopFix21085
-	jmp for8187
-forLoopDone23390
+	bne forLoopFix16202
+	jmp forLoopDone2634
+forLoopFix16202
+	jmp for19156
+forLoopDone2634
 	; Assigning single variable : arr
 	lda #3
 	; VarNode StoreVariable
@@ -1250,7 +1248,7 @@ forLoopDone23390
 	lda #5
 	; VarNode StoreVariable
 	sta x
-for4755
+for20328
 
 	; Assigning single variable : val
 	; Add/sub where right value is constant number
@@ -1280,48 +1278,48 @@ for4755
 	lda arr,x
 	
 	cmp x
-	bne forLoopFix28128
-	jmp forLoopDone25502
-forLoopFix28128
-	jmp for4755
-forLoopDone25502
+	bne forLoopFix26362
+	jmp forLoopDone4886
+forLoopFix26362
+	jmp for20328
+forLoopDone4886
 	lda #8
 	cmp val
-	beq conditionalfailed30885
-	jmp ConditionalTrueBlock3565
-conditionalfailed30885
-	jmp elseblock3872
-	jmp elsedoneblock832
-ConditionalTrueBlock3565
-	jmp printstring_call6646
-printstring_text20889	.dc "FOR3 OK ",0
-printstring_call6646
+	beq conditionalfailed21881
+	jmp ConditionalTrueBlock20142
+conditionalfailed21881
+	jmp elseblock23844
+	jmp elsedoneblock1416
+ConditionalTrueBlock20142
+	jmp printstring_call10322
+printstring_text18651	.dc "FOR3 OK ",0
+printstring_call10322
 	clc
 	; TEST
-	lda #<printstring_text20889
+	lda #<printstring_text18651
 	adc #0
-	ldy #>printstring_text20889
+	ldy #>printstring_text18651
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock832
-elseblock3872
-	jmp printstring_call10883
-printstring_text24925	.dc "FOR3 FAILED ******************** ",0
-printstring_call10883
+	jmp elsedoneblock1416
+elseblock23844
+	jmp printstring_call5699
+printstring_text3557	.dc "FOR3 FAILED ******************** ",0
+printstring_call5699
 	clc
 	; TEST
-	lda #<printstring_text24925
+	lda #<printstring_text3557
 	adc #0
-	ldy #>printstring_text24925
+	ldy #>printstring_text3557
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock832
+elsedoneblock1416
 	jsr incScreen
 
 	rts
@@ -1331,13 +1329,13 @@ afterProc_TestFor
 	lda #$00
 	tax
 	lda #32
-clearloop21265
+clearloop28476
 	sta $0000+$400,x
 	sta $0100+$400,x
 	sta $0200+$400,x
 	sta $0300+$400,x
 	dex
-	bne clearloop21265
+	bne clearloop28476
 	lda #0
 	sta screen_x
 	lda #0

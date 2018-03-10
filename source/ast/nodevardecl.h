@@ -70,6 +70,7 @@ public:
     }
 
 
+
     QString Build(Assembler* as) {
 
         ExecuteSym(as->m_symTab);
@@ -77,7 +78,7 @@ public:
         NodeVar* v = (NodeVar*)m_varNode;
         NodeVarType* t = (NodeVarType*)m_typeNode;
         if (t->m_op.m_type==TokenType::ARRAY) {
-            as->DeclareArray(v->value, t->m_arrayVarType.m_value, t->m_op.m_intVal, t->m_data);
+            as->DeclareArray(v->value, t->m_arrayVarType.m_value, t->m_op.m_intVal, t->m_data, t->m_position);
         }
         else
             if (t->m_op.m_type==TokenType::INCBIN)

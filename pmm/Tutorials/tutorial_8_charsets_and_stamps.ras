@@ -1,0 +1,703 @@
+	processor 6502
+
+	ORG $0801
+	.byte    $0E, $08, $0A, $00, $9E, $20, $28,  $32, $33
+	.byte    $30, $34, $29, $00, $00, $00
+
+	ORG $0900
+
+Tutorial6
+	jmp block12052
+xscroll	dc.b
+x	dc.b
+val	dc.b
+i	dc.b
+textshift	dc.b
+text	dc.b
+time	dc.b
+colorIndex	dc.b
+fade
+	.byte 0, 11, 6, 12, 4, 14, 15, 1
+	.byte 1, 15, 14, 4, 12, 6, 11, 0
+	.byte 0, 
+char_test_set
+	.byte 0, 0, 0, 0, 0, 0, 0, 1
+	.byte 0, 0, 0, 0, 0, 5, 10, 85
+	.byte 0, 0, 0, 21, 42, 85, 170, 85
+	.byte 0, 0, 0, 85, 170, 85, 170, 85
+	.byte 0, 0, 0, 64, 160, 85, 170, 85
+	.byte 0, 0, 0, 0, 0, 64, 160, 80
+	.byte 0, 0, 0, 0, 0, 1, 2, 5
+	.byte 2, 5, 10, 21, 42, 85, 171, 87
+	.byte 170, 85, 170, 85, 170, 255, 255, 255
+	.byte 170, 85, 170, 85, 255, 255, 255, 255
+	.byte 170, 85, 171, 255, 255, 255, 255, 255
+	.byte 170, 87, 255, 255, 255, 255, 255, 255
+	.byte 170, 255, 255, 255, 255, 255, 255, 255
+	.byte 170, 245, 250, 255, 255, 255, 255, 255
+	.byte 170, 85, 170, 213, 250, 253, 254, 255
+	.byte 168, 85, 170, 85, 170, 85, 170, 85
+	.byte 0, 0, 128, 64, 160, 80, 168, 80
+	.byte 10, 21, 42, 87, 175, 87, 175, 95
+	.byte 191, 127, 255, 255, 255, 255, 255, 255
+	.byte 255, 255, 255, 255, 255, 253, 250, 213
+	.byte 255, 255, 250, 213, 170, 85, 170, 85
+	.byte 255, 255, 170, 85, 170, 85, 170, 85
+	.byte 255, 253, 170, 85, 170, 85, 170, 85
+	.byte 255, 87, 170, 85, 170, 85, 170, 85
+	.byte 255, 255, 175, 87, 170, 85, 170, 213
+	.byte 255, 255, 255, 255, 255, 127, 175, 85
+	.byte 234, 245, 254, 255, 255, 255, 255, 255
+	.byte 168, 84, 170, 85, 170, 213, 234, 213
+	.byte 0, 0, 0, 0, 128, 64, 160, 80
+	.byte 2, 1, 2, 1, 2, 1, 2, 5
+	.byte 175, 95, 191, 127, 191, 127, 255, 255
+	.byte 255, 255, 254, 255, 254, 253, 250, 253
+	.byte 170, 85, 170, 85, 170, 85, 170, 85
+	.byte 254, 127, 255, 127, 255, 95, 175, 87
+	.byte 170, 85, 234, 245, 255, 255, 255, 255
+	.byte 171, 95, 191, 255, 255, 255, 255, 255
+	.byte 250, 245, 250, 245, 250, 245, 170, 85
+	.byte 255, 127, 191, 127, 191, 95, 191, 95
+	.byte 234, 245, 250, 245, 250, 253, 254, 255
+	.byte 168, 80, 168, 80, 168, 84, 170, 84
+	.byte 10, 5, 10, 5, 10, 5, 10, 5
+	.byte 255, 255, 255, 255, 255, 255, 255, 255
+	.byte 250, 245, 250, 245, 250, 245, 250, 245
+	.byte 175, 95, 191, 255, 255, 255, 255, 255
+	.byte 255, 255, 255, 255, 251, 245, 170, 85
+	.byte 250, 255, 255, 255, 255, 255, 191, 95
+	.byte 170, 85, 170, 213, 250, 253, 250, 253
+	.byte 191, 95, 191, 95, 191, 95, 191, 95
+	.byte 254, 255, 255, 255, 255, 255, 255, 255
+	.byte 170, 84, 170, 84, 170, 84, 170, 84
+	.byte 255, 127, 191, 95, 191, 95, 175, 87
+	.byte 250, 245, 250, 253, 254, 255, 255, 255
+	.byte 170, 85, 170, 85, 170, 213, 234, 255
+	.byte 170, 85, 170, 85, 170, 85, 170, 245
+	.byte 186, 85, 170, 85, 170, 85, 170, 85
+	.byte 175, 85, 170, 85, 170, 85, 170, 85
+	.byte 250, 253, 234, 85, 170, 85, 170, 85
+	.byte 170, 85, 170, 85, 171, 87, 191, 127
+	.byte 254, 255, 254, 253, 254, 253, 250, 245
+	.byte 170, 84, 170, 84, 170, 84, 168, 80
+	.byte 10, 5, 2, 1, 0, 0, 0, 0
+	.byte 171, 87, 171, 85, 170, 85, 10, 5
+	.byte 255, 255, 255, 255, 255, 255, 255, 85
+	.byte 255, 255, 255, 255, 255, 255, 255, 127
+	.byte 255, 255, 255, 253, 250, 245, 170, 85
+	.byte 234, 213, 170, 85, 170, 85, 170, 85
+	.byte 160, 80, 168, 80, 168, 80, 168, 80
+	.byte 170, 85, 10, 5, 0, 0, 0, 0
+	.byte 170, 85, 170, 85, 170, 85, 0, 0
+	.byte 191, 85, 170, 85, 170, 85, 170, 85
+	.byte 255, 85, 170, 85, 170, 85, 170, 85
+	.byte 255, 93, 170, 85, 170, 85, 170, 85
+	.byte 255, 117, 170, 85, 170, 85, 170, 85
+	.byte 234, 85, 170, 85, 170, 85, 170, 85
+	.byte 170, 85, 170, 85, 170, 85, 170, 84
+	.byte 170, 85, 168, 80, 160, 64, 0, 0
+	.byte 160, 64, 0, 0, 0, 0, 0, 0
+	.byte 170, 85, 0, 0, 0, 0, 0, 0
+	.byte 168, 80, 0, 0, 0, 0, 0, 0
+	.byte 
+char_test_data
+	.byte 135, 9, 0, 10, 1, 10, 2, 10
+	.byte 3, 10, 3, 10, 3, 10, 3, 10
+	.byte 4, 10, 5, 10, 29, 11, 6, 10
+	.byte 7, 10, 8, 10, 9, 10, 10, 10
+	.byte 11, 10, 12, 10, 13, 10, 14, 10
+	.byte 15, 10, 16, 10, 27, 13, 0, 10
+	.byte 17, 10, 18, 10, 19, 10, 20, 10
+	.byte 21, 10, 22, 10, 23, 10, 24, 10
+	.byte 25, 10, 26, 10, 27, 10, 28, 10
+	.byte 26, 13, 29, 10, 30, 10, 31, 10
+	.byte 32, 10, 32, 10, 33, 10, 34, 10
+	.byte 35, 10, 36, 10, 32, 10, 37, 10
+	.byte 38, 10, 39, 10, 26, 13, 40, 10
+	.byte 41, 10, 42, 10, 32, 10, 32, 10
+	.byte 43, 10, 44, 10, 45, 10, 46, 10
+	.byte 32, 10, 47, 10, 48, 10, 49, 10
+	.byte 26, 13, 40, 10, 50, 10, 51, 10
+	.byte 52, 10, 53, 10, 54, 10, 32, 10
+	.byte 55, 10, 56, 10, 57, 10, 18, 10
+	.byte 58, 10, 59, 10, 26, 13, 60, 10
+	.byte 61, 10, 25, 10, 62, 10, 63, 10
+	.byte 41, 10, 41, 10, 12, 10, 12, 10
+	.byte 41, 10, 64, 10, 65, 10, 66, 10
+	.byte 28, 11, 67, 10, 68, 10, 32, 10
+	.byte 69, 10, 70, 10, 71, 10, 72, 10
+	.byte 73, 10, 74, 10, 75, 10, 76, 10
+	.byte 32, 5, 77, 10, 77, 10, 77, 10
+	.byte 77, 10, 78, 10, 0, 0, 
+block12052
+	
+	
+	; ***********  Defining procedure : initeightbitmul
+	;    Procedure type : Built-in function
+	;    Requires initialization : no
+	
+	jmp afterProc_initeightbitmul
+initeightbitmul
+	jmp multiply_eightbit27350
+multiplier .byte 0
+multiply_eightbit
+	cpx #$00
+	beq mul_end
+	dex
+	stx mul_mod+1
+	lsr
+	sta multiplier
+	lda #$00
+	ldx #$08
+mul_loop
+	bcc mul_skip
+mul_mod
+	adc #$00
+mul_skip
+	ror
+	ror multiplier
+	dex
+	bne mul_loop
+	ldx multiplier
+	rts
+mul_end
+	txa
+	rts
+multiply_eightbit27350
+	rts
+afterProc_initeightbitmul
+	
+	
+	; ***********  Defining procedure : initmoveto
+	;    Procedure type : Built-in function
+	;    Requires initialization : no
+	
+	jmp afterProc_initmoveto
+initmoveto
+	jmp moveto1150
+screenMemory = $fb 
+screen_x .byte 0 
+screen_y .byte 0 
+SetScreenPosition
+	sta screenMemory+1
+	lda #0
+	sta screenMemory
+	ldy screen_y
+	cpy #0
+	beq sydone
+syloop
+	clc
+	adc #40
+	bcc sskip
+	inc screenMemory+1
+sskip
+	dey
+	cpy #$00
+	bne syloop
+sydone
+	ldx screen_x
+	cpx #0
+	beq sxdone
+	clc
+	adc screen_x
+	bcc sxdone
+	inc screenMemory+1
+sxdone
+	sta screenMemory
+	rts
+moveto1150
+	rts
+afterProc_initmoveto
+	
+	
+	; ***********  Defining procedure : initprintstring
+	;    Procedure type : Built-in function
+	;    Requires initialization : no
+	
+	jmp afterProc_initprintstring
+initprintstring
+print_text = $fd
+print_number_text .dc "    ",0
+printstring
+	ldy #0
+printstringloop
+	lda (print_text),y
+	cmp #0
+	beq printstring_done
+	cmp #64
+	bcc printstring_skip
+	sec
+	sbc #64
+printstring_skip
+	sta (screenMemory),y
+	iny
+	dex
+	cpx #0
+	beq printstring_done
+	jmp printstringloop
+printstring_done
+	rts
+afterProc_initprintstring
+	
+	
+	; ***********  Defining procedure : CopyChartestData
+	;    Procedure type : User-defined procedure
+	
+	jmp afterProc_CopyChartestData
+CopyChartestData
+
+	; memcpy
+	ldx #0
+memcpy21724
+	lda char_test_set + #$0,x
+	; Binop of two constant values
+	sta $2800+$200,x
+	inx
+	cpx #0
+	bne memcpy21724
+	; memcpy
+	ldx #0
+memcpy13966
+	lda char_test_set + #$100,x
+	; Binop of two constant values
+	sta $2800+$300,x
+	inx
+	cpx #0
+	bne memcpy13966
+	; memcpy
+	ldx #0
+memcpy3430
+	lda char_test_set + #$200,x
+	; Binop of two constant values
+	sta $2800+$400,x
+	inx
+	cpx #120
+	bne memcpy3430
+
+	rts
+afterProc_CopyChartestData
+	
+	
+	; ***********  Defining procedure : PrintText
+	;    Procedure type : User-defined procedure
+	
+	jmp afterProc_PrintText
+PrintText
+
+	lda #2
+	sta screen_x
+	lda #22
+	sta screen_y
+	lda #4
+	jsr SetScreenPosition
+	jmp printstring_call30191
+printstring_text18007	.dc "                                WHY AM I DOING THIS WHEN I SHOULD SLEEP? I DIDN'T GO TO WORK TODAY SO I HAVE TO GO TOMORROW                                 ",0
+printstring_call30191
+	clc
+	; TEST
+	lda #<printstring_text18007
+	adc textshift
+	ldy #>printstring_text18007
+	sta print_text+0
+	sty print_text+1
+	lda #36
+	tax
+	jsr printstring
+	lda #2
+	sta screen_x
+	lda #22
+	sta screen_y
+	lda #216
+	jsr SetScreenPosition
+	; Assigning single variable : colorIndex
+	; Add/sub where right value is constant number
+	lda colorIndex
+	clc
+	adc #1
+	 ; end add / sub var with constant
+	
+	; VarNode StoreVariable
+	sta colorIndex
+	; Assigning single variable : x
+	lda #0
+	; VarNode StoreVariable
+	sta x
+for11337
+
+	; Assigning single variable : val
+	; Load Byte array
+	pha
+	; Add/sub where right value is constant number
+	; Add/sub right value is variable/expression
+	jmp jmprightvar27753
+rightvar12287	.byte	0
+jmprightvar27753
+	lda colorIndex
+	sta rightvar12287
+	
+	lda x
+	sec
+	sbc rightvar12287
+	
+	and #15
+	 ; end add / sub var with constant
+	
+	tax
+	pla
+	lda fade,x
+	
+	; VarNode StoreVariable
+	sta val
+	ldy #0
+	sta (screenMemory),y
+	lda #1
+	sta screen_x
+	lda screenMemory
+	cpx #0
+	beq incscreenx10383
+	clc
+	adc screen_x
+	bcc incscreenx10383
+	inc screenMemory+1
+incscreenx10383
+	sta screenMemory
+
+	inc x
+	lda #36
+	cmp x
+	bne forLoopFix14945
+	jmp forLoopDone8909
+forLoopFix14945
+	jmp for11337
+forLoopDone8909
+
+	rts
+afterProc_PrintText
+	
+	
+	; ***********  Defining procedure : StampImage
+	;    Procedure type : User-defined procedure
+	
+	jmp afterProc_StampImage
+StampImage
+	jmp block32209
+index	dc.b
+length	dc.b
+charset	dc.b
+pos_x	dc.b
+pos_y	dc.b
+block32209
+
+	lda pos_x
+	sta screen_x
+	lda pos_y
+	sta screen_y
+	lda #4
+	jsr SetScreenPosition
+	; Assigning single variable : index
+	lda #1
+	; VarNode StoreVariable
+	sta index
+while9758
+	lda #0
+	; Load Byte array
+	pha
+	lda index
+	tax
+	pla
+	cmp charset,x
+	
+	beq conditionalfailed24946
+	jmp ConditionalTrueBlock24221
+conditionalfailed24946
+	jmp elsedoneblock6422
+ConditionalTrueBlock24221
+
+	; Assigning single variable : length
+	; Load Byte array
+	pha
+	lda index
+	tax
+	pla
+	lda charset,x
+	
+	; VarNode StoreVariable
+	sta length
+	; Assigning single variable : index
+	; Add/sub where right value is constant number
+	lda index
+	clc
+	adc #1
+	 ; end add / sub var with constant
+	
+	; VarNode StoreVariable
+	sta index
+	; Assigning single variable : x
+	lda #0
+	; VarNode StoreVariable
+	sta x
+for13030
+
+	; Add/sub where right value is constant number
+	; Load Byte array
+	pha
+	lda index
+	tax
+	pla
+	lda charset,x
+	
+	clc
+	adc #64
+	 ; end add / sub var with constant
+	
+	ldy #0
+	sta (screenMemory),y
+	; Assigning single variable : index
+	; Add/sub where right value is constant number
+	lda index
+	clc
+	adc #2
+	 ; end add / sub var with constant
+	
+	; VarNode StoreVariable
+	sta index
+	lda #1
+	sta screen_x
+	lda screenMemory
+	cpx #0
+	beq incscreenx29168
+	clc
+	adc screen_x
+	bcc incscreenx29168
+	inc screenMemory+1
+incscreenx29168
+	sta screenMemory
+
+	inc x
+	lda length
+	cmp x
+	bne forLoopFix900
+	jmp forLoopDone32591
+forLoopFix900
+	jmp for13030
+forLoopDone32591
+	; Add/sub where right value is constant number
+	; Load Byte array
+	pha
+	lda index
+	tax
+	pla
+	lda charset,x
+	
+	clc
+	adc #1
+	 ; end add / sub var with constant
+	
+	sta screen_x
+	lda screenMemory
+	cpx #0
+	beq incscreenx18762
+	clc
+	adc screen_x
+	bcc incscreenx18762
+	inc screenMemory+1
+incscreenx18762
+	sta screenMemory
+	; Assigning single variable : index
+	; Add/sub where right value is constant number
+	lda index
+	clc
+	adc #1
+	 ; end add / sub var with constant
+	
+	; VarNode StoreVariable
+	sta index
+
+	jmp while9758
+elsedoneblock6422
+
+	rts
+afterProc_StampImage
+	
+	
+	; ***********  Defining procedure : UpdateRaster
+	;    Procedure type : User-defined procedure
+	
+	jmp afterProc_UpdateRaster
+UpdateRaster
+	dec $d019        ; acknowledge IRQ
+
+	; Assigning single variable : time
+	; Add/sub where right value is constant number
+	lda time
+	clc
+	adc #1
+	 ; end add / sub var with constant
+	
+	; VarNode StoreVariable
+	sta time
+	; Assigning single variable : x
+	; Add/sub where right value is constant number
+	and #7
+	 ; end add / sub var with constant
+	
+	; VarNode StoreVariable
+	sta x
+	lda #0
+	cmp x
+	bne conditionalfailed21548
+	jmp ConditionalTrueBlock6359
+conditionalfailed21548
+	jmp elsedoneblock20537
+ConditionalTrueBlock6359
+
+	; Assigning single variable : textshift
+	; Add/sub where right value is constant number
+	lda textshift
+	clc
+	adc #1
+	 ; end add / sub var with constant
+	
+	; VarNode StoreVariable
+	sta textshift
+
+elsedoneblock20537
+	; Assigning single variable : xscroll
+	; Add/sub where right value is constant number
+	; Add/sub where right value is constant number
+	lda xscroll
+	clc
+	adc #1
+	 ; end add / sub var with constant
+	
+	and #7
+	 ; end add / sub var with constant
+	
+	; VarNode StoreVariable
+	sta xscroll
+	; wait for raster
+	; Binop of two constant values
+	ldx #22*#10
+	cpx $d012
+	bne *-3
+	; Add/sub right value is variable/expression
+	jmp jmprightvar4041
+rightvar27595	.byte	0
+jmprightvar4041
+	lda xscroll
+	sta rightvar27595
+	
+	lda #8
+	sec
+	sbc rightvar27595
+	
+	lda $d016  
+	and #$F8
+	clc
+	; Add/sub right value is variable/expression
+	jmp jmprightvar24350
+rightvar3602	.byte	0
+jmprightvar24350
+	lda xscroll
+	sta rightvar3602
+	
+	lda #8
+	sec
+	sbc rightvar3602
+	
+	sta $d016
+	; wait for raster
+	; Binop of two constant values
+	ldx #24*#10
+	cpx $d012
+	bne *-3
+	lda #0
+	lda $d016  
+	and #$F8
+	clc
+	adc #0
+	sta $d016
+	jsr PrintText
+	jmp $ea81        ; return to kernel interrupt routine
+
+	rts
+afterProc_UpdateRaster
+	
+	
+	; ***********  Defining procedure : Setup
+	;    Procedure type : User-defined procedure
+	
+	jmp afterProc_Setup
+Setup
+
+	; Clear screen with offset
+	lda #$00
+	tax
+	lda #32
+clearloop30836
+	sta $0000+$400,x
+	sta $0100+$400,x
+	sta $0200+$400,x
+	sta $0300+$400,x
+	dex
+	bne clearloop30836
+	; Poke
+	; Optimization: shift is zero
+	lda #0
+	sta $d020
+	; Poke
+	; Optimization: shift is zero
+	lda #0
+	sta $d021
+	; Poke
+	; Optimization: shift is zero
+	lda #26
+	sta $d018
+
+	rts
+afterProc_Setup
+
+	jsr Setup
+	jsr CopyChartestData
+	; 
+	; ****** Inline assembler section
+; ptest
+	
+	; Assigning single variable : charset
+	lda char_test_data
+	; VarNode StoreVariable
+	lda #3
+	; VarNode StoreVariable
+	sta pos_x
+	lda #1
+	; VarNode StoreVariable
+	sta pos_y
+	jsr StampImage
+	; Disable interrupts
+	sei 
+	ldy #$7f    ; $7f = %01111111
+	sty $dc0d   ; Turn off CIAs Timer interrupts
+	sty $dd0d   ; Turn off CIAs Timer interrupts
+	lda $dc0d   ; cancel all CIA-IRQs in queue/unprocessed
+	lda $dd0d   ; cancel all CIA-IRQs in queue/unprocessed
+	
+	; Set raster interrupt pointing to : UpdateRaster
+	lda #$01    ; Set Interrupt Request Mask...
+	sta $d01a   ; ...we want IRQ by Rasterbeam
+	lda #<UpdateRaster
+	ldx #>UpdateRaster
+	sta $314    ; store in $314/$315
+	stx $315
+	lda #0
+	sta $d012
+	lda $d011   ; Bit#0 of $d011 is basically...
+	and #$7f    ; ...the 9th Bit for $d012
+	sta $d011   ; we need to make sure it is set to zero 
+	cli
+	jmp * ; loop like (¤/%
+
+	rts
+	org $27FF
+mainChar
+	incbin "c:/users/leuat/onedrive/documents/github/pmm/pmm///test.bin"

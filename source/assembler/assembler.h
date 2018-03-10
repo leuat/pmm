@@ -84,7 +84,7 @@ public:
     virtual void EndProgram() = 0;
     virtual void VarDeclHeader() = 0;
     virtual void DeclareVariable(QString name, QString type)=0;
-    virtual void DeclareArray(QString name, QString type, int count, QStringList lst) {}
+    virtual void DeclareArray(QString name, QString type, int count, QStringList lst, QString position) {}
     virtual void BeginBlock() = 0;
     virtual void EndBlock() = 0;
     virtual void AssignVariable(QString var) = 0;

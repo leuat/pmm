@@ -39,6 +39,8 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::ELSE,"ELSE"));
     reservedWords.append(Token(TokenType::OR,"OR"));
     reservedWords.append(Token(TokenType::AND,"AND"));
+    reservedWords.append(Token(TokenType::POINTER,"POINTER"));
+    reservedWords.append(Token(TokenType::AT,"AT"));
 
 }
 
@@ -66,6 +68,14 @@ void Syntax::SetupBuiltinFunctions()
                 BuiltInFunction::Type::INTEGER <<
                 BuiltInFunction::Type::INTEGER <<
                 BuiltInFunction::Type::INTEGER);
+
+    builtInFunctions["memcpylarge"] = BuiltInFunction(
+                "memcpylarge",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER);
+
 
 
     builtInFunctions["initrandom"] = (BuiltInFunction(
@@ -260,6 +270,42 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER
                 );
+    builtInFunctions["setmulticolormode"] = BuiltInFunction(
+                "setmulticolormode",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["setregularcolormode"] = BuiltInFunction(
+                "setregularcolormode",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["setbitmapmode"] = BuiltInFunction(
+                "setbitmapmode",
+                QList<BuiltInFunction::Type>()
+                );
+
+
+    builtInFunctions["settextmode"] = BuiltInFunction(
+                "settextmode",
+                QList<BuiltInFunction::Type>()
+
+                );
+
+
+    builtInFunctions["setbank"] = BuiltInFunction(
+                "setbank",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["copyimagecolordata"] = BuiltInFunction(
+                "copyimagecolordata",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER
+                );
+
 
 
 }

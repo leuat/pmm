@@ -94,6 +94,10 @@ public:
             as->Asm("lda " +value+"+1");
             return;
         }
+        if (t == TokenType::POINTER) {
+            LoadByteArray(as);
+            return;
+        }
         ErrorHandler::e.Error(TokenType::getType(t) + " assignment not supported yet for exp: " + value);
         return;
     }

@@ -514,8 +514,8 @@ QVector<Node*> Parser::Declarations()
 
         Eat(TokenType::SEMI);
         Node* block = Block(true);
-        if (block==nullptr)
-            qDebug() << "Procedure decl: " << procName;
+//        if (block==nullptr)
+  //          qDebug() << "Procedure decl: " << procName;
         Node* procDecl = new NodeProcedureDecl(procName, paramDecl, block, isInterrupt);
         //decl.append(procDecl);
         if (block!=nullptr)
@@ -607,15 +607,22 @@ Node *Parser::TypeSpec()
             Eat(TokenType::RPAREN);
         }
 
+        QString position = "";
+        if (m_currentToken.m_type==TokenType::AT) {
+            Eat(TokenType::AT);
+            position = m_currentToken.m_value;
+            Eat(m_currentToken.m_type);
+        }
+
         t.m_intVal = count;
-        return new NodeVarType(t,arrayType,data);
+        return new NodeVarType(t,position, arrayType,data);
 
     }
 
     Eat(m_currentToken.m_type);
 
 
-    return new NodeVarType(t);
+    return new NodeVarType(t,"");
 
 }
 

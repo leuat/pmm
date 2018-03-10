@@ -1,0 +1,114 @@
+program Tutorial7;
+var
+	xscroll, x,y, val, i: byte;
+	textshift, wobbleShift: byte;
+	text: array[255] of byte;
+	time: byte;
+	colorIndex:byte;
+	fade : array [16] of byte = (11,6,6,12,4,14,15,1,1,15,14,4,12,6,6,11); 
+	
+	mainChar: IncBin("test.bin","$27FF");
+	image_color: IncBin("images/octopus_color.bin", "$5000");
+	
+	image_data: IncBin("images/octopus_data.bin", "$6000");
+
+
+procedure PrintText();
+begin
+	// move to screen position
+	moveto(#2,#23, #$04);
+	// print text
+	PrintString(text, textshift, #36);
+	// move cursor to color
+	moveto(#2,#23, #$D8);
+	colorIndex:=colorIndex+#1;
+
+	for x:=#0 to #36 do begin
+		val:=fade[((x+colorIndex)/#2)&#15];
+		pokescreen(val, #0);
+		incscreenx(#1);
+
+	end;
+end;
+
+interrupt UpdateRaster();
+begin
+	// increase global time
+	time:=time+#1;
+	// increase text shift only every 8th step due to scrolling 
+
+	x:=time&#7;
+	if x=#0 then begin
+		textshift:=textshift+ #1;
+	end;
+	// increase scrolling 
+
+	xscroll:=(xscroll+#1)&#7;
+	y:=#0;
+	// Optional wobble effect on the main image	
+	wobbleShift:=sine[time*#2];
+	while y<#23*#9 do begin
+		// Keep until rasterline hits text line
+		peek(RASTERLINE_POS, #0, y);
+		val:=sine[y*#8 + wobbleShift]/#32;
+		scroll(val);
+		waitnoraster(#1);
+	end;
+
+	// Wait for text line raster
+	waitForRaster(#23*#10);
+	// switch bank to 0
+	setbank(VIC_BANK0);
+	// switch graphics mode
+	
+	setregularcolormode();
+	settextmode();
+	// set the vic's data to point to the custom character set
+	poke(VIC_DATA_LOC, #0, #$1A);
+
+	// scroll this area
+	Scroll(#8-xscroll);
+	// wait for rasterline to hit near bottom
+	waitForRaster(#25*#10);
+	// switch back to bank #1 and set multi color mode again
+
+	setbank(VIC_BANK1);
+
+	Scroll(#0); 
+	setmulticolormode();
+	setbitmapmode();
+
+	// Make sure we point the vic to the bitmap data
+	poke(VIC_DATA_LOC, #0, #$18);
+	// finally, update the text
+
+	PrintText();
+	// call system kernel
+	kernelinterrupt();
+end;
+
+
+procedure Setup();
+begin
+	ClearScreen(#$20, SCREEN_CHAR_LOC);
+	Poke(SCREEN_BG_COL, #0, BLACK);
+	Poke(SCREEN_FG_COL, #0, BLACK);
+
+	setbank(VIC_BANK1);
+	copyimagecolordata(image_color,1);
+
+	text:="                WHY AM I DOING THIS WHEN I SHOULD BE SLEEPING     I DIDN'T GO TO WORK TODAY BUT LUCKILY NOBODY NOTICED                  THIS SCOLLING DOESN'T END PROPERLY";
+
+
+end;
+
+begin
+	Setup();
+
+	DisableInterrupts();
+	RasterIRQ(UpdateRaster(), #0);
+	EnableInterrupts();
+
+	Loop();
+
+end.

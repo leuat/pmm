@@ -42,14 +42,50 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="peek")
         Peek(as);
 
+    if (m_procName.toLower() == "copyimagecolordata")
+        CopyImageColorData(as);
+
     if (m_procName.toLower()=="waitforraster")
         WaitForRaster(as);
+
+    if (m_procName.toLower() =="setmulticolormode") {
+        as->Comment("Multicolor mode");
+        as->Asm("lda #$18");
+        as->Asm("sta $d016");
+
+    }
+
+    if (m_procName.toLower() =="settextmode") {
+        as->Comment("Regular text mode ");
+        as->Asm("lda $D011");
+        as->Asm("lda #%11011111");
+        as->Asm("sta $D011");
+    }
+    if (m_procName.toLower() =="setbank") {
+        SetBank(as);
+    }
+    if (m_procName.toLower() =="setbitmapmode") {
+        as->Comment("Bitmap mode ");
+        as->Asm("lda #$3b");
+        as->Asm("sta $d011");
+    }
+
+    if (m_procName.toLower() =="regularcolormode") {
+        as->Comment("Regularcolor mode");
+        as->Asm("lda #$4");
+        as->Asm("sta $d016");
+
+    }
 
     if (m_procName.toLower()=="waitnoraster")
         WaitNoRasterLines(as);
 
     if (m_procName.toLower()=="memcpy")
         MemCpy(as);
+
+    if (m_procName.toLower()=="memcpylarge")
+        MemCpyLarge(as);
+
 
     if (m_procName.toLower()=="and")
         BitOp(as,0);
@@ -942,6 +978,129 @@ void NodeBuiltinMethod::Swap(Assembler *as)
     vars[1]->StoreVariable(as);
     //as->Asm("sta " + vars[1]->value+ ",x");
 
+
+}
+
+void NodeBuiltinMethod::MemCpyLarge(Assembler *as)
+{
+    /*as->Comment("Memory copy large > 255 bytes");
+
+    NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
+    if (var==nullptr)
+        ErrorHandler::e.Error("MemCpyLarge parameter 0 must be Variable location");
+
+
+    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[3]);
+    if (num==nullptr)
+        ErrorHandler::e.Error("MemCpyLarge parameter 4 must be constant");
+
+
+    QString defs = as->NewLabel("memcpy_defs");
+    QString counter = as->NewLabel("memcpy_counter");
+    QString carry = as->NewLabel("memcpy_carry");
+
+    as->Asm("lda <"+var->value);
+    as->Asm("ldy >"+var->value);
+    as->Asm("sta print_text+0");
+    as->Asm("sty print_text+1");
+
+    as->Asm("lda <"+var->value);
+    as->Asm("ldy >"+var->value);
+    as->Asm("sta print_text+0");
+    as->Asm("sty print_text+1");
+
+
+    as->Asm("jmp " + defs);
+    as->Label(counter + "\t dc.w\t" + num->HexValue());
+    as->Label(defs);
+    as->
+
+
+
+
+    as->PopLabel("memcpy_defs");
+    as->PopLabel("memcpy_counter");
+    as->PopLabel("memcpy_carry");
+*/
+/*    as->Comment("memcpy");
+    QString lbl = as->NewLabel("memcpy");
+    as->Asm("ldx #0");
+    as->Label(lbl);
+    //LoadVar(as, 0, "x");
+    as->Asm("lda " + var->value + " + #" + num->HexValue() + ",x");
+    SaveVar(as, 2, "x");
+    as->Asm("inx");
+    as->Term("cpx ");
+    m_params[3]->Build(as);
+    as->Term();
+    as->Asm("bne " + lbl);
+  */
+}
+
+void NodeBuiltinMethod::SetBank(Assembler *as)
+{
+    as->Comment("Set bank");
+    as->Asm("lda $dd00");
+    as->Asm("and #$fc");
+    as->Term("ora ");
+    m_params[0]->Build(as);
+    as->Term();
+    as->Asm("sta $dd00");
+}
+
+void NodeBuiltinMethod::CopyImageColorData(Assembler *as)
+{
+    NodeVar* var = dynamic_cast<NodeVar*>(m_params[0]);
+    if (var==nullptr)
+        ErrorHandler::e.Error("CopyImageColorData : parameter 0 must be a variable!");
+
+    NodeNumber * bank = dynamic_cast<NodeNumber*>(m_params[1]);
+    if (bank==nullptr)
+        ErrorHandler::e.Error("CopyImageColorData : parameter 1 must be a constant number!");
+
+
+    QString addBank="";
+    if (bank->m_val==1)
+        addBank="$4000";
+    if (bank->m_val==2)
+        addBank="$8000";
+    if (bank->m_val==3)
+        addBank="$c000";
+
+    QString varName = var->value;
+    QString lbl = as->NewLabel("copyimageloop");
+
+
+    as->Comment("Copy image color data");
+    as->Asm("lda "+varName);
+    as->Asm("sta $d020 ; background");
+    as->Asm("lda "+varName+"+1");
+    as->Asm("sta $d021; foreground");
+    as->Asm("ldx #$00");
+    as->Label(lbl);
+    as->Asm("lda "+varName+"+2,x");
+    as->Asm("sta $0400 +"+addBank+",x");
+    as->Asm("lda "+varName+" + $102,x");
+    as->Asm("sta $0500+"+addBank+",x");
+    as->Asm("lda "+varName+" + $202,x");
+    as->Asm("sta $0600+"+addBank+",x");
+    as->Asm("lda "+varName+" + $302,x");
+    as->Asm("sta $0700+"+addBank+",x");
+
+    as->Comment("color #2");
+    as->Asm("lda "+varName+"+1002,x");
+    as->Asm("sta $d800,x");
+    as->Asm("lda "+varName+"+1002+ $100,x");
+    as->Asm("sta $d900,x");
+    as->Asm("lda "+varName+"+1002+ $200,x");
+    as->Asm("sta $da00,x");
+    as->Asm("lda "+varName+"+1002+ $300,x");
+    as->Asm("sta $db00,x");
+
+    as->Asm("inx");
+    as->Asm("bne " + lbl);
+
+    as->PopLabel("copyimageloop");
 
 }
 

@@ -67,6 +67,13 @@ void SymbolTable::Initialize()
     m_constants["SIDFILE_1_PLAY"] = new Symbol("","ADDRESS", 0);
     m_constants["SIDFILE_2_PLAY"] = new Symbol("","ADDRESS", 0);
 
+    m_constants["VIC_BANK0"] = new Symbol("#3","BYTE", 3);
+    m_constants["VIC_BANK1"] = new Symbol("#2","BYTE", 2);
+    m_constants["VIC_BANK2"] = new Symbol("#1","BYTE", 1);
+    m_constants["VIC_BANK3"] = new Symbol("#0","BYTE", 0);
+
+    m_constants["VIC_DATA_LOC"] = new Symbol("$d018", "ADDRESS", 0xd018);
+
 }
 
 void SymbolTable::InitBuiltins()
@@ -76,6 +83,7 @@ void SymbolTable::InitBuiltins()
     Define(new BuiltInTypeSymbol("REAL",""));
     Define(new BuiltInTypeSymbol("BYTE",""));
     Define(new BuiltInTypeSymbol("STRING",""));
+    Define(new BuiltInTypeSymbol("POINTER",""));
     Define(new BuiltInTypeSymbol("ARRAY",""));
     Define(new BuiltInTypeSymbol("INCBIN",""));
     Define(new BuiltInTypeSymbol("INCSID",""));

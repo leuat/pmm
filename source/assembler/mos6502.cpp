@@ -25,12 +25,15 @@ void AsmMOS6502::EndProgram()
     Asm("rts");
 }
 
-void AsmMOS6502::DeclareArray(QString name, QString type, int count, QStringList data)
+void AsmMOS6502::DeclareArray(QString name, QString type, int count, QStringList data, QString pos)
 {
     QString t = byte;
     if (type.toLower()=="integer")
         t = word;
     if (type.toLower()=="byte")
+        t = byte;
+
+    if (type.toLower()=="string")
         t = byte;
 
 
@@ -39,21 +42,30 @@ void AsmMOS6502::DeclareArray(QString name, QString type, int count, QStringList
         Asm("org "+name+"+" +QString::number(count));
     }
     else {
-        Write(name);
+        QString s="";
+        s=s+name + "\t"+t+" ";
 
-        ClearTerm();
-        Term(".byte ");
         for (int i=0;i<data.count();i++) {
-            Term(data[i]);
+            s=s+data[i];
             if (i%8==7) {
-                Term();
-                Term(".byte ");
+                s=s+"\n";
+                s=s + "\t" +t + " ";
             }
-            else Term(", ");
+            else s=s+", ";
 
         }
+        QStringList lst = s.split("\n");
+        if (pos=="") {
+            for (int i=0;i<lst.count();i++)
+                Write(lst[i]);
+        }
+        else {
+            Appendix("org " + pos,1);
+            for (int i=0;i<lst.count();i++)
+                Appendix(lst[i],0);
+        }
+
     }
-    Term();
 }
 
 void AsmMOS6502::VarDeclHeader()

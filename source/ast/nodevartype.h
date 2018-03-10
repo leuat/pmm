@@ -16,11 +16,12 @@ public:
     QStringList m_data;
     QString m_filename, m_position;
 
-    NodeVarType(Token t,    Token arrayVarType=Token(),QStringList data =QStringList() ) {
+    NodeVarType(Token t, QString position,   Token arrayVarType=Token(),QStringList data =QStringList() ) {
         m_op = t;
         value = t.m_value;
         m_arrayVarType = arrayVarType;
         m_data = data;
+        m_position = position;
 
     }
     NodeVarType(Token t,    QString filename, QString position ) {
