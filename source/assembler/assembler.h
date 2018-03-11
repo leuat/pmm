@@ -71,7 +71,6 @@ public:
     }
 
     void PopLabel(QString s) {
-        qDebug() << "popping " << s;
         m_labelStack[s].pop();
     }
 

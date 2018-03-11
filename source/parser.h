@@ -25,10 +25,13 @@
 #include "source/ast/nodebinaryclause.h".h"
 
 
+
+
 class Parser {
 public:
 
     QMap<QString, Node*> m_procedures;
+    QMap<QString, QString> m_preprocessorDefines;
     QVector<Node*> m_proceduresOnly;
     Lexer* m_lexer;
     Token m_currentToken;

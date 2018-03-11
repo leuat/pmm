@@ -164,7 +164,7 @@ void Syntax::SetupBuiltinFunctions()
                 BuiltInFunction::Type::INTEGER
                 );
 
-    builtInFunctions["and"] = BuiltInFunction(
+/*    builtInFunctions["and"] = BuiltInFunction(
                 "and",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
                 BuiltInFunction::Type::INTEGER
@@ -175,7 +175,7 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
                 BuiltInFunction::Type::INTEGER
                 );
-
+*/
     builtInFunctions["printstring"] = BuiltInFunction(
                 "printstring",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::STRING << BuiltInFunction::Type::INTEGER

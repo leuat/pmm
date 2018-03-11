@@ -381,6 +381,7 @@ void Parser::Preprocess()
     m_lexer->Initialize();
     m_lexer->m_ignorePreprocessor = false;
     m_currentToken = m_lexer->GetNextToken();
+    m_preprocessorDefines.clear();
     while (m_currentToken.m_type!=TokenType::TEOF) {
         if (m_currentToken.m_type == TokenType::PREPROCESSOR) {
             if (m_currentToken.m_value=="include") {
@@ -397,16 +398,29 @@ void Parser::Preprocess()
                 //Eat(TokenType::SEMI);
                 //IncludeFile(filename);
             }
-
+            else if (m_currentToken.m_value =="define") {
+                Eat(TokenType::PREPROCESSOR);
+                QString key = m_currentToken.m_value;
+                Eat();
+                QString val = m_currentToken.m_value;
+                if (val=="")
+                    val = QString::number(m_currentToken.m_intVal);
+                Eat();
+                m_preprocessorDefines[key] = val;
+            }
         }
 
         Eat(m_currentToken.m_type);
     }
-//    qDebug() << m_lexer->m_text;
 
-  //  qDebug() << "Done preprocessor";
-//    qDebug() << "FIRST TYPE " << m_currentToken.getType();
+    // Afterwards, replace all preprocessor defines
 
+    for (QString k: m_preprocessorDefines.keys()) {
+        QString val = m_preprocessorDefines[k];
+        qDebug() << "Replacing: @" + k << "  with " << val;
+        m_lexer->m_text = m_lexer->m_text.replace("@" +k, val);
+    }
+    qDebug() << m_lexer->m_text;
 }
 
 Node* Parser::Parse()

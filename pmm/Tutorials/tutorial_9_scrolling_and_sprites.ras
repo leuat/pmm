@@ -22,6 +22,8 @@ var
 @include "RasLib/banking.ras"
 @include "RasLib/verticalscrolling.ras"
 
+@define spriteBaseLoc "#$90"
+
 procedure PrintLine();
 begin
 	j:=sine[time*#1]/#8;
@@ -70,8 +72,8 @@ begin
 	monster_y:=#55;
 
 	// 0D
-	setSpriteLoc(#0, #$90, #0);
-	setSpriteLoc(#0,  #$90, #1);
+	setSpriteLoc(#0, @spriteBaseLoc, #0);
+	setSpriteLoc(#0, @spriteBaseLoc, #1);
 
 	setSpriteLoc(#1, #$92, #0);
 	setSpriteLoc(#1, #$92 ,#1);
