@@ -41,6 +41,9 @@ public:
     void Poke(bool start) override;
     void Peek(bool start) override;
 
+    QString StoreInTempVar(QString name) override;
+
+
     void Writeln() override;
     void EndWriteln() override;
     void LoadVariable(QString var) override;

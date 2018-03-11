@@ -35,7 +35,7 @@ begin
 	bar_s[#0] := sine[time*#2]/#2 + #100;
 	bar_s[#1] := sine[time*#2 + #30]/#2 + #100;
 	
-	if bar_s[#0]>bar_s[#1] then begin
+	if bar_s[#1]<bar_s[#0] then begin
 		swap(bar_s[#0], bar_s[#1]);
 	end;
 
@@ -72,14 +72,14 @@ begin
 	barCount:=#15;
 	colorIndex:=#0;
 
-	if diff<#34 then begin
+	if diff<#36 then begin
 		peek($d012, #0, a);
 		bar_s[currentBar]:=a+#2;
 		barCount:=diff/#2 +#2;
 		colorIndex:=#15-diff/#2;
 	end;
 
-	if currentBar < #1 then begin
+	if currentBar < #2 then begin
 		Bars();
 	end;
 	

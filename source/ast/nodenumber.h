@@ -38,6 +38,20 @@ public:
         return "$" + QString::number((int)m_val,16);
     }
 
+    QString StringValue() {
+        QString val;
+        if (m_op.m_type==TokenType::BYTE)
+            val = "#"+QString::number((int)m_val);
+        if (m_op.m_type==TokenType::INTEGER)
+            val = "#"+QString::number((int)m_val);
+        if (m_op.m_type==TokenType::INTEGER_CONST)
+            val = "#"+QString::number((int)m_val);
+        if (m_op.m_type==TokenType::ADDRESS) {
+            val = "$" + QString::number((int)m_val,16);
+        }
+        return val;
+    }
+
     QString Build(Assembler *as) override {
         QString val = "";
 

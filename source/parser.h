@@ -22,6 +22,7 @@
 #include "source/ast/nodebuiltinmethod.h"
 #include "source/ast/nodewhileloop.h"
 #include "source/ast/nodeasm.h"
+#include "source/ast/nodebinaryclause.h".h"
 
 
 class Parser {
@@ -60,6 +61,8 @@ public:
     Node* Expr();
     Node* Term();
     Node* FindProcedure();
+    Node* BinaryClause();
+    //Node* LogicalClause();
     Node* Block(bool useOwnSymTab);
     QVector<Node*> Parameters();
     Node* ForLoop();

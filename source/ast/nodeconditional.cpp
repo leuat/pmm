@@ -1,6 +1,66 @@
 #include "nodeconditional.h"
 
 
+QString NodeConditional::Build(Assembler *as) {
+    QString labelStartOverAgain = as->NewLabel("while");
+    QString lblstartTrueBlock = as->NewLabel("ConditionalTrueBlock");
+
+    QString labelElse = as->NewLabel("elseblock");
+    QString labelElseDone = as->NewLabel("elsedoneblock");
+   // QString labelFailed = as->NewLabel("conditionalfailed");
+
+    if (m_isWhileLoop)
+        as->Label(labelStartOverAgain);
+
+    // Test all binary clauses:
+    m_binaryClause->Build(as);
+    // Now, a should be either true or false
+
+    as->Asm("cmp #1");
+    as->Asm("beq " + lblstartTrueBlock); // All conditionals checked out!
+    // Failed label
+ //   as->Label(labelFailed);
+    // Do we have an else block?
+    if (m_elseBlock!=nullptr)
+        as->Asm("jmp " + labelElse); // All conditionals false: skip to end (or else block)
+    // If just plain conditional, jump to end
+    as->Asm("jmp " + labelElseDone);
+    // Start main block
+    as->Label(lblstartTrueBlock); // This means skip inside
+
+    m_block->Build(as);
+    if (m_elseBlock!=nullptr)
+        as->Asm("jmp " + labelElseDone);
+
+    // If while loop, return to beginning of conditionals
+    if (m_isWhileLoop)
+        as->Asm("jmp " + labelStartOverAgain);
+
+    // An else block?
+    if (m_elseBlock!=nullptr) {
+        as->Label(labelElse);
+        m_elseBlock->Build(as);
+
+    }
+    as->Label(labelElseDone); // Jump here if not
+
+    as->PopLabel("while");
+    as->PopLabel("ConditionalTrueBlock");
+    as->PopLabel("elseblock");
+    as->PopLabel("elsedoneblock");
+//    as->PopLabel("conditionalfailed");
+
+
+
+    return "";
+}
+
+
+
+
+
+
+
 PVar NodeConditional::Execute(SymbolTable *symTab, uint lvl) {
 /*    Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
     level = lvl+1;
@@ -29,7 +89,7 @@ PVar NodeConditional::Execute(SymbolTable *symTab, uint lvl) {
 
 }
 
-void NodeConditional::ConditionalTryFail(Assembler* as, QString labelFailed, int i)
+/*void NodeConditional::ConditionalTryFail(Assembler* as, QString labelFailed, int i)
 {
     as->ClearTerm();
     m_b[i]->Build(as);
@@ -141,3 +201,5 @@ QString NodeConditional::Build(Assembler *as) {
 
     return "";
 }
+*/
+

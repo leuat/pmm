@@ -208,6 +208,31 @@ Node *Parser::Statement()
 
 
 }
+
+Node *Parser::BinaryClause()
+{
+    if (m_currentToken.m_type == TokenType::LPAREN) {
+        // Logical clause AND OR
+        Eat(TokenType::LPAREN);
+        Node* a = BinaryClause();
+        Token logical = m_currentToken;
+        Eat();
+        Node* b = BinaryClause();
+        Eat(TokenType::RPAREN);
+        return new NodeBinaryClause(logical, a, b);
+    }
+
+    Node* a = Expr();
+    Token comparetoken = m_currentToken;
+    Eat();
+    Node* b = Expr();
+
+    return new NodeBinaryClause(comparetoken, a, b);
+
+}
+
+
+
 Node *Parser::Conditional(bool isWhileLoop)
 {
 
@@ -217,34 +242,10 @@ Node *Parser::Conditional(bool isWhileLoop)
     // Start
     bool done=false;
 
-    while (!done) {
-        done=true;
+    Node* clause = BinaryClause();
 
-        Node* a = Expr();
+    qDebug() << m_currentToken.getType();
 
-        Token compareToken = m_currentToken;
-        Eat(compareToken.m_type);
-
-        Node* b= Expr();
-
-
-        // END
-        left.append(a);
-        right.append(b);
-        compareTokens.append(compareToken);
-/*        if (conditionals.count()==0)
-            conditionals.append(Token(TokenType::AND, "First and"));
-*/
-
-        if (m_currentToken.m_type==TokenType::AND || m_currentToken.m_type==TokenType::OR) {
-            conditionals.append(m_currentToken);
-
-            Eat(m_currentToken.m_type);
-
-            done=false;
-        }
-
-    }
     if (m_currentToken.m_type==TokenType::THEN || m_currentToken.m_type==TokenType::DO)
         Eat(m_currentToken.m_type);
     else
@@ -258,7 +259,7 @@ Node *Parser::Conditional(bool isWhileLoop)
         nodeElse = Block(false);
     }
 
-    return new NodeConditional(compareTokens, left,right,block, isWhileLoop, conditionals, nodeElse);
+    return new NodeConditional(m_currentToken, clause, block, isWhileLoop, nodeElse);
 }
 
 
@@ -380,10 +381,8 @@ void Parser::Preprocess()
     m_lexer->Initialize();
     m_lexer->m_ignorePreprocessor = false;
     m_currentToken = m_lexer->GetNextToken();
-    qDebug() << "Start!";
     while (m_currentToken.m_type!=TokenType::TEOF) {
         if (m_currentToken.m_type == TokenType::PREPROCESSOR) {
-            qDebug() << m_currentToken.m_value;
             if (m_currentToken.m_value=="include") {
                 Eat(TokenType::PREPROCESSOR);
                 QString filename =m_lexer->m_path +"/"+ m_currentToken.m_value;
@@ -403,9 +402,9 @@ void Parser::Preprocess()
 
         Eat(m_currentToken.m_type);
     }
-    qDebug() << m_lexer->m_text;
+//    qDebug() << m_lexer->m_text;
 
-    qDebug() << "Done preprocessor";
+  //  qDebug() << "Done preprocessor";
 //    qDebug() << "FIRST TYPE " << m_currentToken.getType();
 
 }
@@ -475,6 +474,7 @@ Node *Parser::FindProcedure()
     //qDebug() << m_currentToken.getType() << " with value " << m_currentToken.m_value;
     return nullptr;
 }
+
 
 Node *Parser::Block(bool useOwnSymTab)
 {

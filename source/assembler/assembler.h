@@ -37,8 +37,7 @@ public:
     }
     void pop() {
         if (m_vars.count()==0) {
-            ErrorHandler::e.Error("Trying to pop labelstack from zero..");
-            qDebug() << "ÆÆHÆ";
+            ErrorHandler::e.Error("Trying to pop labelstack from zero : " + m_current);
         }
         m_vars.remove(m_vars.count()-1);
         if (m_vars.count()!=0)
@@ -72,6 +71,7 @@ public:
     }
 
     void PopLabel(QString s) {
+        qDebug() << "popping " << s;
         m_labelStack[s].pop();
     }
 
@@ -106,7 +106,7 @@ public:
     void Appendix(QString s, int l);
     virtual void LoadVariable(QString var) {}
     void Connect();
-
+    virtual QString StoreInTempVar(QString name)  { return name;}
     virtual void StartForLoop(QString a, QString b) {}
     virtual void EndForLoop(QString endVal) {}
     void Asm(QString s, QString comment="");

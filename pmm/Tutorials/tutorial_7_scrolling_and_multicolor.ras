@@ -38,7 +38,7 @@ begin
 	// increase text shift only every 8th step due to scrolling 
 
 	x:=time&#7;
-	if x=#0 then begin
+	if time&#7=#0 then begin
 		textshift:=textshift+ #1;
 	end;
 	// increase scrolling 
@@ -47,7 +47,7 @@ begin
 	y:=#0;
 	// Optional wobble effect on the main image	
 	wobbleShift:=sine[time*#2];
-	while y<#23*#9 do begin
+	while y<#210 do begin
 		// Keep until rasterline hits text line
 		peek(RASTERLINE_POS, #0, y);
 		val:=sine[y*#8 + wobbleShift]/#32;

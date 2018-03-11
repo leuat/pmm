@@ -187,6 +187,19 @@ void AsmMOS6502::Peek(bool start)
 
 }
 
+QString AsmMOS6502::StoreInTempVar(QString name)
+{
+    QString tmpVar = NewLabel(name+"_var");
+    QString tmpLab = NewLabel(name+"_label");
+    Asm("jmp " + tmpLab);
+    Label(tmpVar + "\t.byte\t0");
+    Label(tmpLab);
+    Asm("sta " + tmpVar);
+    PopLabel(name+ "_label");
+    PopLabel(name+ "_var");
+    return tmpVar;
+}
+
 void AsmMOS6502::Writeln()
 {
     m_labelStack["writeln"].push();

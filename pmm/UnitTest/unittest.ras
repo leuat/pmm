@@ -50,32 +50,32 @@ begin
 		PrintString("CONDITIONAL3 = FAILED ****************** ", #0, #40);
 	incScreen();	
 
-	if y=#5 or x<>#5 then 
+	if (y=#5 or x<>#5) then 
 		PrintString("CONDITIONAL4 = OK", #0, #40)
 	else
 		PrintString("CONDITIONAL4 = FAILED ****************** ", #0, #40);
 
 	incScreen();	
 
-	if y>#5 and x=#0 then 
+	if (y>#5 and x=#0) then 
 		PrintString("CONDITIONAL5 = OK", #0, #40)
 	else
 		PrintString("CONDITIONAL5 = FAILED ****************** ", #0, #40);
 
 	incScreen();
 
-	if y=#10 and x=#0 and z=#20 then 
+	if (y=#10 and (x=#0 and z=#20)) then 
 		PrintString("CONDITIONAL6 = OK", #0, #40)
 	else
 		PrintString("CONDITIONAL6 = FAILED ****************** ", #0, #40);
 	incScreen();
 
-	if y=#5 or x=#23 or z<>#10 then 
+	if (y=#5 or (x=#23 or z<>#10)) then 
 		PrintString("CONDITIONAL7 = OK", #0, #40)
 	else
 		PrintString("CONDITIONAL7 = FAILED ****************** ", #0, #40);
 
-	if x=#1 or y=#10 then 
+	if (x=#1 or y=#10) then 
 		PrintString("CONDITIONAL8 = OK", #0, #40)
 	else
 		PrintString("CONDITIONAL8 = FAILED ****************** ", #0, #40);
@@ -143,6 +143,17 @@ begin
 		printstring("WHILE1 OK ",#0,#40)
 	else
 		printstring("WHILE1 FAILED ******************** ",#0,#40);
+
+	x:=#0;
+	while x<#5 do begin
+		x:=x+#1; //1 + 2 + 3 + 4 +  5
+	end;
+
+	if x=#5 then
+		printstring("WHILE2 OK ",#0,#40)
+	else
+		printstring("WHILE2 FAILED ******************** ",#0,#40);
+
 
 
 	incScreen();

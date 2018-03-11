@@ -1,6 +1,12 @@
 program test3;
 var  
-   index: byte; 
+   index, b: byte; 
 begin
 
+	index:=#10;
+	b:=#5;
+	if (index>#1 or b=#3) then 
+		writeln("TRUE",#0)
+	else
+		writeln("FALSE",#0);
 end.

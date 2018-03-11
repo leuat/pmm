@@ -26,8 +26,8 @@ begin
 	bullet_y:=#180;
 
 	
-	setSpriteLoc(#0, #$0D);
-	setSpriteLoc(#1, #$0E);
+	setSpriteLoc(#0, #$0D, #0);
+	setSpriteLoc(#1, #$0E, #0);
 
     poke(SPRITE_BITMASK,#0, #%00000011);
 	poke(SPRITE_COLOR,#0, YELLOW);
@@ -88,9 +88,9 @@ begin
 	sprite_y := sprite_y - joystickup*#2;
 
 	rand(#15, #45, x);
-	if joystickleft=#1 or joystickright=#1 then
+	if (joystickleft=#1 or joystickright=#1) then
 		MoveSoundEffect(x);
-	if joystickup<>#0 or joystickdown <>#0 then
+	if (joystickup<>#0 or joystickdown <>#0) then
 		MoveSoundEffect(x);
  
 

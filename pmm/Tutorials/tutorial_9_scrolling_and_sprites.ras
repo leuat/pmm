@@ -1,0 +1,257 @@
+program Tutorial9;
+var  
+   index, time, a, val, color, colorShift,i,j,k : byte; 
+   fade : array [16] of byte = (11,6,6,12,4,14,15,1,1,15,14,4,12,6,6,11); 
+   sprite0data: IncBin("data/tutorial8.bin");
+   mainChar: IncBin("test.bin","$27FF");
+   shootWait : byte;
+
+
+	sprite_time : byte;
+   
+	player_x, player_x_1 : integer;
+	player_y : byte;
+
+	bullet_x : integer;
+	bullet_y : byte;
+
+	monster_x : integer;
+	monster_y : byte;
+
+
+@include "RasLib/banking.ras"
+@include "RasLib/verticalscrolling.ras"
+
+procedure PrintLine();
+begin
+	j:=sine[time*#1]/#8;
+	k:=sine[j*time/#64]/#2;
+	for i:=#0 to #40 do begin
+	//	rand(#0, #255, val);
+		val:=val/#32+#64 - #4;
+		val:=sine[(i*#4 + j+k)+#30]/#16 + #64 - #4;
+
+		if val<#64 then
+			val:=#$20;
+
+		if g_currentBank=#1 then
+			poke($0400, i, val)
+		else
+			poke($4400, i, val);
+		
+	end;
+
+end;
+
+procedure printColor();
+begin
+	colorShift:=#0;
+	color:=fade[(time/#16 + colorShift)&#15];
+	for i:=#0 to #40 do begin
+//		rand(#0, #255, colorShift);
+	//	colorShift:=colorShift/#64;
+		poke($D800,i,color);
+	end;
+
+end;
+
+procedure InitializeSprites();
+begin
+	Asm("	ldx #0");
+	player_x:=#160;
+	player_y:=#180;
+
+	Asm("	ldx #0");
+	bullet_x:=#100;
+	bullet_y:=#180;
+
+	Asm("	ldx #0");
+	monster_x:=#160;
+	monster_y:=#55;
+
+	// 0D
+	setSpriteLoc(#0, #$90, #0);
+	setSpriteLoc(#0,  #$90, #1);
+
+	setSpriteLoc(#1, #$92, #0);
+	setSpriteLoc(#1, #$92 ,#1);
+
+    setSpriteLoc(#2, #$93, #0);
+	setSpriteLoc(#2, #$93 ,#1);
+
+
+    poke(SPRITE_BITMASK,#0, #%00000111);
+	poke(SPRITE_COLOR,#0, GREEN);
+	poke(SPRITE_COLOR,#1, YELLOW);
+	poke(SPRITE_COLOR,#2, WHITE);
+	poke(SPRITE_COLOR,#3, BLUE);
+
+    memcpy(sprite0data, #0, SPRITE_LOC1, #63);
+    memcpy(sprite0data, #0, SPRITE_LOC1 + $4000, #63);
+    memcpy(sprite0data, #64, SPRITE_LOC1 + 64, #63);
+    memcpy(sprite0data, #64, SPRITE_LOC1 + $4000 + 64, #63);
+
+    memcpy(sprite0data, #128, SPRITE_LOC2, #63);
+    memcpy(sprite0data, #128, SPRITE_LOC2 + $4000, #63);
+
+    memcpy(sprite0data, #192, SPRITE_LOC3, #63);
+    memcpy(sprite0data, #192, SPRITE_LOC3 + $4000, #63);
+
+
+end;
+
+procedure ShootSoundEffect(wave_type, freq:byte);
+begin
+	 //Volume, hi byte freq, attack voice 1, sustain=16* + release, waveform, release waveform 
+	PlaySound(SID_CHANNEL2, 
+	#15,  // Volume
+	freq,  // Hi byte frequency 
+	#0*#16+#0,  // Attack voice 1
+	#15*#16 + #6,   // Sustain = 16*15 + release=6
+	#1 +wave_type,  // Waveform
+	wave_type);  // waveform
+
+end;
+
+
+
+procedure MoveBullet();
+begin
+	spritepos(bullet_x, bullet_y, #4, #$04, #$FB);
+
+	if bullet_y>#1 then
+		bullet_y:=bullet_y-#3;	
+
+end;
+
+
+procedure MovePlayer();
+begin
+	spritepos(player_x, player_y, #0, #$01, #$FE);
+
+	player_x := player_x - joystickleft*#2;
+	player_x := player_x + joystickright*#2;
+	player_y := player_y + joystickdown*#2;
+	player_y := player_y - joystickup*#2;
+		Joystick();
+
+	if (joystickbutton=#1 and shootWait=#0) then begin
+		ShootSoundEffect(SID_NOISE, #15);
+		bullet_x:=player_x;
+		bullet_y:=player_y;
+		shootWait := #25;
+		
+    	//poke(SPRITE_BITMASK,#0, #%0001111);
+		
+	end;
+	if shootWait<>#0 then
+		shootWait:=shootWait-#1;
+	
+end;
+
+
+procedure MoveMonster();
+begin
+	spritepos(monster_x, monster_y, #2, #%00000010, #%11111101);
+	asm("       ldx #0");
+	monster_x:=#80 + sine[time*#2]/#2;	
+	asm("     lda #0
+			  ldx #1
+			   sta monster_x,x
+	");
+	
+end;
+
+procedure UpdatePlayers();
+begin
+	sprite_time := sprite_time +#1;
+	if sprite_time>#20 then begin
+		sprite_time:=#0;
+	end;
+	if sprite_time<#10 then begin
+		setSpriteLoc(#0, #$90, #0);
+		setSpriteLoc(#0, #$90, #1);
+	end;
+	if sprite_time>#10 then begin
+		setSpriteLoc(#0, #$91, #0);
+		setSpriteLoc(#0, #$91, #1);
+	end;
+
+	setSpriteLoc(#1, #$92, #0);
+	setSpriteLoc(#1, #$92, #1);
+
+	setSpriteLoc(#2, #$93, #0);
+	setSpriteLoc(#2, #$93, #1);
+
+
+end;
+
+procedure CrashPlayer();
+begin
+	//i:=player_x/#8;
+	//j:=player_y/#8;
+
+//	poke(#
+
+	//ShootSoundEffect(SID_NOISE, #15);
+
+
+end;
+
+
+interrupt Update();
+begin
+	time:=time+#1;
+	a:=(time*#4)&#3;
+	MovePlayer();
+
+	UpdatePlayers();
+	MoveMonster();
+	MoveBullet();
+	CrashPlayer();
+
+
+	if a=#0 then begin
+		VerticalScroll();
+
+	end;
+
+
+
+	if g_vscroll=#0 then 
+		printColor();
+		
+	if g_vscroll=#7 then 
+		PrintLine();
+
+
+
+	kernelinterrupt();
+end;
+
+procedure Setup();
+begin
+	copyfullscreen($27FF,$27FF+$4000);
+
+	poke(SCREEN_BG_COL, #0, #0);
+	poke(SCREEN_FG_COL, #0, #0);
+
+	hideBorderY(#0);
+
+
+end;
+
+
+begin
+	time:=#0;	
+	Setup();
+	ClearScreen(#$20, SCREEN_CHAR_LOC);
+	ClearScreen(#$00, SCREEN_COL_LOC);
+
+	InitializeSprites();
+
+	disableinterrupts();
+	RasterIRQ(Update(), #1);
+	enableinterrupts();
+
+end.
