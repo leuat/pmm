@@ -143,6 +143,7 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
                 );
 
+
     builtInFunctions["hidebordery"] = BuiltInFunction(
                 "hidebordery",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER

@@ -7,12 +7,14 @@ VAR
    fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
 	fadeRedBlue : array [8] of byte = (00,$0f,$09,$0e,$02,$0c,$00,$0c,$09,$00,$02,$00,$0b,$05,$06,$0c); 
 	fade : array [8] of byte = (00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00); 
+	
+	shiftx: byte;
 
    siny : array[25] of byte; 
    sinx : array[40] of byte; 
 
 @define hallaballa "ehm"
-@define y_start "#2"
+@define y_start "#5"
 @define include_color  ""
 
 procedure Plasma();
@@ -21,8 +23,10 @@ begin
 	c2x:=ax;
 	c2y:=ay;
 	
+	shiftx:=shiftx+#25;
+
 	for x:=#0 to #25 do begin 
-		siny[x]:=  sine[c2x] + sine[c2y];
+		siny[x]:=  sine[c2x] + sine[c2y] + shiftx;
 		c2x:=c2x+#4;
 		c2y:=c2y+#9;
 	end;
@@ -43,22 +47,22 @@ begin
 	for y:=@y_start to #23 do begin
 		val:=siny[y];
 		for x:=#1 to #36 do begin
-			k:=(sinx[x] +val)/#8 + #64;
-			pokescreen(k, x);
+			pokescreen((sinx[x] +val)/#8 + #64, x);
 
 		end;
 		incscreenx(#40);
 	end;
 
-	moveto(#1,@y_start, #$D8);
-
 @ifdef include_color	
+
+	moveto(#1,@y_start, #$D8);
 
 	for y:=@y_start to #23 do begin
 		val:=siny[y];
 		for x:=#1 to #36 do begin
 			c:=fade[ (sinx[x] +val)/#16 ];
 			pokescreen(c, x);
+			//pokescreen(y, x);
 
 		end;
 		incscreenx(#40);
@@ -91,7 +95,7 @@ begin
 
 	while #1<>#2 do begin
 		time:=time+#1;
-
+		waitForRaster(#128);
 		Plasma();
 	end;
 
