@@ -243,11 +243,11 @@ Token Lexer::GetNextToken()
 
         if (m_currentChar=="@") {
             Advance();
-            if (m_ignorePreprocessor) {
+/*            if (m_ignorePreprocessor) {
                 SkipUntilNewLine();
                 continue;
             }
-            else
+            else*/
                 return Preprocessor();
         }
 

@@ -35,7 +35,7 @@ public:
     QVector<Node*> m_proceduresOnly;
     Lexer* m_lexer;
     Token m_currentToken;
-
+    int m_pass = 0;
     Parser();
     Parser(Lexer* l) {
         m_lexer = l;
@@ -49,8 +49,10 @@ public:
     void Eat(TokenType::Type t);
     void VerifyToken(Token t);
 
-
+    void HandlePreprocessorInParsing();
     void Preprocess();
+    void PreprocessReplace();
+    void PreprocessIfDefs(bool ifdef);
 
     Node* Parse();
     Node* Variable();

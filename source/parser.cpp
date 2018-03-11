@@ -22,6 +22,9 @@ void Parser::Eat(TokenType::Type t)
     if (m_currentToken.m_type == t) {
         m_currentToken = m_lexer->GetNextToken();
 
+        if (m_currentToken.m_type==TokenType::PREPROCESSOR && m_pass==1)
+            HandlePreprocessorInParsing();
+
     }
     else {
         QString warning = "\nDid you forget a semicolon (;) ?";
@@ -77,6 +80,69 @@ void Parser::VerifyToken(Token t)
     //    return;
 
     // ErrorHandler::e.Error("Does not recognize '"+t.m_value + "'");
+}
+
+void Parser::PreprocessIfDefs(bool ifdef)
+{
+    Eat();
+    QString key = m_currentToken.m_value;
+    Eat();
+
+  /*  for (QString k : m_preprocessorDefines.keys())
+        qDebug() << " key : " << k;
+*/
+//    qDebug() << key << " " << m_preprocessorDefines.contains(key);
+    if (ifdef && m_preprocessorDefines.contains(key))
+
+        return; // K
+
+    if (!ifdef && !m_preprocessorDefines.contains(key))
+        return;
+
+    // Remove everything!
+
+    while (!m_lexer->m_finished) {
+        m_pass = 0;
+        Eat(); // OM NOM NOM
+        m_pass = 1;
+        if (m_currentToken.m_type==TokenType::PREPROCESSOR) {
+            if (m_currentToken.m_value=="endif") {
+                Eat();
+                return; // Finish
+            }
+        }
+    }
+
+
+}
+
+
+void Parser::HandlePreprocessorInParsing()
+{
+    if (m_currentToken.m_value=="define") {
+        Eat();
+        Eat();
+        Eat();
+        return;
+    }
+    if (m_currentToken.m_value=="include") {
+        Eat();
+        Eat();
+    }
+    if (m_currentToken.m_value=="endif") {
+        Eat();
+        return;
+    }
+    if (m_currentToken.m_value=="ifdef") {
+        PreprocessIfDefs(true);
+        return;
+    }
+
+    if (m_currentToken.m_value=="ifndef") {
+        PreprocessIfDefs(false);
+        return;
+    }
+
 }
 
 
@@ -244,7 +310,6 @@ Node *Parser::Conditional(bool isWhileLoop)
 
     Node* clause = BinaryClause();
 
-    qDebug() << m_currentToken.getType();
 
     if (m_currentToken.m_type==TokenType::THEN || m_currentToken.m_type==TokenType::DO)
         Eat(m_currentToken.m_type);
@@ -384,7 +449,7 @@ void Parser::Preprocess()
     m_preprocessorDefines.clear();
     while (m_currentToken.m_type!=TokenType::TEOF) {
         if (m_currentToken.m_type == TokenType::PREPROCESSOR) {
-            if (m_currentToken.m_value=="include") {
+            if (m_currentToken.m_value.toLower()=="include") {
                 Eat(TokenType::PREPROCESSOR);
                 QString filename =m_lexer->m_path +"/"+ m_currentToken.m_value;
 
@@ -398,14 +463,14 @@ void Parser::Preprocess()
                 //Eat(TokenType::SEMI);
                 //IncludeFile(filename);
             }
-            else if (m_currentToken.m_value =="define") {
+            else if (m_currentToken.m_value.toLower() =="define") {
                 Eat(TokenType::PREPROCESSOR);
                 QString key = m_currentToken.m_value;
                 Eat();
                 QString val = m_currentToken.m_value;
                 if (val=="")
                     val = QString::number(m_currentToken.m_intVal);
-                Eat();
+
                 m_preprocessorDefines[key] = val;
             }
         }
@@ -414,20 +479,27 @@ void Parser::Preprocess()
     }
 
     // Afterwards, replace all preprocessor defines
+//    PreprocessIfDefs();
+    PreprocessReplace();
+}
 
+void Parser::PreprocessReplace()
+{
     for (QString k: m_preprocessorDefines.keys()) {
         QString val = m_preprocessorDefines[k];
-        qDebug() << "Replacing: @" + k << "  with " << val;
+//        qDebug() << "Replacing: @" + k << "  with " << val;
         m_lexer->m_text = m_lexer->m_text.replace("@" +k, val);
     }
-    qDebug() << m_lexer->m_text;
+
 }
 
 Node* Parser::Parse()
 {
     // Call preprocessor for include files etc
     m_lexer->m_text = m_lexer->m_orgText;
+    m_pass = 0;
     Preprocess();
+    m_pass = 1;
 
     m_lexer->Initialize();
     m_lexer->m_ignorePreprocessor = true;

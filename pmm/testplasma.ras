@@ -1,9 +1,8 @@
-PROGRAM FirstC64;
+PROGRAM PlasmaTest;
 
 VAR
    a, b, c, i, j,k,val,mainloop, idx, time,c2x, c2y,ax, ay : byte;
-   x,y,scrollx,shiftx, shifty : byte;
-   sprite0data: IncBin("data/sprite1.bin");
+   x,y : byte;
    charset: IncBin("test.bin","$1fff");
    fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
 	fadeRedBlue : array [8] of byte = (00,$0f,$09,$0e,$02,$0c,$00,$0c,$09,$00,$02,$00,$0b,$05,$06,$0c); 
@@ -12,14 +11,10 @@ VAR
    siny : array[25] of byte; 
    sinx : array[40] of byte; 
 
-   message: array[255] of byte;
-  
-   sprite_x : integer;
-   sprite_y : integer;
+@define hallaballa "ehm"
+@define y_start "#2"
+@define include_color  ""
 
-
-
-	
 procedure Plasma();
 begin
 
@@ -39,28 +34,37 @@ begin
 
 	for x:=#0 to #40 do begin 
 		sinx[x] := sine[c2x] + sine[c2y];
-		c2x:=c2x+#6;
-		c2y:=c2y+#14;
+		c2x:=c2x+#3;
+		c2y:=c2y+#7;
 
 	end;
+	moveto(#1,@y_start, #$04);
 	
-	for y:=#9 to #23 do begin
-		moveto(#1,y, #$04);
+	for y:=@y_start to #23 do begin
 		val:=siny[y];
-		//peek(siny, y, val);
-		for x:=#1 to #20 do begin
-			k:=sinx[x] +val;
-
-		 	k:=k/#8;
-			c:=fade[k/#2];
-			k:=k+#64;
-
-			pokescreencolor(k,c,#0,#2);
-/*			pokescreencolor(k,c,#1);*/
-			incscreenx(#2);
+		for x:=#1 to #36 do begin
+			k:=(sinx[x] +val)/#8 + #64;
+			pokescreen(k, x);
 
 		end;
+		incscreenx(#40);
 	end;
+
+	moveto(#1,@y_start, #$D8);
+
+@ifdef include_color	
+
+	for y:=@y_start to #23 do begin
+		val:=siny[y];
+		for x:=#1 to #36 do begin
+			c:=fade[ (sinx[x] +val)/#16 ];
+			pokescreen(c, x);
+
+		end;
+		incscreenx(#40);
+	end;
+
+@endif
 		
 	
 
@@ -68,90 +72,28 @@ end;
 
 
 
-procedure InitializeSprites();
-
-begin
-    poke(SPRITE_DATA_LOC,#0, #$0D); 
-	poke(SPRITE_DATA_LOC,#1, #$0D);
-    poke(SPRITE_BITMASK,#0, #%00000111);
-	poke(SPRITE_COLOR,#0, WHITE);
-    poke(SPRITE_COLOR,#1, YELLOW);
-    memcpy(sprite0data, #0, $0340, #63);
-
-end;
 
 
-procedure MoveSprite();
-begin
-//	b:=time;
 
-
-/*	spritepos(sprite_x, sprite_y, #0, #$01, #$FE);
-	Joystick();
-
-	sprite_x := sprite_x - joystickvalue[#1]*#4;
-	sprite_x := sprite_x + joystickvalue[#2]*#4;
-	sprite_y := sprite_y + joystickvalue[#3]*#4;
-
-	
-
-
-	if joystickvalue[#3]=#1 then begin
-		moveto(#3, #3, #$04);
-//		printstring("BUTTON", #0);
-
-	end;
-*/
-
-end;
-
-
-procedure PrintText(); 
-begin
-	MoveTo(#10, #24, #$04);
-	printstring(message, #0,#40);
-	MoveTo(#17, #24, #$04);
-	printnumber(time);
-
-end;
 
 
 begin
-	moveto(#0,#0, #$04);
-	message:="TIME";
-	i:=#0;
-	a:=#4;
-	b:=#4;
-	a:=b*#3;
 	poke(SCREEN_BG_COL, #0, a);
 	poke(SCREEN_BG_COL, #1, BLACK);
 	poke($d018, #0, #$18);
     poke($C202, #0,#13);
 
-	mainloop:=#1;
-	time:=#0;
-
 
 	ax:=#1;
 	ay:=#5;
-	fill($D800, GREEN,#0);
-	fill($D900, GREEN,#0);
-	fill($DA00, GREEN,#0);
-	fill($DB00, GREEN,#0);
-	asm("
-	cli
-	");
 
-	InitializeSprites();
-	asm(";feil");
-	while mainloop<>#10 do begin
+	ClearScreen(#$20, SCREEN_CHAR_LOC);
+
+	while #1<>#2 do begin
 		time:=time+#1;
-		shiftx:=shiftx+#1;
-		shifty:=shifty+#3;
 
 		Plasma();
-		PrintText();
-		MoveSprite();
 	end;
+
 
 END.

@@ -43,6 +43,9 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::AT,"AT"));
     reservedWords.append(Token(TokenType::INCLUDE,"INCLUDE"));
     reservedWords.append(Token(TokenType::DEFINE,"DEFINE"));
+    reservedWords.append(Token(TokenType::IFDEF,"IFDEF"));
+    reservedWords.append(Token(TokenType::IFNDEF,"IFNDEF"));
+    reservedWords.append(Token(TokenType::ENDIF,"ENDIF"));
 
 }
 

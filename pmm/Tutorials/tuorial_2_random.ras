@@ -30,24 +30,33 @@ begin
 	index:=#0; 
 	// infinite loop
 	cnt := #0;
-	while cnt<#10 do begin
+	while #1=#1 do begin
 		// loop y		
 		for y:=#5 to #20 do begin
 			// moves current screen position
-			moveto(#5, y, #$04); // $04 is screen memory upper byte
+			moveto(#0, y, #$04); // $04 is screen memory upper byte
+			// Select some random color
+			for x:=#5 to #35 do begin
+				// Sets both screen and color values
+				PokeScreen(random_values[index],  x);
+				// increases screen X counter
+				// Increase by some random non-repeatable prime
+				index:=index+#17;
+	    	end;
+			moveto(#0, y, #$D8); // $04 is screen memory upper byte
 			// Select some random color
 			random_color := random_values[index];
 			// restrict to 0-16
 			random_color := random_color/#16;
-
 			for x:=#5 to #35 do begin
 				// Sets both screen and color values
-				PokeScreen(random_values[index],  #0);
+				PokeScreen(random_color,  x);
 				// increases screen X counter
-				incscreenx(#1);
+				//incscreenx(#1);
 				// Increase by some random non-repeatable prime
-				index:=index+#17;
+				//index:=index+#17;
 	    	end;
+
 		end
 	end;
 end.
