@@ -1,17 +1,16 @@
 PROGRAM Tutorial3;
 
 VAR
-   a, b, c, i, j,k,val,mainloop, idx, time,c2x, c2y,ax, ay : byte;
-   x,y : byte;
-   charset: IncBin("test.bin","$1fff");
-   fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
-	fadeRedBlue : array [8] of byte = (00,$0f,$09,$0e,$02,$0c,$00,$0c,$09,$00,$02,$00,$0b,$05,$06,$0c); 
+	c,val,time,c2x, c2y,ax, ay : byte;
+	x,y : byte;
+	charset: IncBin("test.bin","$1fff");
 	fade : array [8] of byte = (11,6,12,12,4,14,15,1,1,1,1,15,14,4,12,12,6,11); 
 	
 	shiftx: byte;
 
-   siny : array[25] of byte; 
-   sinx : array[40] of byte; 
+    siny : array[25] of byte; 
+	sinx : array[40] of byte; 
+
 
 @define hallaballa "ehm"
 @define y_start "#5"
@@ -19,7 +18,6 @@ VAR
 
 procedure Plasma();
 begin
-
 	c2x:=ax;
 	c2y:=ay;
 	
@@ -33,8 +31,6 @@ begin
 
 	ax:=ax+#3;
 	ay:=ay-#5;
-
-		
 
 	for x:=#0 to #40 do begin 
 		sinx[x] := sine[c2x] + sine[c2y];
@@ -75,29 +71,24 @@ begin
 end;
 
 
-
-
-
-
-
-
 begin
-	poke(SCREEN_BG_COL, #0, a);
+	poke(SCREEN_BG_COL, #0, BLACK);
 	poke(SCREEN_BG_COL, #1, BLACK);
+	// Set custom character pos
 	poke(VIC_DATA_LOC, #0, #$18);
-    //poke($C202, #0,#13);
 
-
+	// Initialize sine functions
 	ax:=#1;
 	ay:=#5;
 
 	ClearScreen(#$20, SCREEN_CHAR_LOC);
+	ClearScreen(GREEN, SCREEN_COL_LOC);
 
 	while #1<>#2 do begin
 		time:=time+#1;
-		waitForRaster(#128);
+		waitForRaster(#0);
 		Plasma();
 	end;
 
 
-END.
+end.

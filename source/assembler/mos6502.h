@@ -41,7 +41,7 @@ public:
     void Poke(bool start) override;
     void Peek(bool start) override;
 
-    QString StoreInTempVar(QString name) override;
+    QString StoreInTempVar(QString name, QString type="byte") override;
 
 
     void Writeln() override;

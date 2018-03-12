@@ -13,6 +13,7 @@ public:
     int m_lineNumber;
     uint level = 0;
     Node* m_left = nullptr, *m_right = nullptr;
+    bool m_isWord = false;
     virtual PVar Execute(SymbolTable* symTab, uint lvl) = 0;
     virtual void ExecuteSym(SymbolTable* symTab) = 0;
     virtual void Delete() {
@@ -36,6 +37,9 @@ public:
     }
     virtual void LoadVariable(Assembler* a) {}
     virtual void StoreVariable(Assembler* a) {}
+    virtual TokenType::Type getType(Assembler* as) {
+        return m_op.m_type;
+    }
 };
 
 

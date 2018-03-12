@@ -41,6 +41,7 @@ void SymbolTable::Initialize()
     m_constants["SPRITE_BITMASK"] = new Symbol("$d015", "ADDRESS", 0xd015);
     m_constants["SPRITE_COLOR"] = new Symbol("53287","ADDRESS", 0xD027);
     m_constants["SPRITE_DATA"] = new Symbol("$0340","ADDRESS", 0x0340);
+    m_constants["SPRITE_COLLISION"] = new Symbol("$D01E","ADDRESS", 0xD01E);
 
     m_constants["SPRITE_LOC1"] = new Symbol("", "ADDRESS", 0);
     m_constants["SPRITE_LOC2"] = new Symbol("", "ADDRESS", 0);
@@ -50,6 +51,17 @@ void SymbolTable::Initialize()
     m_constants["SPRITE_LOC6"] = new Symbol("", "ADDRESS", 0);
     m_constants["SPRITE_LOC7"] = new Symbol("", "ADDRESS", 0);
     m_constants["SPRITE_LOC8"] = new Symbol("", "ADDRESS", 0);
+
+    m_constants["SPRITE_STRETCH_X"] = new Symbol("$D01D", "ADDRESS", 0xD01D);
+    m_constants["SPRITE_STRETCH_Y"] = new Symbol("$D017", "ADDRESS", 0xD017);
+
+    m_constants["SPRITE_MULTICOLOR"] = new Symbol("$D01C", "ADDRESS", 0xD01C);
+
+    m_constants["SPRITE_MULTICOLOR_REG1"] = new Symbol("$D025", "ADDRESS", 0xD025);
+    m_constants["SPRITE_MULTICOLOR_REG2"] = new Symbol("$D026", "ADDRESS", 0xD026);
+
+
+    m_constants["MULTICOLOR_CHAR_COL"] = new Symbol("$D021", "ADDRESS", 0xD021);
 
 
     m_constants["SID_TRI"] = new Symbol("#16","BYTE", 16);

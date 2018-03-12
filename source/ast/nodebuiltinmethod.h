@@ -60,6 +60,9 @@ public:
     void CopyImageColorData(Assembler* as);
     void CopyHalfScreen(Assembler* as);
     void CopyFullScreen(Assembler* as);
+    void TransformColors(Assembler* as);
+    void ToggleBit(Assembler* as);
+    void GetBit(Assembler* as);
 
 
     void LoadVar(Assembler* as, int paramNo, QString register, QString load="");

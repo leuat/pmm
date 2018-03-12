@@ -15,6 +15,7 @@ public:
     Node* m_expr = nullptr;
 
 
+
     NodeVar(Token t) {
         m_op = t;
         value = t.m_value;
@@ -24,15 +25,18 @@ public:
         m_op = t;
         value = t.m_value;
         m_expr = expr;
+      //  if (m_op.m_type==TokenType::INTEGER)
+       //     m_isWord = true;
+
     }
 
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         level = lvl+1;
         Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         ErrorHandler::e.DebugLow("Calling Var Node",level);
-        if (symTab->Lookup(value)==nullptr) {
-            ErrorHandler::e.Error("Could not find variable '" +value +"'");
-        }
+        if (symTab->Lookup(value)==nullptr)
+            ErrorHandler::e.Error("Could not find variable '" +value +"'.");
+
         if (symTab->Lookup(value)->m_value==nullptr)
             ErrorHandler::e.Error("Variable '" +value +"' not initialized before use.");
 
@@ -40,6 +44,13 @@ public:
         PVar v = *symTab->Lookup(value)->m_value;
        return v;
 
+    }
+
+
+    TokenType::Type getType(Assembler* as) override {
+        if (as->m_symTab->Lookup(value)!=nullptr)
+            return as->m_symTab->Lookup(value)->getTokenType();
+        return m_op.m_type;
     }
 
     void LoadByteArray(Assembler *as) {
@@ -89,7 +100,8 @@ public:
             return;
         }
         if (t == TokenType::INTEGER) {
-            as->Asm("Integer assignment in nodevar WTF");
+            m_isWord = true;
+            as->Comment("Integer assignment in nodevar");
             as->Asm("ldx " +value);
             as->Asm("lda " +value+"+1");
             return;

@@ -64,8 +64,24 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["peek"] = BuiltInFunction(
                 "peek",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
-                BuiltInFunction::Type::INTEGER <<
-                BuiltInFunction::Type::INTEGER);
+                BuiltInFunction::Type::INTEGER
+               //  << BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["togglebit"] = BuiltInFunction(
+                "togglebit",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER
+               //  << BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["getbit"] = BuiltInFunction(
+                "getbit",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER
+               //  << BuiltInFunction::Type::INTEGER
+                );
 
     builtInFunctions["memcpy"] = BuiltInFunction(
                 "memcpy",
@@ -149,6 +165,15 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
                 );
 
+
+    builtInFunctions["transformcolors"] = BuiltInFunction(
+                "transformcolors",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
+                );
+
+
+
     builtInFunctions["copyhalfscreen"] = BuiltInFunction(
                 "copyhalfscreen",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
@@ -212,7 +237,6 @@ void Syntax::SetupBuiltinFunctions()
                 "spritepos",
                 QList<BuiltInFunction::Type>()
                 <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
-                << BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
                 << BuiltInFunction::Type::INTEGER
                 );
 

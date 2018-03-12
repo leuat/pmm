@@ -71,6 +71,13 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         SetBank(as);
     }
 
+    if (m_procName.toLower() =="togglebit") {
+        ToggleBit(as);
+    }
+    if (m_procName.toLower() =="getbit") {
+        GetBit(as);
+    }
+
     if (m_procName.toLower() == "copyhalfscreen")
         CopyHalfScreen(as);
 
@@ -128,6 +135,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower()=="initrandom")
         InitRandom(as);
+
+    if (m_procName.toLower()=="transformcolors")
+        TransformColors(as);
 
     if (m_procName.toLower()=="enableinterrupts")
         EnableInterrupts(as);
@@ -238,10 +248,23 @@ void NodeBuiltinMethod::Poke(Assembler* as)
 void NodeBuiltinMethod::Peek(Assembler* as)
 {
     as->Comment("Peek");
+
+    // Optimize if numeric
+    NodeNumber* num = dynamic_cast<NodeNumber*>(m_params[1]);
+    if (num!=nullptr) {
+        as->ClearTerm();
+        as->Term("lda ");
+        m_params[0]->Build(as);
+        as->Term(" + " + num->HexValue());
+        as->Term();
+        return;
+
+    }
+
     LoadVar(as, 1);
     as->Asm("tax");
     LoadVar(as,0,"x");
-    SaveVar(as,2);
+    //SaveVar(as,2);
 
 }
 
@@ -605,10 +628,18 @@ void NodeBuiltinMethod::SetSpritePos(Assembler *as)
 
     QString lbl = as->NewLabel("spritepos");
     QString lbl2 = as->NewLabel("spriteposcontinue");
-    as->Comment("Setting sprite position");
-    LoadVar(as, 2);
 
-    as->Asm("tay");
+    NodeNumber* sprite = dynamic_cast<NodeNumber*>(m_params[2]);
+    if (sprite==nullptr)
+        ErrorHandler::e.Error("For now, parameter 3 in setSpritePos must be number 0-7");
+
+    uchar v = 1 << (uchar)sprite->m_val;
+
+
+    as->Comment("Setting sprite position");
+    as->Asm("ldy #" +QString::number((int)sprite->m_val*2) );
+
+//    as->Asm("tay");
 
     LoadVar(as, 0);
     as->Asm("sta $D000,y");
@@ -619,17 +650,17 @@ void NodeBuiltinMethod::SetSpritePos(Assembler *as)
 
 
     as->Asm("lda $D010");
-    as->Term("ora ");
-    m_params[3]->Build(as);
-    as->Term();
+    as->Asm("ora #%" + QString::number(v,2) );
+    //m_params[3]->Build(as);
+//    as->Term();
     as->Asm("sta $D010");
     as->Asm("jmp "+lbl2);
     as->Label(lbl);
 
     as->Asm("lda $D010");
-    as->Term("and ");
-    m_params[4]->Build(as);
-    as->Term();
+    as->Asm("and #%" + QString::number(~v,2) );
+  //  m_params[4]->Build(as);
+  //  as->Term();
     as->Asm("sta $D010");
 
     as->Label(lbl2);
@@ -1005,7 +1036,7 @@ void NodeBuiltinMethod::SetSpriteLoc(Assembler *as)
     int newLoc = 64*num->m_val;
     qDebug() << newLoc;
     QString c = "SPRITE_LOC" +QString::number((int)num2->m_val+1);
-    qDebug() << "sprite num : " << ("$" + QString::number((int)(newLoc),16)) << " with value " << c;
+//    qDebug() << "sprite num : " << ("$" + QString::number((int)(newLoc),16)) << " with value " << c;
     as->m_symTab->m_constants[c]->m_value->m_fVal = newLoc;
     as->m_symTab->m_constants[c]->m_value->m_strVal = "$" + QString::number((int)(newLoc),16);
 
@@ -1250,6 +1281,101 @@ void NodeBuiltinMethod::CopyFullScreen(Assembler *as)
     as->PopLabel("fullcopyloop");
     as->PopLabel("fullcopyloop2");
     as->PopLabel("fullcopydone");
+
+}
+
+void NodeBuiltinMethod::TransformColors(Assembler *as)
+{
+    NodeVar* var = dynamic_cast<NodeVar*>(m_params[0]);
+    if (var==nullptr)
+        ErrorHandler::e.Error("Parameter 0 must be variable (array)");
+
+    NodeNumber* num = dynamic_cast<NodeNumber*>(m_params[1]);
+    if (num==nullptr)
+        ErrorHandler::e.Error("Parameter 1 must be address");
+
+    QString tempVar = as->StoreInTempVar("tempTransform");
+    for (int i=0;i<4;i++) {
+        QString loopInner = as->NewLabel("transform_loop_outer");
+        QString shift = " -#1 + #" + QString::number(i*250);
+        as->Asm("ldx #250");
+        as->Label(loopInner);
+        as->Asm("lda " + num->StringValue() + shift +",x");
+        as->Asm("pha");
+        as->Asm("and #$F0");
+        as->Asm("lsr");
+        as->Asm("lsr");
+        as->Asm("lsr");
+        as->Asm("lsr");
+        as->Asm("tay");
+        as->Asm("lda " + var->value+ ",y");
+
+        as->Asm("asl");
+        as->Asm("asl");
+        as->Asm("asl");
+        as->Asm("asl");
+        as->Asm("sta " + tempVar);
+        as->Asm("pla");
+        as->Asm("and #$0F");
+        as->Asm("tay");
+        as->Asm("lda " + var->value+ ",y");
+        as->Asm("ora " + tempVar);
+        as->Asm("sta "+num->StringValue() + shift +",x");
+
+        as->Asm("dex");
+        as->Asm("bne " + loopInner);
+        as->PopLabel("transform_loop_outer");
+    }
+}
+
+void NodeBuiltinMethod::ToggleBit(Assembler *as)
+{
+    NodeNumber* sprite = dynamic_cast<NodeNumber*>(m_params[1]);
+    if (sprite==nullptr)
+        ErrorHandler::e.Error("ToggleBit (for now) needs param 2 to be a number");
+
+    NodeNumber* toggle = dynamic_cast<NodeNumber*>(m_params[2]);
+    if (toggle==nullptr)
+        ErrorHandler::e.Error("TogglesBit (for now) needs param 3 to be a number");
+
+    uchar v = 1 << (uchar)sprite->m_val;
+//    qDebug() << QString::number((uchar)v,2);;
+//    qDebug() << QString::number((uchar)~v,2);;
+  //  exit(1);
+    as->Comment("Toggle bit");
+    if (toggle->m_val==0) { // turn off}
+        LoadVar(as, 0);
+        as->Asm("and #%"+QString::number((uchar)~v,2));
+        SaveVar(as,0);
+    }
+    if (toggle->m_val==1) { // turn off}
+        LoadVar(as, 0);
+        as->Asm("ora #%"+QString::number((uchar)v,2));
+        SaveVar(as,0);
+    }
+
+}
+
+void NodeBuiltinMethod::GetBit(Assembler *as)
+{
+    NodeNumber* sprite = dynamic_cast<NodeNumber*>(m_params[1]);
+    if (sprite==nullptr)
+        ErrorHandler::e.Error("GetBit (for now) needs param 2 to be a number");
+
+
+    QString lbl = as->NewLabel("getbit_false");
+
+    uchar v = 1 << (uchar)sprite->m_val;
+    as->Comment("Get bit");
+    LoadVar(as, 0);
+    as->Asm("and #%"+QString::number((uchar)v,2));
+    as->Asm("beq " + lbl);
+    as->Asm("lda #1");
+    as->Label(lbl);
+    as->Asm("eor #1");
+
+
+    as->PopLabel("getbit_false");
 
 }
 

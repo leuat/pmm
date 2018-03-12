@@ -419,9 +419,14 @@ Node* Parser::Factor()
 
     }
     if (t.m_type == TokenType::ID) {
+//        qDebug() << "FINDING PROCEDURE IN TERM: " << t.m_value;
         Node* node = FindProcedure();
         if (node!=nullptr)
             return node;
+        node = BuiltinFunction();
+        if (node!=nullptr)
+            return node;
+            qDebug() << m_currentToken.getType();
 
     }
     return Variable();

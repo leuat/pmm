@@ -2,7 +2,8 @@ program Tutorial9;
 var  
    index, time, a, val, color, colorShift,i,j,k : byte; 
    fade : array [16] of byte = (11,6,6,12,4,14,15,1,1,15,14,4,12,6,6,11); 
-   sprite0data: IncBin("data/tutorial8.bin");
+	random: array[255] of byte;
+   sprite0data: IncBin("data/tutorial9_mc.bin");
    mainChar: IncBin("test.bin","$27FF");
    shootWait : byte;
 
@@ -18,9 +19,22 @@ var
 	monster_x : integer;
 	monster_y : byte;
 
+	monster_dx, monster_dy : byte;
 
+	
+	score : byte;
+
+@define _playerSprite "#0"
+@define _bulletSprite "#2"
+@define _monsterSprite "#1"
+
+
+// Include methods for banking
 @include "RasLib/banking.ras"
+
+// include vscroll methods
 @include "RasLib/verticalscrolling.ras"
+
 
 @define spriteBaseLoc "#$90"
 
@@ -30,16 +44,18 @@ begin
 	k:=sine[j*time/#64]/#2;
 	for i:=#0 to #40 do begin
 	//	rand(#0, #255, val);
-		val:=val/#32+#64 - #4;
-		val:=sine[(i*#4 + j+k)+#30]/#16 + #64 - #4;
+	//	val:=val/#32+#67;
+		val:=sine[(i*#4 + j+k)+#30]/#16 + #64 + #1;
 
-		if val<#64 then
-			val:=#$20;
+//		if val<#64 then
+	//		val:=#$20;
+
+//		val:=val+#1;
 
 		if g_currentBank=#1 then
-			poke($0400, i, val)
+			poke($0400 + 0, i, val)
 		else
-			poke($4400, i, val);
+			poke($4400 + 0, i, val);
 		
 	end;
 
@@ -48,11 +64,19 @@ end;
 procedure printColor();
 begin
 	colorShift:=#0;
-	color:=fade[(time/#16 + colorShift)&#15];
-	for i:=#0 to #40 do begin
+
+	poke(MULTICOLOR_CHAR_COL, #0, BLACK);
+	poke(MULTICOLOR_CHAR_COL, #1, YELLOW);
+	poke(MULTICOLOR_CHAR_COL, #2, PURPLE);
+
+	for i:=#0 to #20 do begin
+		colorShift:=(random[i+ time] + #0)/#64;
+		color:=fade[(time/#16 + colorShift)&#15];
+
 //		rand(#0, #255, colorShift);
 	//	colorShift:=colorShift/#64;
-		poke($D800,i,color);
+		poke($D800 + 0 ,i,color);
+		poke($D800 + 0 ,i+#20,color);
 	end;
 
 end;
@@ -64,12 +88,12 @@ begin
 	player_y:=#180;
 
 	Asm("	ldx #0");
-	bullet_x:=#100;
+	bullet_x:=#200;
 	bullet_y:=#180;
 
 	Asm("	ldx #0");
 	monster_x:=#160;
-	monster_y:=#55;
+	monster_y:=#75;
 
 	// 0D
 	setSpriteLoc(#0, @spriteBaseLoc, #0);
@@ -82,11 +106,25 @@ begin
 	setSpriteLoc(#2, #$93 ,#1);
 
 
-    poke(SPRITE_BITMASK,#0, #%00000111);
-	poke(SPRITE_COLOR,#0, GREEN);
-	poke(SPRITE_COLOR,#1, YELLOW);
-	poke(SPRITE_COLOR,#2, WHITE);
-	poke(SPRITE_COLOR,#3, BLUE);
+	poke(SPRITE_MULTICOLOR_REG1, #0, BLACK);
+	poke(SPRITE_MULTICOLOR_REG2, #0, GREY);
+
+    poke(SPRITE_BITMASK,#0, #%00000011);
+
+	poke(SPRITE_COLOR,#0, BLUE);
+	poke(SPRITE_COLOR,#1, ORANGE);
+	poke(SPRITE_COLOR,#2, GREEN);
+
+
+
+
+//	poke(SPRITE_MULTICOLOR_REG1, #1, YELLOW);
+//	poke(SPRITE_MULTICOLOR_REG2, #1, WHITE);
+
+/*	poke(SPRITE_MULTICOLOR_REG1, #1, BLUE);
+	poke(SPRITE_MULTICOLOR_REG2, #1, DARK_GREY);
+*/
+
 
     memcpy(sprite0data, #0, SPRITE_LOC1, #63);
     memcpy(sprite0data, #0, SPRITE_LOC1 + $4000, #63);
@@ -100,7 +138,17 @@ begin
     memcpy(sprite0data, #192, SPRITE_LOC3 + $4000, #63);
 
 
+	poke(SPRITE_STRETCH_X, #0, #%00001010);
+	poke(SPRITE_STRETCH_Y, #0, #%00001010);
+
+
+	togglebit(SPRITE_MULTICOLOR, @_playerSprite, #1);
+	togglebit(SPRITE_MULTICOLOR, @_monsterSprite, #1);
+	togglebit(SPRITE_MULTICOLOR, @_bulletSprite, #1);
+
 end;
+
+
 
 procedure ShootSoundEffect(wave_type, freq:byte);
 begin
@@ -119,31 +167,32 @@ end;
 
 procedure MoveBullet();
 begin
-	spritepos(bullet_x, bullet_y, #4, #$04, #$FB);
+	spritepos(bullet_x, bullet_y, @_bulletSprite);
 
-	if bullet_y>#1 then
-		bullet_y:=bullet_y-#3;	
+	if bullet_y>#6 then
+		bullet_y:=bullet_y-#3
+	else
+		ToggleBit(SPRITE_BITMASK, @_bulletSprite, #0);
 
 end;
 
 
 procedure MovePlayer();
 begin
-	spritepos(player_x, player_y, #0, #$01, #$FE);
+	spritepos(player_x, player_y, @_playerSprite);
 
 	player_x := player_x - joystickleft*#2;
 	player_x := player_x + joystickright*#2;
 	player_y := player_y + joystickdown*#2;
 	player_y := player_y - joystickup*#2;
-		Joystick();
+	Joystick();
 
 	if (joystickbutton=#1 and shootWait=#0) then begin
 		ShootSoundEffect(SID_NOISE, #15);
 		bullet_x:=player_x;
 		bullet_y:=player_y;
 		shootWait := #25;
-		
-    	//poke(SPRITE_BITMASK,#0, #%0001111);
+		ToggleBit(SPRITE_BITMASK, @_bulletSprite, #1);
 		
 	end;
 	if shootWait<>#0 then
@@ -154,14 +203,32 @@ end;
 
 procedure MoveMonster();
 begin
-	spritepos(monster_x, monster_y, #2, #%00000010, #%11111101);
+	spritepos(monster_x, monster_y, @_monsterSprite);
 	asm("       ldx #0");
-	monster_x:=#80 + sine[time*#2]/#2;	
+	monster_x:=#80 + sine[time/#2]/#2;	
 	asm("     lda #0
 			  ldx #1
 			   sta monster_x,x
 	");
 	
+
+//	peek($D01E, #0,val);
+
+	if getBit(SPRITE_COLLISION, @_monsterSprite)=#0 then
+	begin
+		ShootSoundEffect(SID_NOISE, #5);
+		ToggleBit(SPRITE_BITMASK, @_bulletSprite, #0);
+		monster_dy:=#253;		
+	end;
+
+	monster_y:=monster_y + monster_dy;
+	
+	if monster_dy<>#0 then begin
+	if monster_dy<#128 then 
+		monster_dy:=monster_dy-#1
+	else 
+		monster_dy:=monster_dy+#1;
+	end;
 end;
 
 procedure UpdatePlayers();
@@ -179,6 +246,8 @@ begin
 		setSpriteLoc(#0, #$91, #1);
 	end;
 
+
+	// Update locations on current buffers
 	setSpriteLoc(#1, #$92, #0);
 	setSpriteLoc(#1, #$92, #1);
 
@@ -187,6 +256,10 @@ begin
 
 
 end;
+
+
+procedure Update();
+
 
 procedure CrashPlayer();
 begin
@@ -201,16 +274,69 @@ begin
 end;
 
 
+
+
+interrupt UpdateScore();
+begin
+	SetBank(VIC_BANK2);
+//	MoveTo(#20, #1, #$84);
+//	printString("SCORE:", #0, #10);
+//	MoveTo(#30, #1, #$84);
+//	printNumber(score);
+
+	scrolly(#0);
+		//waitForRaster(#65);
+
+
+	//waitNoRaster(#10);
+
+
+		if g_currentBank=#0 then
+			SetBank(VIC_BANK0)
+		else
+			SetBank(VIC_BANK1);
+
+
+	RasterIRQ(Update(), #0);
+
+	kernelInterrupt();
+
+	
+
+end;
+
+
+
+
 interrupt Update();
 begin
 	time:=time+#1;
 	a:=(time*#4)&#3;
-	MovePlayer();
+
+//	RasterIRQ(UpdateScore(), #220);
+
+	//waitForRaster(#1);
 
 	UpdatePlayers();
-	MoveMonster();
 	MoveBullet();
+	MoveMonster();
 	CrashPlayer();
+
+
+//	UpdateScore();
+
+	scrolly(g_vscroll);
+
+
+
+
+	if g_vscroll=#0 then 
+		printColor();
+		
+	if g_vscroll=#0 then 
+		PrintLine();
+
+	MovePlayer();
 
 
 	if a=#0 then begin
@@ -219,14 +345,7 @@ begin
 	end;
 
 
-
-	if g_vscroll=#0 then 
-		printColor();
-		
-	if g_vscroll=#7 then 
-		PrintLine();
-
-
+//	waitForRaster(#220);
 
 	kernelinterrupt();
 end;
@@ -234,26 +353,39 @@ end;
 procedure Setup();
 begin
 	copyfullscreen($27FF,$27FF+$4000);
+	copyfullscreen($27FF,$27FF+$8000);
 
-	poke(SCREEN_BG_COL, #0, #0);
-	poke(SCREEN_FG_COL, #0, #0);
+	poke(SCREEN_BG_COL, #0, BLACK);
+	poke(SCREEN_FG_COL, #0, BLACK);
 
 	hideBorderY(#0);
 
+	for val:=#0 to #255 do begin
+		rand(#0, #255, a);
+		random[val] := a;
+	end;
+	SetMultiColorMode();
 
 end;
 
 
 begin
 	time:=#0;	
+	score:=#0;
 	Setup();
 	ClearScreen(#$20, SCREEN_CHAR_LOC);
-	ClearScreen(#$00, SCREEN_COL_LOC);
+	ClearScreen(#$20, $4400);
+	ClearScreen(#$0F, SCREEN_COL_LOC);
+	ClearScreen(#$20, $8400);
+
+	MoveTo(#20, #1, #$84);
+	printString(" SCORE:", #1, #10);
+
 
 	InitializeSprites();
 
 	disableinterrupts();
-	RasterIRQ(Update(), #1);
+	RasterIRQ(Update(), #0);
 	enableinterrupts();
 
 end.

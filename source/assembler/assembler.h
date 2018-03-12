@@ -105,7 +105,7 @@ public:
     void Appendix(QString s, int l);
     virtual void LoadVariable(QString var) {}
     void Connect();
-    virtual QString StoreInTempVar(QString name)  { return name;}
+    virtual QString StoreInTempVar(QString name, QString type="byte")  { return name;}
     virtual void StartForLoop(QString a, QString b) {}
     virtual void EndForLoop(QString endVal) {}
     void Asm(QString s, QString comment="");

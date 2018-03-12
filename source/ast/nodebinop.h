@@ -132,10 +132,8 @@ public:
     }
 
 
-    void RightIsPureNumericMulDiv(Assembler* as) {
+    void RightIsPureNumericMulDiv8bit(Assembler* as) {
         int val = ((NodeNumber*)m_right)->m_val;
-
-
         int cnt = getShiftCount(val);
         if (cnt == -1 ) {
             if (m_op.m_type == TokenType::MUL)
@@ -147,6 +145,7 @@ public:
         as->Comment("8 bit mul of power 2");
 
         QString command = "";
+        QString varName;
         if (m_op.m_type == TokenType::DIV)
             command = "lsr";
         if (m_op.m_type == TokenType::MUL)
@@ -155,14 +154,62 @@ public:
 
         as->Asm("");
         m_left->LoadVariable(as);
+        as->Term();
+
         for (int i=0;i<cnt;i++)
             as->Asm(command);
+
+
+
+    }
+
+    void RightIsPureNumericMulDiv16bit(Assembler* as) {
+        int val = ((NodeNumber*)m_right)->m_val;
+
+
+        int cnt = getShiftCount(val);
+        if (cnt == -1 ) {
+            //if (m_op.m_type == TokenType::MUL)
+            //    EightBitMul(as);
+            //else
+                ErrorHandler::e.Error("16 bit Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
+            //return;
+        }
+        as->Comment("16 bit mul of power 2");
+
+        QString command = "";
+        QString varName;
+        if (m_op.m_type == TokenType::DIV)
+            command = "lsr";
+        if (m_op.m_type == TokenType::MUL)
+            command = "asl";
+
+
+        as->Asm("");
+        m_left->LoadVariable(as);
+        as->Term();
+
+        varName = as->StoreInTempVar("int_shift", "word");
+        as->Asm("stx "+varName);
+        as->Asm("sta "+varName+"+1");
+        command = "\t lsr " + varName +"+1"+ "\n";
+        command += "\t ror " + varName+"+0" + "\n";
+
+
+        for (int i=0;i<cnt;i++)
+            as->Asm(command);
+
+        as->Asm("lda " + varName);
+
 
     }
 
     void HandleMulDiv(Assembler* as) {
         if (m_right->isPureNumeric())  {
-            RightIsPureNumericMulDiv(as);
+            if (m_left->getType(as)==TokenType::INTEGER)
+                RightIsPureNumericMulDiv16bit(as);
+            else
+                RightIsPureNumericMulDiv8bit(as);
             return;
         }
         if (m_op.m_type==TokenType::MUL) {
