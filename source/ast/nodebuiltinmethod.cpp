@@ -623,6 +623,17 @@ void NodeBuiltinMethod::PokeScreenColor(Assembler *as, int hiAddress)
     as->Asm("sta screenMemory+1");
 }
 
+
+
+/*(char=65, col=4, x shift 65 count 20,
+                x shift, count... )
+
+*/
+
+
+
+
+
 void NodeBuiltinMethod::SetSpritePos(Assembler *as)
 {
 
@@ -637,12 +648,12 @@ void NodeBuiltinMethod::SetSpritePos(Assembler *as)
 
 
     as->Comment("Setting sprite position");
-    as->Asm("ldy #" +QString::number((int)sprite->m_val*2) );
+    as->Asm("ldx #" +QString::number((int)sprite->m_val*2) );
 
 //    as->Asm("tay");
 
     LoadVar(as, 0);
-    as->Asm("sta $D000,y");
+    as->Asm("sta $D000,x");
     m_params[0]->Build(as);
     as->Term("+1",true);
     as->Asm("cmp #0");
@@ -665,9 +676,9 @@ void NodeBuiltinMethod::SetSpritePos(Assembler *as)
 
     as->Label(lbl2);
 
-    as->Asm("iny");
+    as->Asm("inx");
     LoadVar(as, 1);
-    as->Asm("sta $D000,y");
+    as->Asm("sta $D000,x");
 
     as->PopLabel("spritepos");
     as->PopLabel("spriteposcontinue");

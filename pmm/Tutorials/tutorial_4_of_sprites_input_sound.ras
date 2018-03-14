@@ -72,14 +72,14 @@ end;
 
 procedure MoveBullet();
 begin
-	spritepos(bullet_x, bullet_y, #2, #$02, #$FD);
+	spritepos(bullet_x, bullet_y, #1);
 	bullet_x:=bullet_x+#1;	
 end;
 
 
 procedure MoveSprite();
 begin
-	spritepos(sprite_x, sprite_y, #0, #$01, #$FE);
+	spritepos(sprite_x, sprite_y, #0);
 	Joystick();
 
 	sprite_x := sprite_x - joystickleft*#2;

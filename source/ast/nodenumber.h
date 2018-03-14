@@ -75,8 +75,8 @@ public:
             as->Comment("Integer constant assigning");
             int hiBit = ((int)m_val)>>8;
             int loBit = ((int)m_val)&0xff;
-            as->Asm("lda #" + QString::number(hiBit) );
-            as->Asm("tax");
+            as->Asm("ldy #" + QString::number(hiBit) );
+//            as->Asm("tax");
             as->Asm("lda #" + QString::number(loBit) );
             return val;
 

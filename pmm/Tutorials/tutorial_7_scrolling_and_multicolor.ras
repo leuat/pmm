@@ -49,7 +49,7 @@ begin
 	wobbleShift:=sine[time*#2];
 	while y<#210 do begin
 		// Keep until rasterline hits text line
-		peek(RASTERLINE_POS, #0, y);
+		y:=peek(RASTERLINE_POS, #0);
 		val:=sine[y*#8 + wobbleShift]/#32;
 		scrollx(val);
 		waitnoraster(#1);

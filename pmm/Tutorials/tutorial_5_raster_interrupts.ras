@@ -73,7 +73,7 @@ begin
 	colorIndex:=#0;
 
 	if diff<#36 then begin
-		peek($d012, #0, a);
+		a:=peek($d012, #0);
 		bar_s[currentBar]:=a+#2;
 		barCount:=diff/#2 +#2;
 		colorIndex:=#15-diff/#2;

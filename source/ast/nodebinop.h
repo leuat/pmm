@@ -190,7 +190,7 @@ public:
         as->Term();
 
         varName = as->StoreInTempVar("int_shift", "word");
-        as->Asm("stx "+varName);
+        as->Asm("sty "+varName);
         as->Asm("sta "+varName+"+1");
         command = "\t lsr " + varName +"+1"+ "\n";
         command += "\t ror " + varName+"+0" + "\n";
@@ -305,11 +305,11 @@ public:
     //        as->Asm("sta " + varName);
             if (m_op.m_type==TokenType::PLUS) {
                 as->Asm("bcc "+lblword);
-                as->Asm("inx");
+                as->Asm("iny");
             }
             else {
                 as->Asm("bcs "+lblword);
-                as->Asm("dex");
+                as->Asm("dey");
             }
             as->Label(lblword);
 

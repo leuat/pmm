@@ -82,6 +82,8 @@ public:
         }
         if (m_right==nullptr)
             ErrorHandler::e.Error("Node assign: right hand must be expression", m_op.m_lineNumber);
+        if (m_left->getType(as)==TokenType::INTEGER)
+            as->Asm("ldy #0");
         m_right->Build(as);
         as->Term();
         v->StoreVariable(as);

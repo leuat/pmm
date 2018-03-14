@@ -243,7 +243,7 @@ void AsmMOS6502::Variable(QString v, bool isByte)
             m_term = "lda ";
         m_term+=v + "+1 ; Next one";
         Term();
-        Asm("tax");
+        Asm("tay");
         Term("lda "+v);
 
     }

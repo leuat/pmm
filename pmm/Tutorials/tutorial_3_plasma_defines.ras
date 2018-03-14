@@ -12,7 +12,6 @@ VAR
 	sinx : array[40] of byte; 
 
 
-@define hallaballa "ehm"
 @define y_start "#5"
 //@define include_color  true
 

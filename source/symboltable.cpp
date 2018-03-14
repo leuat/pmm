@@ -61,6 +61,7 @@ void SymbolTable::Initialize()
     m_constants["SPRITE_MULTICOLOR_REG2"] = new Symbol("$D026", "ADDRESS", 0xD026);
 
 
+
     m_constants["MULTICOLOR_CHAR_COL"] = new Symbol("$D021", "ADDRESS", 0xD021);
 
 

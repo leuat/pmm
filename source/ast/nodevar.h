@@ -102,7 +102,7 @@ public:
         if (t == TokenType::INTEGER) {
             m_isWord = true;
             as->Comment("Integer assignment in nodevar");
-            as->Asm("ldx " +value);
+            as->Asm("ldy " +value);
             as->Asm("lda " +value+"+1");
             return;
         }
@@ -119,6 +119,7 @@ public:
         if (as->m_symTab->Lookup(value)==nullptr)
             ErrorHandler::e.Error("Could not find variable '" +value +"' for storing.", m_op.m_lineNumber);
 
+        // Is array
         if (m_expr != nullptr) {
             NodeNumber* number = dynamic_cast<NodeNumber*>(m_expr);
             if (number!=nullptr) { // IS NUMBER optimize}
@@ -144,8 +145,7 @@ public:
             }
             if (as->m_symTab->Lookup(value)->getTokenType() == TokenType::INTEGER) {
                 as->Asm("sta " + value);
-                as->Asm("txa " );
-                as->Asm("sta " + value + "+1");
+                as->Asm("sty " + value + "+1");
                 return;
             }
 
