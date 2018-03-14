@@ -239,10 +239,18 @@ public:
 
         if (!isWord) {
             // Optimizing check: if right var is number, then cut losses
-
-            if (dynamic_cast<const NodeNumber*>(m_right)!=nullptr) {
+            NodeNumber* num = dynamic_cast<NodeNumber*>(m_right);
+            NodeVar* var = dynamic_cast<NodeVar*>(m_left);
+            if (num!=nullptr) {
                 as->Comment("Add/sub where right value is constant number");
-
+                if (num->m_op.m_type==TokenType::ADDRESS && var!=nullptr) {
+                    //qDebug() << "ADDRESS: " << num->StringValue();
+                    //exit(1);
+                    //as->
+                    as->ClearTerm();
+                    as->Term("lda " + var->value + " + " + num->StringValue());
+                    return;
+                }
                 m_left->Build(as);
                 as->Term();
                 as->BinOP(m_op.m_type);

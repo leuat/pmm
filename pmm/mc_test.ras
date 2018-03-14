@@ -2,24 +2,26 @@ program mc_test;
 var  
    index: byte; 
 	 mainChar: IncBin("charsets/test_mc.bin","$2800");
+	 screen: IncBin("screens/screen1.bin");
 begin
-	clearscreen( #$0D, SCREEN_COL_LOC); // green
+	//clearscreen( #$0D, SCREEN_COL_LOC); // green
 
 	setmulticolormode();
 	poke(VIC_DATA_LOC, #0, #$1A);
 
 
+	//copyhalfscreen(screen, $0400 , #12, #1);
+	copyfullscreen(screen + 1000, $D800); 
+	copyfullscreen(screen, $0400); 
+	
 	
 	poke(MULTICOLOR_CHAR_COL, #0, BLACK);
-	poke(MULTICOLOR_CHAR_COL, #1, WHITE); 
-	poke(MULTICOLOR_CHAR_COL, #2, RED);
+	poke(MULTICOLOR_CHAR_COL, #1, #1); 
+	poke(MULTICOLOR_CHAR_COL, #2, #2);
 
 	//poke(SCREEN_BG_COL, #0, BLACK);
 	//poke(SCREEN_FG_COL, #0, BLACK);
 
-	fill($0400, #01, #255);
-	fill($0500, #02, #255);
-	fill($0600, #03, #255);
 	
 
 
