@@ -33,6 +33,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="poke")
         Poke(as);
 
+    if (m_procName.toLower()=="copyzpdata")
+        CopyZPdata(as);
+
     if (m_procName.toLower()=="swap")
         Swap(as);
 
@@ -41,6 +44,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower()=="peek")
         Peek(as);
+
+    if (m_procName.toLower()=="peekzp")
+        PeekZp(as);
 
     if (m_procName.toLower() == "copyimagecolordata")
         CopyImageColorData(as);
@@ -69,6 +75,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     }
     if (m_procName.toLower() =="setbank") {
         SetBank(as);
+    }
+    if (m_procName.toLower() =="renderlevel") {
+        RenderLevel(as);
     }
 
     if (m_procName.toLower() =="togglebit") {
@@ -123,6 +132,11 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower() == "incscreenx")
             IncScreenX(as);
+
+    if (m_procName.toLower() == "inczp")
+            IncZp(as);
+
+
 
     if (m_procName.toLower() == "spritepos")
             SetSpritePos(as);
@@ -850,6 +864,30 @@ void NodeBuiltinMethod::InitSinusTable(Assembler *as)
 }
 
 
+void NodeBuiltinMethod::IncZp(Assembler *as)
+{
+    as->m_labelStack["incscreenx"].push();
+    QString lbl = as->getLabel("incscreenx");
+
+    as->Term("lda ");
+    m_params[0]->Build(as);
+    as->Term();
+    as->Asm("sta screen_x");
+    as->Asm("lda print_text");
+    //as->Asm("cpx #0");
+   // as->Asm("beq " + lbl);
+    as->Asm("clc");
+    as->Asm("adc screen_x");
+    as->Asm("bcc " + lbl);
+    as->Asm("inc print_text+1");
+    as->Label(lbl);
+    as->Asm("sta print_text");
+
+
+    as->m_labelStack["incscreenx"].pop();
+
+}
+
 
 
 void NodeBuiltinMethod::IncScreenX(Assembler *as)
@@ -862,8 +900,8 @@ void NodeBuiltinMethod::IncScreenX(Assembler *as)
     as->Term();
     as->Asm("sta screen_x");
     as->Asm("lda screenMemory");
-    as->Asm("cpx #0");
-    as->Asm("beq " + lbl);
+    //as->Asm("cpx #0");
+   // as->Asm("beq " + lbl);
     as->Asm("clc");
     as->Asm("adc screen_x");
     as->Asm("bcc " + lbl);
@@ -875,6 +913,7 @@ void NodeBuiltinMethod::IncScreenX(Assembler *as)
     as->m_labelStack["incscreenx"].pop();
 
 }
+
 
 void NodeBuiltinMethod::Call(Assembler *as)
 {
@@ -1387,6 +1426,70 @@ void NodeBuiltinMethod::GetBit(Assembler *as)
 
 
     as->PopLabel("getbit_false");
+
+}
+
+void NodeBuiltinMethod::RenderLevel(Assembler *as)
+{
+// use print_text
+
+    NodeVar* var = dynamic_cast<NodeVar*>(m_params[0]);
+    if (var==nullptr)
+        ErrorHandler::e.Error("RenderLevel: param 0 must be level variable pointer");
+
+/*    ba[0] = m_sizex;
+    ba[1] = m_sizey;
+    ba[2] = m_width;
+    ba[3] = m_height;
+    ba[4] = m_startx;
+    ba[5] = m_starty;
+    ba[6] = (uchar)(m_levelSize >>8)&0xFF;
+    ba[7] = (uchar)(m_levelSize&0xFF);
+    ba[8] = m_extraDataSize;
+  */
+    QString head = " +#13 ";
+    // dataSize = lvl + header + 6
+
+
+//    level +header + 0  = m_sizeX
+    as->Asm("lda #<" + var->value + head); // Data start
+    as->Asm("ldx #>" + var->value);  // Data start
+    as->Asm("sta print_text");
+    as->Asm("stx print_text+1");
+
+//    as->Asm("lda " + var->value + head + "#2"); // width
+//    as->Asm("ldx " + var->value + head + "#3"); // width
+
+}
+
+void NodeBuiltinMethod::CopyZPdata(Assembler *as)
+{
+    as->Comment("Copy Zero-page data");
+    QString loop = as->NewLabel("zpcopy");
+    as->ClearTerm();
+    as->Term("ldy ");
+    m_params[1]->Build(as);
+    as->Term();
+    as->Label(loop);
+    as->Asm("lda (print_text),y");
+ //   as->Asm("lda #46");
+    as->Term("sta ");
+    m_params[0]->Build(as);
+    as->Term(",y", true);
+    as->Asm("dey");
+    as->Asm("bne " + loop);
+
+    as->PopLabel("zpcopy");
+
+
+}
+
+void NodeBuiltinMethod::PeekZp(Assembler *as)
+{
+    as->Term("ldy ");
+    m_params[0]->Build(as);
+    as->Term();
+    as->Asm("lda (print_text),y");
 
 }
 

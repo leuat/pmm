@@ -45,6 +45,7 @@ public:
     PVar Execute(SymbolTable* symTab, uint lvl) override;
     void PlaySound(Assembler* as);
     void IncScreenX(Assembler* as);
+    void IncZp(Assembler* as);
     void Call(Assembler* as);
     void InitSid(Assembler* as);
     void DisableInterrupts(Assembler* as);
@@ -63,6 +64,9 @@ public:
     void TransformColors(Assembler* as);
     void ToggleBit(Assembler* as);
     void GetBit(Assembler* as);
+    void RenderLevel(Assembler* as);
+    void CopyZPdata(Assembler* as);
+    void PeekZp(Assembler* as);
 
 
     void LoadVar(Assembler* as, int paramNo, QString register, QString load="");

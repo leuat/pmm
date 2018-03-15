@@ -159,6 +159,11 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
                 );
 
+    builtInFunctions["inczp"] = BuiltInFunction(
+                "inczp",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                );
+
 
     builtInFunctions["hidebordery"] = BuiltInFunction(
                 "hidebordery",
@@ -239,6 +244,29 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
                 << BuiltInFunction::Type::INTEGER
                 );
+
+
+    builtInFunctions["renderlevel"] = BuiltInFunction(
+                "renderlevel",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["peekzp"] = BuiltInFunction(
+                "peekzp",
+                QList<BuiltInFunction::Type>()
+                << BuiltInFunction::Type::INTEGER
+                );
+
+
+    builtInFunctions["copyzpdata"] = BuiltInFunction(
+                "copyzpdata",
+                QList<BuiltInFunction::Type>()
+                << BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
+                );
+
 
 
     builtInFunctions["playsound"] = BuiltInFunction(

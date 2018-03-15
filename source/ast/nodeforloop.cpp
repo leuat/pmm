@@ -33,14 +33,9 @@ QString NodeForLoop::Build(Assembler *as) {
   //  if (m_b->m_op.m_type==TokenType::INTEGER ||m_b->m_op.m_type==TokenType::INTEGER_CONST )
   //      to = "#" + to;
     as->StartForLoop(var, to);
-    m_block->Build(as);
-
-//    as->EndForLoop(m_b);
-    as->m_stack["for"].pop();
     QString loopForFix = as->NewLabel("forLoopFix");
     QString loopDone = as->NewLabel("forLoopDone");
 
-    as->Asm("inc " + as->m_stack["for"].current());
 
 //    if (Syntax::s.isNumeric(endVal))
 //        endVal = "#" + endVal;
@@ -50,6 +45,11 @@ QString NodeForLoop::Build(Assembler *as) {
     as->Asm("bne "+loopForFix);
     as->Asm("jmp "+loopDone);
     as->Label(loopForFix);
+    m_block->Build(as);
+//    as->EndForLoop(m_b);
+    as->m_stack["for"].pop();
+    as->Asm("inc " + as->m_stack["for"].current());
+
     as->Asm("jmp " + as->getLabel("for"));
 
     as->Label(loopDone);

@@ -7,7 +7,7 @@
 	ORG $0900
 
 UnitTest
-	jmp block7799
+	jmp block41
 x	dc.b
 y	dc.b
 z	dc.b
@@ -20,7 +20,7 @@ arr	dc.b
 iarr	dc.w	 
 	org iarr+255
 str	dc.b
-block7799
+block41
 	
 	
 	; ***********  Defining procedure : initeightbitmul
@@ -29,7 +29,7 @@ block7799
 	
 	jmp afterProc_initeightbitmul
 initeightbitmul
-	jmp multiply_eightbit18674
+	jmp multiply_eightbit18467
 multiplier .byte 0
 multiply_eightbit
 	cpx #$00
@@ -54,7 +54,7 @@ mul_skip
 mul_end
 	txa
 	rts
-multiply_eightbit18674
+multiply_eightbit18467
 	rts
 afterProc_initeightbitmul
 	
@@ -65,7 +65,7 @@ afterProc_initeightbitmul
 	
 	jmp afterProc_initmoveto
 initmoveto
-	jmp moveto21331
+	jmp moveto6334
 screenMemory = $fb 
 screen_x .byte 0 
 screen_y .byte 0 
@@ -96,7 +96,7 @@ sydone
 sxdone
 	sta screenMemory
 	rts
-moveto21331
+moveto6334
 	rts
 afterProc_initmoveto
 	
@@ -149,21 +149,21 @@ incScreen
 	; Binary clause: GREATER
 	; Compare with pure num / var optimization
 	cmp #23
-	bcc binaryclausefailed30950
+	bcc binaryclausefailed26962
 	lda #1; success
-	jmp binaryclausefinished3398
-binaryclausefailed30950
+	jmp binaryclausefinished24464
+binaryclausefailed26962
 	lda #0 ; failed state
-binaryclausefinished3398
+binaryclausefinished24464
 	cmp #1
-	beq ConditionalTrueBlock3751
-	jmp elsedoneblock32642
-ConditionalTrueBlock3751
+	beq ConditionalTrueBlock15724
+	jmp elsedoneblock29358
+ConditionalTrueBlock15724
 	; Assigning single variable : screeny
 	lda #0
 	; VarNode StoreVariable
 	sta screeny
-elsedoneblock32642
+elsedoneblock29358
 	lda #0
 	sta screen_x
 	lda screeny
@@ -197,510 +197,510 @@ TestConditionals
 	lda y
 	; Compare with pure num / var optimization
 	cmp #20
-	bcs binaryclausefailed1046
+	bcs binaryclausefailed2995
 	lda #1; success
-	jmp binaryclausefinished11723
-binaryclausefailed1046
+	jmp binaryclausefinished11942
+binaryclausefailed2995
 	lda #0 ; failed state
-binaryclausefinished11723
+binaryclausefinished11942
 	cmp #1
-	beq ConditionalTrueBlock24456
-	jmp elseblock4973
-	jmp elsedoneblock68
-ConditionalTrueBlock24456
-	jmp printstring_call27137
-printstring_text27445	.dc "CONDITIONAL1 = OK",0
-printstring_call27137
+	beq ConditionalTrueBlock16827
+	jmp elseblock9961
+	jmp elsedoneblock491
+ConditionalTrueBlock16827
+	jmp printstring_call5436
+printstring_text32391	.dc "CONDITIONAL1 = OK",0
+printstring_call5436
 	clc
 	; TEST
-	lda #<printstring_text27445
+	lda #<printstring_text32391
 	adc #0
-	ldy #>printstring_text27445
+	ldy #>printstring_text32391
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock68
-elseblock4973
-	jmp printstring_call11644
-printstring_text2585	.dc "CONDITIONAL1 = FAILED ****************** ",0
-printstring_call11644
+	jmp elsedoneblock491
+elseblock9961
+	jmp printstring_call3902
+printstring_text153	.dc "CONDITIONAL1 = FAILED ****************** ",0
+printstring_call3902
 	clc
 	; TEST
-	lda #<printstring_text2585
+	lda #<printstring_text153
 	adc #0
-	ldy #>printstring_text2585
+	ldy #>printstring_text153
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock68
+elsedoneblock491
 	jsr incScreen
 	; Binary clause: EQUALS
 	lda x
 	; Compare with pure num / var optimization
 	cmp #0
-	bne binaryclausefailed7285
+	bne binaryclausefailed19718
 	lda #1; success
-	jmp binaryclausefinished23842
-binaryclausefailed7285
+	jmp binaryclausefinished19895
+binaryclausefailed19718
 	lda #0 ; failed state
-binaryclausefinished23842
+binaryclausefinished19895
 	cmp #1
-	beq ConditionalTrueBlock9690
-	jmp elseblock5587
-	jmp elsedoneblock30908
-ConditionalTrueBlock9690
-	jmp printstring_call20319
-printstring_text15682	.dc "CONDITIONAL2 = OK",0
-printstring_call20319
+	beq ConditionalTrueBlock12382
+	jmp elseblock17421
+	jmp elsedoneblock18716
+ConditionalTrueBlock12382
+	jmp printstring_call21726
+printstring_text14771	.dc "CONDITIONAL2 = OK",0
+printstring_call21726
 	clc
 	; TEST
-	lda #<printstring_text15682
+	lda #<printstring_text14771
 	adc #0
-	ldy #>printstring_text15682
+	ldy #>printstring_text14771
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock30908
-elseblock5587
-	jmp printstring_call7930
-printstring_text17077	.dc "CONDITIONAL2 = FAILED ****************** ",0
-printstring_call7930
+	jmp elsedoneblock18716
+elseblock17421
+	jmp printstring_call1869
+printstring_text19912	.dc "CONDITIONAL2 = FAILED ****************** ",0
+printstring_call1869
 	clc
 	; TEST
-	lda #<printstring_text17077
+	lda #<printstring_text19912
 	adc #0
-	ldy #>printstring_text17077
+	ldy #>printstring_text19912
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock30908
+elsedoneblock18716
 	jsr incScreen
 	; Binary clause: GREATER
 	lda y
 	; Compare with pure num / var optimization
 	cmp #5
-	bcc binaryclausefailed5845
+	bcc binaryclausefailed28703
 	lda #1; success
-	jmp binaryclausefinished32650
-binaryclausefailed5845
+	jmp binaryclausefinished23811
+binaryclausefailed28703
 	lda #0 ; failed state
-binaryclausefinished32650
+binaryclausefinished23811
 	cmp #1
-	beq ConditionalTrueBlock4149
-	jmp elseblock29072
-	jmp elsedoneblock6363
-ConditionalTrueBlock4149
-	jmp printstring_call20435
-printstring_text13529	.dc "CONDITIONAL3 = OK",0
-printstring_call20435
+	beq ConditionalTrueBlock26299
+	jmp elseblock17035
+	jmp elsedoneblock9894
+ConditionalTrueBlock26299
+	jmp printstring_call30333
+printstring_text17673	.dc "CONDITIONAL3 = OK",0
+printstring_call30333
 	clc
 	; TEST
-	lda #<printstring_text13529
+	lda #<printstring_text17673
 	adc #0
-	ldy #>printstring_text13529
+	ldy #>printstring_text17673
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock6363
-elseblock29072
-	jmp printstring_call14450
-printstring_text2099	.dc "CONDITIONAL3 = FAILED ****************** ",0
-printstring_call14450
+	jmp elsedoneblock9894
+elseblock17035
+	jmp printstring_call15141
+printstring_text7711	.dc "CONDITIONAL3 = FAILED ****************** ",0
+printstring_call15141
 	clc
 	; TEST
-	lda #<printstring_text2099
+	lda #<printstring_text7711
 	adc #0
-	ldy #>printstring_text2099
+	ldy #>printstring_text7711
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock6363
+elsedoneblock9894
 	jsr incScreen
 	; Binary clause: NOTEQUALS
 	lda y
 	; Compare with pure num / var optimization
 	cmp #5
-	beq binaryclausefailed6449
+	beq binaryclausefailed32662
 	lda #1; success
-	jmp binaryclausefinished3523
-binaryclausefailed6449
+	jmp binaryclausefinished32757
+binaryclausefailed32662
 	lda #0 ; failed state
-binaryclausefinished3523
+binaryclausefinished32757
 	cmp #1
-	beq ConditionalTrueBlock12529
-	jmp elseblock25739
-	jmp elsedoneblock2078
-ConditionalTrueBlock12529
-	jmp printstring_call27252
-printstring_text21535	.dc "CONDITIONAL3 = OK",0
-printstring_call27252
+	beq ConditionalTrueBlock6868
+	jmp elseblock25547
+	jmp elsedoneblock27644
+ConditionalTrueBlock6868
+	jmp printstring_call12859
+printstring_text8723	.dc "CONDITIONAL3 = OK",0
+printstring_call12859
 	clc
 	; TEST
-	lda #<printstring_text21535
+	lda #<printstring_text8723
 	adc #0
-	ldy #>printstring_text21535
+	ldy #>printstring_text8723
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock2078
-elseblock25739
-	jmp printstring_call17164
-printstring_text20038	.dc "CONDITIONAL3 = FAILED ****************** ",0
-printstring_call17164
+	jmp elsedoneblock27644
+elseblock25547
+	jmp printstring_call27529
+printstring_text778	.dc "CONDITIONAL3 = FAILED ****************** ",0
+printstring_call27529
 	clc
 	; TEST
-	lda #<printstring_text20038
+	lda #<printstring_text778
 	adc #0
-	ldy #>printstring_text20038
+	ldy #>printstring_text778
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock2078
+elsedoneblock27644
 	jsr incScreen
 	; Binary clause: EQUALS
 	lda y
 	; Compare with pure num / var optimization
 	cmp #5
-	bne binaryclausefailed15589
+	bne binaryclausefailed288
 	lda #1; success
-	jmp binaryclausefinished15207
-binaryclausefailed15589
+	jmp binaryclausefinished30106
+binaryclausefailed288
 	lda #0 ; failed state
-binaryclausefinished15207
-	jmp logical_class_temp_label10779
-logical_class_temp_var22191	.byte	0
-logical_class_temp_label10779
-	sta logical_class_temp_var22191
+binaryclausefinished30106
+	jmp logical_class_temp_label8942
+logical_class_temp_var9040	.byte	0
+logical_class_temp_label8942
+	sta logical_class_temp_var9040
 	; Binary clause: NOTEQUALS
 	lda x
 	; Compare with pure num / var optimization
 	cmp #5
-	beq binaryclausefailed17148
+	beq binaryclausefailed19264
 	lda #1; success
-	jmp binaryclausefinished30236
-binaryclausefailed17148
+	jmp binaryclausefinished22648
+binaryclausefailed19264
 	lda #0 ; failed state
-binaryclausefinished30236
-	ora logical_class_temp_var22191
+binaryclausefinished22648
+	ora logical_class_temp_var9040
 	cmp #1
-	beq ConditionalTrueBlock27311
-	jmp elseblock11473
-	jmp elsedoneblock6797
-ConditionalTrueBlock27311
-	jmp printstring_call29649
-printstring_text22572	.dc "CONDITIONAL4 = OK",0
-printstring_call29649
+	beq ConditionalTrueBlock3035
+	jmp elseblock22190
+	jmp elsedoneblock1842
+ConditionalTrueBlock3035
+	jmp printstring_call23805
+printstring_text15890	.dc "CONDITIONAL4 = OK",0
+printstring_call23805
 	clc
 	; TEST
-	lda #<printstring_text22572
+	lda #<printstring_text15890
 	adc #0
-	ldy #>printstring_text22572
+	ldy #>printstring_text15890
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock6797
-elseblock11473
-	jmp printstring_call23843
-printstring_text787	.dc "CONDITIONAL4 = FAILED ****************** ",0
-printstring_call23843
+	jmp elsedoneblock1842
+elseblock22190
+	jmp printstring_call24370
+printstring_text15350	.dc "CONDITIONAL4 = FAILED ****************** ",0
+printstring_call24370
 	clc
 	; TEST
-	lda #<printstring_text787
+	lda #<printstring_text15350
 	adc #0
-	ldy #>printstring_text787
+	ldy #>printstring_text15350
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock6797
+elsedoneblock1842
 	jsr incScreen
 	; Binary clause: GREATER
 	lda y
 	; Compare with pure num / var optimization
 	cmp #5
-	bcc binaryclausefailed12749
+	bcc binaryclausefailed19629
 	lda #1; success
-	jmp binaryclausefinished14758
-binaryclausefailed12749
+	jmp binaryclausefinished12623
+binaryclausefailed19629
 	lda #0 ; failed state
-binaryclausefinished14758
-	jmp logical_class_temp_label27335
-logical_class_temp_var30217	.byte	0
-logical_class_temp_label27335
-	sta logical_class_temp_var30217
+binaryclausefinished12623
+	jmp logical_class_temp_label19954
+logical_class_temp_var24084	.byte	0
+logical_class_temp_label19954
+	sta logical_class_temp_var24084
 	; Binary clause: EQUALS
 	lda x
 	; Compare with pure num / var optimization
 	cmp #0
-	bne binaryclausefailed24008
+	bne binaryclausefailed18756
 	lda #1; success
-	jmp binaryclausefinished25669
-binaryclausefailed24008
+	jmp binaryclausefinished11840
+binaryclausefailed18756
 	lda #0 ; failed state
-binaryclausefinished25669
-	and logical_class_temp_var30217
+binaryclausefinished11840
+	and logical_class_temp_var24084
 	cmp #1
-	beq ConditionalTrueBlock7211
-	jmp elseblock26735
-	jmp elsedoneblock21625
-ConditionalTrueBlock7211
-	jmp printstring_call12320
-printstring_text9590	.dc "CONDITIONAL5 = OK",0
-printstring_call12320
+	beq ConditionalTrueBlock31101
+	jmp elseblock24393
+	jmp elsedoneblock3548
+ConditionalTrueBlock31101
+	jmp printstring_call7376
+printstring_text13931	.dc "CONDITIONAL5 = OK",0
+printstring_call7376
 	clc
 	; TEST
-	lda #<printstring_text9590
+	lda #<printstring_text13931
 	adc #0
-	ldy #>printstring_text9590
+	ldy #>printstring_text13931
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock21625
-elseblock26735
-	jmp printstring_call12152
-printstring_text30582	.dc "CONDITIONAL5 = FAILED ****************** ",0
-printstring_call12152
+	jmp elsedoneblock3548
+elseblock24393
+	jmp printstring_call16944
+printstring_text32439	.dc "CONDITIONAL5 = FAILED ****************** ",0
+printstring_call16944
 	clc
 	; TEST
-	lda #<printstring_text30582
+	lda #<printstring_text32439
 	adc #0
-	ldy #>printstring_text30582
+	ldy #>printstring_text32439
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock21625
+elsedoneblock3548
 	jsr incScreen
 	; Binary clause: EQUALS
 	lda y
 	; Compare with pure num / var optimization
 	cmp #10
-	bne binaryclausefailed30502
+	bne binaryclausefailed16118
 	lda #1; success
-	jmp binaryclausefinished21091
-binaryclausefailed30502
+	jmp binaryclausefinished2082
+binaryclausefailed16118
 	lda #0 ; failed state
-binaryclausefinished21091
-	jmp logical_class_temp_label11905
-logical_class_temp_var25209	.byte	0
-logical_class_temp_label11905
-	sta logical_class_temp_var25209
+binaryclausefinished2082
+	jmp logical_class_temp_label16541
+logical_class_temp_var22929	.byte	0
+logical_class_temp_label16541
+	sta logical_class_temp_var22929
 	; Binary clause: EQUALS
 	lda x
 	; Compare with pure num / var optimization
 	cmp #0
-	bne binaryclausefailed28797
+	bne binaryclausefailed4833
 	lda #1; success
-	jmp binaryclausefinished10115
-binaryclausefailed28797
+	jmp binaryclausefinished31115
+binaryclausefailed4833
 	lda #0 ; failed state
-binaryclausefinished10115
-	jmp logical_class_temp_label28877
-logical_class_temp_var32243	.byte	0
-logical_class_temp_label28877
-	sta logical_class_temp_var32243
+binaryclausefinished31115
+	jmp logical_class_temp_label29658
+logical_class_temp_var4639	.byte	0
+logical_class_temp_label29658
+	sta logical_class_temp_var4639
 	; Binary clause: EQUALS
 	lda z
 	; Compare with pure num / var optimization
 	cmp #20
-	bne binaryclausefailed15285
+	bne binaryclausefailed22704
 	lda #1; success
-	jmp binaryclausefinished7883
-binaryclausefailed15285
+	jmp binaryclausefinished9930
+binaryclausefailed22704
 	lda #0 ; failed state
-binaryclausefinished7883
-	and logical_class_temp_var32243
-	and logical_class_temp_var25209
+binaryclausefinished9930
+	and logical_class_temp_var4639
+	and logical_class_temp_var22929
 	cmp #1
-	beq ConditionalTrueBlock8082
-	jmp elseblock28125
-	jmp elsedoneblock12869
-ConditionalTrueBlock8082
-	jmp printstring_call32493
-printstring_text23759	.dc "CONDITIONAL6 = OK",0
-printstring_call32493
+	beq ConditionalTrueBlock11323
+	jmp elseblock5537
+	jmp elsedoneblock21538
+ConditionalTrueBlock11323
+	jmp printstring_call2306
+printstring_text31673	.dc "CONDITIONAL6 = OK",0
+printstring_call2306
 	clc
 	; TEST
-	lda #<printstring_text23759
+	lda #<printstring_text31673
 	adc #0
-	ldy #>printstring_text23759
+	ldy #>printstring_text31673
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock12869
-elseblock28125
-	jmp printstring_call27372
-printstring_text11902	.dc "CONDITIONAL6 = FAILED ****************** ",0
-printstring_call27372
+	jmp elsedoneblock21538
+elseblock5537
+	jmp printstring_call5021
+printstring_text28745	.dc "CONDITIONAL6 = FAILED ****************** ",0
+printstring_call5021
 	clc
 	; TEST
-	lda #<printstring_text11902
+	lda #<printstring_text28745
 	adc #0
-	ldy #>printstring_text11902
+	ldy #>printstring_text28745
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock12869
+elsedoneblock21538
 	jsr incScreen
 	; Binary clause: EQUALS
 	lda y
 	; Compare with pure num / var optimization
 	cmp #5
-	bne binaryclausefailed11075
+	bne binaryclausefailed26777
 	lda #1; success
-	jmp binaryclausefinished4955
-binaryclausefailed11075
+	jmp binaryclausefinished15573
+binaryclausefailed26777
 	lda #0 ; failed state
-binaryclausefinished4955
-	jmp logical_class_temp_label11653
-logical_class_temp_var26341	.byte	0
-logical_class_temp_label11653
-	sta logical_class_temp_var26341
+binaryclausefinished15573
+	jmp logical_class_temp_label16512
+logical_class_temp_var5097	.byte	0
+logical_class_temp_label16512
+	sta logical_class_temp_var5097
 	; Binary clause: EQUALS
 	lda x
 	; Compare with pure num / var optimization
 	cmp #23
-	bne binaryclausefailed10210
+	bne binaryclausefailed23986
 	lda #1; success
-	jmp binaryclausefinished22596
-binaryclausefailed10210
+	jmp binaryclausefinished13290
+binaryclausefailed23986
 	lda #0 ; failed state
-binaryclausefinished22596
-	jmp logical_class_temp_label1845
-logical_class_temp_var2591	.byte	0
-logical_class_temp_label1845
-	sta logical_class_temp_var2591
+binaryclausefinished13290
+	jmp logical_class_temp_label18636
+logical_class_temp_var9161	.byte	0
+logical_class_temp_label18636
+	sta logical_class_temp_var9161
 	; Binary clause: NOTEQUALS
 	lda z
 	; Compare with pure num / var optimization
 	cmp #10
-	beq binaryclausefailed1266
+	beq binaryclausefailed22355
 	lda #1; success
-	jmp binaryclausefinished26100
-binaryclausefailed1266
+	jmp binaryclausefinished24767
+binaryclausefailed22355
 	lda #0 ; failed state
-binaryclausefinished26100
-	ora logical_class_temp_var2591
-	ora logical_class_temp_var26341
+binaryclausefinished24767
+	ora logical_class_temp_var9161
+	ora logical_class_temp_var5097
 	cmp #1
-	beq ConditionalTrueBlock7315
-	jmp elseblock27425
-	jmp elsedoneblock19428
-ConditionalTrueBlock7315
-	jmp printstring_call4592
-printstring_text6607	.dc "CONDITIONAL7 = OK",0
-printstring_call4592
+	beq ConditionalTrueBlock19072
+	jmp elseblock6270
+	jmp elsedoneblock5829
+ConditionalTrueBlock19072
+	jmp printstring_call15574
+printstring_text4031	.dc "CONDITIONAL7 = OK",0
+printstring_call15574
 	clc
 	; TEST
-	lda #<printstring_text6607
+	lda #<printstring_text4031
 	adc #0
-	ldy #>printstring_text6607
+	ldy #>printstring_text4031
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock19428
-elseblock27425
-	jmp printstring_call7777
-printstring_text23503	.dc "CONDITIONAL7 = FAILED ****************** ",0
-printstring_call7777
+	jmp elsedoneblock5829
+elseblock6270
+	jmp printstring_call27350
+printstring_text1150	.dc "CONDITIONAL7 = FAILED ****************** ",0
+printstring_call27350
 	clc
 	; TEST
-	lda #<printstring_text23503
+	lda #<printstring_text1150
 	adc #0
-	ldy #>printstring_text23503
+	ldy #>printstring_text1150
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock19428
+elsedoneblock5829
 	; Binary clause: EQUALS
 	lda x
 	; Compare with pure num / var optimization
 	cmp #1
-	bne binaryclausefailed5174
+	bne binaryclausefailed31107
 	lda #1; success
-	jmp binaryclausefinished5912
-binaryclausefailed5174
+	jmp binaryclausefinished30191
+binaryclausefailed31107
 	lda #0 ; failed state
-binaryclausefinished5912
-	jmp logical_class_temp_label26697
-logical_class_temp_var21300	.byte	0
-logical_class_temp_label26697
-	sta logical_class_temp_var21300
+binaryclausefinished30191
+	jmp logical_class_temp_label11337
+logical_class_temp_var18007	.byte	0
+logical_class_temp_label11337
+	sta logical_class_temp_var18007
 	; Binary clause: EQUALS
 	lda y
 	; Compare with pure num / var optimization
 	cmp #10
-	bne binaryclausefailed17852
+	bne binaryclausefailed15457
 	lda #1; success
-	jmp binaryclausefinished11385
-binaryclausefailed17852
+	jmp binaryclausefinished12287
+binaryclausefailed15457
 	lda #0 ; failed state
-binaryclausefinished11385
-	ora logical_class_temp_var21300
+binaryclausefinished12287
+	ora logical_class_temp_var18007
 	cmp #1
-	beq ConditionalTrueBlock20371
-	jmp elseblock4169
-	jmp elsedoneblock21557
-ConditionalTrueBlock20371
-	jmp printstring_call17322
-printstring_text20368	.dc "CONDITIONAL8 = OK",0
-printstring_call17322
+	beq ConditionalTrueBlock21724
+	jmp elseblock13966
+	jmp elsedoneblock3430
+ConditionalTrueBlock21724
+	jmp printstring_call10383
+printstring_text14945	.dc "CONDITIONAL8 = OK",0
+printstring_call10383
 	clc
 	; TEST
-	lda #<printstring_text20368
+	lda #<printstring_text14945
 	adc #0
-	ldy #>printstring_text20368
+	ldy #>printstring_text14945
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock21557
-elseblock4169
-	jmp printstring_call23002
-printstring_text2398	.dc "CONDITIONAL8 = FAILED ****************** ",0
-printstring_call23002
+	jmp elsedoneblock3430
+elseblock13966
+	jmp printstring_call32209
+printstring_text9758	.dc "CONDITIONAL8 = FAILED ****************** ",0
+printstring_call32209
 	clc
 	; TEST
-	lda #<printstring_text2398
+	lda #<printstring_text9758
 	adc #0
-	ldy #>printstring_text2398
+	ldy #>printstring_text9758
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock21557
+elsedoneblock3430
 	jsr incScreen
 
 	rts
@@ -736,46 +736,46 @@ TestMul
 	; Binary clause: EQUALS
 	; Compare with pure num / var optimization
 	cmp #2
-	bne binaryclausefailed30939
+	bne binaryclausefailed13030
 	lda #1; success
-	jmp binaryclausefinished30218
-binaryclausefailed30939
+	jmp binaryclausefinished16413
+binaryclausefailed13030
 	lda #0 ; failed state
-binaryclausefinished30218
+binaryclausefinished16413
 	cmp #1
-	beq ConditionalTrueBlock27154
-	jmp elseblock6411
-	jmp elsedoneblock22570
-ConditionalTrueBlock27154
-	jmp printstring_call7287
-printstring_text27645	.dc "ASSIGN1 OK ",0
-printstring_call7287
+	beq ConditionalTrueBlock6422
+	jmp elseblock24946
+	jmp elsedoneblock27506
+ConditionalTrueBlock6422
+	jmp printstring_call900
+printstring_text32591	.dc "ASSIGN1 OK ",0
+printstring_call900
 	clc
 	; TEST
-	lda #<printstring_text27645
+	lda #<printstring_text32591
 	adc #0
-	ldy #>printstring_text27645
+	ldy #>printstring_text32591
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock22570
-elseblock6411
-	jmp printstring_call6391
-printstring_text9894	.dc "ASSING 1 FAILED ****************",0
-printstring_call6391
+	jmp elsedoneblock27506
+elseblock24946
+	jmp printstring_call1655
+printstring_text17410	.dc "ASSING 1 FAILED ****************",0
+printstring_call1655
 	clc
 	; TEST
-	lda #<printstring_text9894
+	lda #<printstring_text17410
 	adc #0
-	ldy #>printstring_text9894
+	ldy #>printstring_text17410
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock22570
+elsedoneblock27506
 	; Assigning single variable : val
 	; 8 bit mul
 	lda x
@@ -794,46 +794,46 @@ elsedoneblock22570
 	lda val
 	; Compare with pure num / var optimization
 	cmp #4
-	bne binaryclausefailed18034
+	bne binaryclausefailed4041
 	lda #1; success
-	jmp binaryclausefinished2168
-binaryclausefailed18034
+	jmp binaryclausefinished3602
+binaryclausefailed4041
 	lda #0 ; failed state
-binaryclausefinished2168
+binaryclausefinished3602
 	cmp #1
-	beq ConditionalTrueBlock26717
-	jmp elseblock23923
-	jmp elsedoneblock1902
-ConditionalTrueBlock26717
-	jmp printstring_call21795
-printstring_text2064	.dc "ASSIGN2 OK ",0
-printstring_call21795
+	beq ConditionalTrueBlock21548
+	jmp elseblock6483
+	jmp elsedoneblock27595
+ConditionalTrueBlock21548
+	jmp printstring_call10291
+printstring_text30836	.dc "ASSIGN2 OK ",0
+printstring_call10291
 	clc
 	; TEST
-	lda #<printstring_text2064
+	lda #<printstring_text30836
 	adc #0
-	ldy #>printstring_text2064
+	ldy #>printstring_text30836
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock1902
-elseblock23923
-	jmp printstring_call27876
-printstring_text2439	.dc "ASSING 2 FAILED ****************",0
-printstring_call27876
+	jmp elsedoneblock27595
+elseblock6483
+	jmp printstring_call11020
+printstring_text4596	.dc "ASSING 2 FAILED ****************",0
+printstring_call11020
 	clc
 	; TEST
-	lda #<printstring_text2439
+	lda #<printstring_text4596
 	adc #0
-	ldy #>printstring_text2439
+	ldy #>printstring_text4596
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock1902
+elsedoneblock27595
 	jsr incScreen
 	; Assigning single variable : val
 	; 8 bit mul
@@ -856,46 +856,46 @@ elsedoneblock1902
 	; Binary clause: EQUALS
 	; Compare with pure num / var optimization
 	cmp #6
-	bne binaryclausefailed29670
+	bne binaryclausefailed4734
 	lda #1; success
-	jmp binaryclausefinished11985
-binaryclausefailed29670
+	jmp binaryclausefinished53
+binaryclausefailed4734
 	lda #0 ; failed state
-binaryclausefinished11985
+binaryclausefinished53
 	cmp #1
-	beq ConditionalTrueBlock19517
-	jmp elseblock9499
-	jmp elsedoneblock3589
-ConditionalTrueBlock19517
-	jmp printstring_call1816
-printstring_text21699	.dc "ASSIGN3 OK ",0
-printstring_call1816
+	beq ConditionalTrueBlock19668
+	jmp elseblock24484
+	jmp elsedoneblock8281
+ConditionalTrueBlock19668
+	jmp printstring_call26418
+printstring_text27938	.dc "ASSIGN3 OK ",0
+printstring_call26418
 	clc
 	; TEST
-	lda #<printstring_text21699
+	lda #<printstring_text27938
 	adc #0
-	ldy #>printstring_text21699
+	ldy #>printstring_text27938
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock3589
-elseblock9499
-	jmp printstring_call23035
-printstring_text30498	.dc "ASSING 3 FAILED ****************",0
-printstring_call23035
+	jmp elsedoneblock8281
+elseblock24484
+	jmp printstring_call3788
+printstring_text18127	.dc "ASSING 3 FAILED ****************",0
+printstring_call3788
 	clc
 	; TEST
-	lda #<printstring_text30498
+	lda #<printstring_text18127
 	adc #0
-	ldy #>printstring_text30498
+	ldy #>printstring_text18127
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock3589
+elsedoneblock8281
 	jsr incScreen
 	; Assigning single variable : val
 	; 8 bit mul
@@ -923,46 +923,46 @@ elsedoneblock3589
 	; Binary clause: EQUALS
 	; Compare with pure num / var optimization
 	cmp #10
-	bne binaryclausefailed5315
+	bne binaryclausefailed2421
 	lda #1; success
-	jmp binaryclausefinished26445
-binaryclausefailed5315
+	jmp binaryclausefinished14310
+binaryclausefailed2421
 	lda #0 ; failed state
-binaryclausefinished26445
+binaryclausefinished14310
 	cmp #1
-	beq ConditionalTrueBlock29556
-	jmp elseblock10813
-	jmp elsedoneblock23208
-ConditionalTrueBlock29556
-	jmp printstring_call27114
-printstring_text21485	.dc "ASSIGN4 OK ",0
-printstring_call27114
+	beq ConditionalTrueBlock24648
+	jmp elseblock22483
+	jmp elsedoneblock17807
+ConditionalTrueBlock24648
+	jmp printstring_call22813
+printstring_text9514	.dc "ASSIGN4 OK ",0
+printstring_call22813
 	clc
 	; TEST
-	lda #<printstring_text21485
+	lda #<printstring_text9514
 	adc #0
-	ldy #>printstring_text21485
+	ldy #>printstring_text9514
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock23208
-elseblock10813
-	jmp printstring_call13138
-printstring_text30306	.dc "ASSING 4 FAILED ****************",0
-printstring_call13138
+	jmp elsedoneblock17807
+elseblock22483
+	jmp printstring_call7616
+printstring_text18935	.dc "ASSING 4 FAILED ****************",0
+printstring_call7616
 	clc
 	; TEST
-	lda #<printstring_text30306
+	lda #<printstring_text18935
 	adc #0
-	ldy #>printstring_text30306
+	ldy #>printstring_text18935
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock23208
+elsedoneblock17807
 	jsr incScreen
 	; Assigning single variable : val
 	; 8 bit mul
@@ -989,46 +989,46 @@ elsedoneblock23208
 	; Binary clause: EQUALS
 	; Compare with pure num / var optimization
 	cmp #12
-	bne binaryclausefailed17668
+	bne binaryclausefailed11008
 	lda #1; success
-	jmp binaryclausefinished27612
-binaryclausefailed17668
+	jmp binaryclausefinished5844
+binaryclausefailed11008
 	lda #0 ; failed state
-binaryclausefinished27612
+binaryclausefinished5844
 	cmp #1
-	beq ConditionalTrueBlock27550
-	jmp elseblock27959
-	jmp elsedoneblock16464
-ConditionalTrueBlock27550
-	jmp printstring_call5546
-printstring_text2074	.dc "ASSIGN5 OK ",0
-printstring_call5546
+	beq ConditionalTrueBlock22798
+	jmp elseblock30303
+	jmp elsedoneblock6224
+ConditionalTrueBlock22798
+	jmp printstring_call14989
+printstring_text32702	.dc "ASSIGN5 OK ",0
+printstring_call14989
 	clc
 	; TEST
-	lda #<printstring_text2074
+	lda #<printstring_text32702
 	adc #0
-	ldy #>printstring_text2074
+	ldy #>printstring_text32702
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock16464
-elseblock27959
-	jmp printstring_call7589
-printstring_text20937	.dc "ASSING 5 FAILED ****************",0
-printstring_call7589
+	jmp elsedoneblock6224
+elseblock30303
+	jmp printstring_call20485
+printstring_text3093	.dc "ASSING 5 FAILED ****************",0
+printstring_call20485
 	clc
 	; TEST
-	lda #<printstring_text20937
+	lda #<printstring_text3093
 	adc #0
-	ldy #>printstring_text20937
+	ldy #>printstring_text3093
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock16464
+elsedoneblock6224
 	jsr incScreen
 	; Assigning single variable : val
 	; 8 bit mul
@@ -1070,46 +1070,46 @@ elsedoneblock16464
 	; Binary clause: EQUALS
 	; Compare with pure num / var optimization
 	cmp #30
-	bne binaryclausefailed27706
+	bne binaryclausefailed6618
 	lda #1; success
-	jmp binaryclausefinished11420
-binaryclausefailed27706
+	jmp binaryclausefinished20580
+binaryclausefailed6618
 	lda #0 ; failed state
-binaryclausefinished11420
+binaryclausefinished20580
 	cmp #1
-	beq ConditionalTrueBlock10752
-	jmp elseblock2391
-	jmp elsedoneblock22295
-ConditionalTrueBlock10752
-	jmp printstring_call29251
-printstring_text27917	.dc "ASSIGN6 OK ",0
-printstring_call29251
+	beq ConditionalTrueBlock7448
+	jmp elseblock25200
+	jmp elsedoneblock13458
+ConditionalTrueBlock7448
+	jmp printstring_call14798
+printstring_text15281	.dc "ASSIGN6 OK ",0
+printstring_call14798
 	clc
 	; TEST
-	lda #<printstring_text27917
+	lda #<printstring_text15281
 	adc #0
-	ldy #>printstring_text27917
+	ldy #>printstring_text15281
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock22295
-elseblock2391
-	jmp printstring_call14992
-printstring_text15352	.dc "ASSING 6 FAILED ****************",0
-printstring_call14992
+	jmp elsedoneblock13458
+elseblock25200
+	jmp printstring_call20798
+printstring_text28009	.dc "ASSING 6 FAILED ****************",0
+printstring_call20798
 	clc
 	; TEST
-	lda #<printstring_text15352
+	lda #<printstring_text28009
 	adc #0
-	ldy #>printstring_text15352
+	ldy #>printstring_text28009
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock22295
+elsedoneblock13458
 	jsr incScreen
 
 	rts
@@ -1130,21 +1130,21 @@ TestWhile
 	lda #0
 	; VarNode StoreVariable
 	sta val
-while20399
+while20472
 	; Binary clause: NOTEQUALS
 	lda x
 	; Compare with pure num / var optimization
 	cmp #1
-	beq binaryclausefailed7413
+	beq binaryclausefailed6038
 	lda #1; success
-	jmp binaryclausefinished22418
-binaryclausefailed7413
+	jmp binaryclausefinished24179
+binaryclausefailed6038
 	lda #0 ; failed state
-binaryclausefinished22418
+binaryclausefinished24179
 	cmp #1
-	beq ConditionalTrueBlock17162
-	jmp elsedoneblock2088
-ConditionalTrueBlock17162
+	beq ConditionalTrueBlock23622
+	jmp elsedoneblock12292
+ConditionalTrueBlock23622
 
 	; Assigning single variable : x
 	; Add/sub where right value is constant number
@@ -1165,71 +1165,71 @@ ConditionalTrueBlock17162
 	; VarNode StoreVariable
 	sta val
 
-	jmp while20399
-elsedoneblock2088
+	jmp while20472
+elsedoneblock12292
 	; Binary clause: EQUALS
 	lda val
 	; Compare with pure num / var optimization
 	cmp #9
-	bne binaryclausefailed27763
+	bne binaryclausefailed22888
 	lda #1; success
-	jmp binaryclausefinished18433
-binaryclausefailed27763
+	jmp binaryclausefinished19156
+binaryclausefailed22888
 	lda #0 ; failed state
-binaryclausefinished18433
+binaryclausefinished19156
 	cmp #1
-	beq ConditionalTrueBlock25527
-	jmp elseblock18596
-	jmp elsedoneblock13094
-ConditionalTrueBlock25527
-	jmp printstring_call19374
-printstring_text11738	.dc "WHILE1 OK ",0
-printstring_call19374
+	beq ConditionalTrueBlock7958
+	jmp elseblock6191
+	jmp elsedoneblock19815
+ConditionalTrueBlock7958
+	jmp printstring_call16202
+printstring_text2634	.dc "WHILE1 OK ",0
+printstring_call16202
 	clc
 	; TEST
-	lda #<printstring_text11738
+	lda #<printstring_text2634
 	adc #0
-	ldy #>printstring_text11738
+	ldy #>printstring_text2634
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock13094
-elseblock18596
-	jmp printstring_call17806
-printstring_text28730	.dc "WHILE1 FAILED ******************** ",0
-printstring_call17806
+	jmp elsedoneblock19815
+elseblock6191
+	jmp printstring_call20055
+printstring_text20328	.dc "WHILE1 FAILED ******************** ",0
+printstring_call20055
 	clc
 	; TEST
-	lda #<printstring_text28730
+	lda #<printstring_text20328
 	adc #0
-	ldy #>printstring_text28730
+	ldy #>printstring_text20328
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock13094
+elsedoneblock19815
 	; Assigning single variable : x
 	lda #0
 	; VarNode StoreVariable
 	sta x
-while12349
+while22646
 	; Binary clause: LESS
 	lda x
 	; Compare with pure num / var optimization
 	cmp #5
-	bcs binaryclausefailed1080
+	bcs binaryclausefailed28433
 	lda #1; success
-	jmp binaryclausefinished1172
-binaryclausefailed1080
+	jmp binaryclausefinished29869
+binaryclausefailed28433
 	lda #0 ; failed state
-binaryclausefinished1172
+binaryclausefinished29869
 	cmp #1
-	beq ConditionalTrueBlock18452
-	jmp elsedoneblock31684
-ConditionalTrueBlock18452
+	beq ConditionalTrueBlock26362
+	jmp elsedoneblock18875
+ConditionalTrueBlock26362
 
 	; Assigning single variable : x
 	; Add/sub where right value is constant number
@@ -1241,52 +1241,52 @@ ConditionalTrueBlock18452
 	; VarNode StoreVariable
 	sta x
 
-	jmp while12349
-elsedoneblock31684
+	jmp while22646
+elsedoneblock18875
 	; Binary clause: EQUALS
 	lda x
 	; Compare with pure num / var optimization
 	cmp #5
-	bne binaryclausefailed7917
+	bne binaryclausefailed10322
 	lda #1; success
-	jmp binaryclausefinished8944
-binaryclausefailed7917
+	jmp binaryclausefinished18651
+binaryclausefailed10322
 	lda #0 ; failed state
-binaryclausefinished8944
+binaryclausefinished18651
 	cmp #1
-	beq ConditionalTrueBlock26169
-	jmp elseblock31635
-	jmp elsedoneblock12483
-ConditionalTrueBlock26169
-	jmp printstring_call19732
-printstring_text19579	.dc "WHILE2 OK ",0
-printstring_call19732
+	beq ConditionalTrueBlock1416
+	jmp elseblock21881
+	jmp elsedoneblock31998
+ConditionalTrueBlock1416
+	jmp printstring_call5699
+printstring_text3557	.dc "WHILE2 OK ",0
+printstring_call5699
 	clc
 	; TEST
-	lda #<printstring_text19579
+	lda #<printstring_text3557
 	adc #0
-	ldy #>printstring_text19579
+	ldy #>printstring_text3557
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock12483
-elseblock31635
-	jmp printstring_call21559
-printstring_text32621	.dc "WHILE2 FAILED ******************** ",0
-printstring_call21559
+	jmp elsedoneblock31998
+elseblock21881
+	jmp printstring_call27892
+printstring_text24389	.dc "WHILE2 FAILED ******************** ",0
+printstring_call27892
 	clc
 	; TEST
-	lda #<printstring_text32621
+	lda #<printstring_text24389
 	adc #0
-	ldy #>printstring_text32621
+	ldy #>printstring_text24389
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock12483
+elsedoneblock31998
 	jsr incScreen
 
 	rts
@@ -1303,7 +1303,12 @@ TestFor
 	lda #0
 	; VarNode StoreVariable
 	sta x
-for23803
+for10712
+	lda #10
+	cmp x
+	bne forLoopFix2600
+	jmp forLoopDone2510
+forLoopFix2600
 
 	; Assigning single variable : arr
 	lda x
@@ -1315,13 +1320,8 @@ for23803
 	sta arr,x
 
 	inc x
-	lda #10
-	cmp x
-	bne forLoopFix18425
-	jmp forLoopDone20428
-forLoopFix18425
-	jmp for23803
-forLoopDone20428
+	jmp for10712
+forLoopDone2510
 	; Assigning single variable : val
 	lda #0
 	; VarNode StoreVariable
@@ -1330,75 +1330,75 @@ forLoopDone20428
 	lda #0
 	; VarNode StoreVariable
 	sta x
-for141
+for26869
+	lda #3
+	cmp x
+	bne forLoopFix17861
+	jmp forLoopDone14688
+forLoopFix17861
 
 	; Assigning single variable : val
 	; Add/sub right value is variable/expression
-	jmp jmprightvar27382
-rightvar20725	.byte	0
-jmprightvar27382
+	jmp jmprightvar15255
+rightvar9789	.byte	0
+jmprightvar15255
 	lda x
-	sta rightvar20725
+	sta rightvar9789
 	
 	lda val
 	clc
-	adc rightvar20725
+	adc rightvar9789
 	
 	; VarNode StoreVariable
 	sta val
 
 	inc x
-	lda #3
-	cmp x
-	bne forLoopFix17911
-	jmp forLoopDone24278
-forLoopFix17911
-	jmp for141
-forLoopDone24278
+	jmp for26869
+forLoopDone14688
 	; Binary clause: NOTEQUALS
 	lda val
 	; Compare with pure num / var optimization
 	cmp #6
-	beq binaryclausefailed3127
+	beq binaryclausefailed10285
 	lda #1; success
-	jmp binaryclausefinished26806
-binaryclausefailed3127
+	jmp binaryclausefinished27088
+binaryclausefailed10285
 	lda #0 ; failed state
-binaryclausefinished26806
+binaryclausefinished27088
 	cmp #1
-	beq ConditionalTrueBlock7896
-	jmp elseblock24255
-	jmp elsedoneblock8054
-ConditionalTrueBlock7896
-	jmp printstring_call20347
-printstring_text2619	.dc "FOR1 OK ",0
-printstring_call20347
+	beq ConditionalTrueBlock5002
+	jmp elseblock10585
+	jmp elsedoneblock24182
+ConditionalTrueBlock5002
+	jmp printstring_call28617
+printstring_text23757	.dc "FOR1 OK ",0
+printstring_call28617
 	clc
 	; TEST
-	lda #<printstring_text2619
+	lda #<printstring_text23757
 	adc #0
-	ldy #>printstring_text2619
+	ldy #>printstring_text23757
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock8054
-elseblock24255
-	jmp printstring_call30683
-printstring_text29352	.dc "FOR1 FAILED ******************** ",0
-printstring_call30683
+	jmp elsedoneblock24182
+elseblock10585
+	jmp printstring_call30932
+printstring_text4169	.dc "FOR1 FAILED ******************** ",0
+printstring_call30932
 	clc
 	; TEST
-	lda #<printstring_text29352
+	lda #<printstring_text4169
 	adc #0
-	ldy #>printstring_text29352
+	ldy #>printstring_text4169
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock8054
+elsedoneblock24182
 	; Assigning single variable : x
 	lda #5
 	; VarNode StoreVariable
@@ -1412,7 +1412,21 @@ elsedoneblock8054
 	lda #0
 	; VarNode StoreVariable
 	sta x
-for20883
+for2154
+	; 8 bit mul
+	lda x
+	pha
+	; Load right hand side
+	tax
+	pla
+	lda x
+	jsr multiply_eightbit
+	txa
+	
+	cmp x
+	bne forLoopFix25721
+	jmp forLoopDone17189
+forLoopFix25721
 
 	; Assigning single variable : val
 	; Add/sub where right value is constant number
@@ -1425,72 +1439,72 @@ for20883
 	sta val
 
 	inc x
-	; 8 bit mul
-	lda x
-	pha
-	; Load right hand side
-	tax
-	pla
-	lda x
-	jsr multiply_eightbit
-	txa
-	
-	cmp x
-	bne forLoopFix17774
-	jmp forLoopDone20250
-forLoopFix17774
-	jmp for20883
-forLoopDone20250
+	jmp for2154
+forLoopDone17189
 	; Binary clause: NOTEQUALS
 	lda val
 	; Compare with pure num / var optimization
 	cmp #25
-	beq binaryclausefailed21720
+	beq binaryclausefailed16549
 	lda #1; success
-	jmp binaryclausefinished3735
-binaryclausefailed21720
+	jmp binaryclausefinished7441
+binaryclausefailed16549
 	lda #0 ; failed state
-binaryclausefinished3735
+binaryclausefinished7441
 	cmp #1
-	beq ConditionalTrueBlock19756
-	jmp elseblock20847
-	jmp elsedoneblock24323
-ConditionalTrueBlock19756
-	jmp printstring_call26660
-printstring_text28368	.dc "FOR2 OK ",0
-printstring_call26660
+	beq ConditionalTrueBlock21425
+	jmp elseblock10555
+	jmp elsedoneblock3434
+ConditionalTrueBlock21425
+	jmp printstring_call30145
+printstring_text18060	.dc "FOR2 OK ",0
+printstring_call30145
 	clc
 	; TEST
-	lda #<printstring_text28368
+	lda #<printstring_text18060
 	adc #0
-	ldy #>printstring_text28368
+	ldy #>printstring_text18060
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock24323
-elseblock20847
-	jmp printstring_call12979
-printstring_text5801	.dc "FOR2 FAILED ******************** ",0
-printstring_call12979
+	jmp elsedoneblock3434
+elseblock10555
+	jmp printstring_call3753
+printstring_text16139	.dc "FOR2 FAILED ******************** ",0
+printstring_call3753
 	clc
 	; TEST
-	lda #<printstring_text5801
+	lda #<printstring_text16139
 	adc #0
-	ldy #>printstring_text5801
+	ldy #>printstring_text16139
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock24323
+elsedoneblock3434
 	jsr incScreen
 	; Assigning single variable : x
 	lda #0
 	; VarNode StoreVariable
 	sta x
-for10770
+for12423
+	; 8 bit mul
+	lda x
+	pha
+	; Load right hand side
+	tax
+	pla
+	lda x
+	jsr multiply_eightbit
+	txa
+	
+	cmp x
+	bne forLoopFix16279
+	jmp forLoopDone25996
+forLoopFix16279
 
 	; Assigning single variable : val
 	; Add/sub where right value is constant number
@@ -1503,22 +1517,8 @@ for10770
 	sta val
 
 	inc x
-	; 8 bit mul
-	lda x
-	pha
-	; Load right hand side
-	tax
-	pla
-	lda x
-	jsr multiply_eightbit
-	txa
-	
-	cmp x
-	bne forLoopFix11363
-	jmp forLoopDone29802
-forLoopFix11363
-	jmp for10770
-forLoopDone29802
+	jmp for12423
+forLoopDone25996
 	; Assigning single variable : arr
 	lda #3
 	; VarNode StoreVariable
@@ -1535,19 +1535,7 @@ forLoopDone29802
 	lda #5
 	; VarNode StoreVariable
 	sta x
-for2380
-
-	; Assigning single variable : val
-	; Add/sub where right value is constant number
-	lda val
-	clc
-	adc #1
-	 ; end add / sub var with constant
-	
-	; VarNode StoreVariable
-	sta val
-
-	inc x
+for17437
 	; Load Byte array
 	pha
 	; 8 bit mul
@@ -1565,55 +1553,67 @@ for2380
 	lda arr,x
 	
 	cmp x
-	bne forLoopFix6509
-	jmp forLoopDone410
-forLoopFix6509
-	jmp for2380
-forLoopDone410
+	bne forLoopFix19866
+	jmp forLoopDone12949
+forLoopFix19866
+
+	; Assigning single variable : val
+	; Add/sub where right value is constant number
+	lda val
+	clc
+	adc #1
+	 ; end add / sub var with constant
+	
+	; VarNode StoreVariable
+	sta val
+
+	inc x
+	jmp for17437
+forLoopDone12949
 	; Binary clause: NOTEQUALS
 	lda val
 	; Compare with pure num / var optimization
 	cmp #8
-	beq binaryclausefailed9951
+	beq binaryclausefailed16282
 	lda #1; success
-	jmp binaryclausefinished22859
-binaryclausefailed9951
+	jmp binaryclausefinished12455
+binaryclausefailed16282
 	lda #0 ; failed state
-binaryclausefinished22859
+binaryclausefinished12455
 	cmp #1
-	beq ConditionalTrueBlock13158
-	jmp elseblock23722
-	jmp elsedoneblock25878
-ConditionalTrueBlock13158
-	jmp printstring_call8961
-printstring_text17318	.dc "FOR3 OK ",0
-printstring_call8961
+	beq ConditionalTrueBlock28286
+	jmp elseblock16105
+	jmp elsedoneblock24488
+ConditionalTrueBlock28286
+	jmp printstring_call18114
+printstring_text11701	.dc "FOR3 OK ",0
+printstring_call18114
 	clc
 	; TEST
-	lda #<printstring_text17318
+	lda #<printstring_text11701
 	adc #0
-	ldy #>printstring_text17318
+	ldy #>printstring_text11701
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-	jmp elsedoneblock25878
-elseblock23722
-	jmp printstring_call15937
-printstring_text22060	.dc "FOR3 FAILED ******************** ",0
-printstring_call15937
+	jmp elsedoneblock24488
+elseblock16105
+	jmp printstring_call20671
+printstring_text5786	.dc "FOR3 FAILED ******************** ",0
+printstring_call20671
 	clc
 	; TEST
-	lda #<printstring_text22060
+	lda #<printstring_text5786
 	adc #0
-	ldy #>printstring_text22060
+	ldy #>printstring_text5786
 	sta print_text+0
 	sty print_text+1
 	lda #40
 	tax
 	jsr printstring
-elsedoneblock25878
+elsedoneblock24488
 	jsr incScreen
 
 	rts
@@ -1623,13 +1623,13 @@ afterProc_TestFor
 	lda #$00
 	tax
 	lda #32
-clearloop20610
+clearloop12263
 	sta $0000+$400,x
 	sta $0100+$400,x
 	sta $0200+$400,x
 	sta $0300+$400,x
 	dex
-	bne clearloop20610
+	bne clearloop12263
 	lda #0
 	sta screen_x
 	lda #0
