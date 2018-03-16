@@ -2,7 +2,7 @@ program Tutorial9;
 var  
    index, time, a, val, color, colorShift,i,j,k : byte; 
    fade : array [16] of byte = (11,6,6,12,4,14,15,1,1,15,14,4,12,6,6,11); 
-	random: array[255] of byte;
+   random : array[255] of byte;
    sprite0data: IncBin("data/tutorial9_mc.bin");
    mainChar: IncBin("test.bin","$27FF");
    shootWait : byte;

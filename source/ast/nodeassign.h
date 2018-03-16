@@ -60,6 +60,27 @@ public:
 
     }
 
+    void AssignPointer(Assembler* as) {
+        NodeVar* bVar = dynamic_cast<NodeVar*>(m_right);
+        NodeNumber* bNum = dynamic_cast<NodeNumber*>(m_right);
+        NodeVar* aVar = dynamic_cast<NodeVar*>(m_left);
+
+        if (bVar==nullptr && bNum== nullptr)
+            ErrorHandler::e.Error("Error assigning pointer: right-hand must be variable or number");
+
+        if (bVar!=nullptr) {
+           as->Asm("lda #<" + bVar->value);
+           as->Asm("ldx #>" + bVar->value);
+           as->Asm("sta " + aVar->value);
+           as->Asm("stx "+ aVar->value+"+1");
+        }
+        if (bNum!=nullptr) {
+            as->Asm("lda #" + QString::number(((int)bNum->m_val) & 255));
+            as->Asm("ldx #" + QString::number(((int)(bNum->m_val)>>8) & 255) );
+            as->Asm("sta " + aVar->value);
+            as->Asm("stx "+ aVar->value+"+1");
+        }
+    }
 
     QString AssignVariable(Assembler* as) {
         NodeVar* v = (NodeVar*)dynamic_cast<const NodeVar*>(m_left);
@@ -73,7 +94,10 @@ public:
 
         TokenType::Type t = s->getTokenType();
 
-
+        if (m_left->getType(as)==TokenType::POINTER && v->m_expr==nullptr) {
+            AssignPointer(as);
+            return v->value;
+        }
 
        if ((NodeString*)dynamic_cast<const NodeString*>(m_right))
         {

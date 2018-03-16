@@ -53,6 +53,26 @@ public:
         return m_op.m_type;
     }
 
+    void LoadPointer(Assembler* as) {
+        as->Comment("Load pointer array");
+        NodeNumber* number = dynamic_cast<NodeNumber*>(m_expr);
+        QString m = as->m_term;
+
+        as->ClearTerm();
+        as->Asm("pha");
+        m_expr->Build(as);
+        as->Term();
+        as->Asm("tay");
+        as->Asm("pla");
+
+            if (m=="")
+                m="lda ";
+            as->Asm(m+  "(" + value+"),y");
+
+    }
+
+
+
     void LoadByteArray(Assembler *as) {
         // Optimizer: if expression is number, just return direct
         as->Comment("Load Byte array");
@@ -90,6 +110,10 @@ public:
             LoadByteArray(as);
             return;
         }
+        if (t==TokenType::POINTER) {
+            LoadPointer(as);
+            return;
+        }
 
         if (t==TokenType::BYTE) {
             if (m_expr!=nullptr)
@@ -106,10 +130,6 @@ public:
             as->Asm("lda " +value+"+1");
             return;
         }
-        if (t == TokenType::POINTER) {
-            LoadByteArray(as);
-            return;
-        }
         ErrorHandler::e.Error(TokenType::getType(t) + " assignment not supported yet for exp: " + value);
         return;
     }
@@ -122,17 +142,46 @@ public:
         // Is array
         if (m_expr != nullptr) {
             NodeNumber* number = dynamic_cast<NodeNumber*>(m_expr);
-            if (number!=nullptr) { // IS NUMBER optimize}
+            if (number!=nullptr && getType(as)!=TokenType::POINTER) { // IS NUMBER optimize}
                 as->Asm("sta " + value + "+"+ QString::number(number->m_val));
+                return;
             }
             else {
-                as->Asm("pha");
-                as->ClearTerm();
-                m_expr->Build(as);
-                as->Term();
-                as->Asm("tax");
-                as->Asm("pla");
-                as->Asm("sta " + value+",x");
+                //if regular array
+
+                NodeVar* var = dynamic_cast<NodeVar*>(m_expr);
+                NodeNumber* num = dynamic_cast<NodeNumber*>(m_expr);
+
+
+                QString secondReg="x";
+                QString pa = "";
+                QString pb= "";
+                if (getType(as)==TokenType::POINTER) {
+                    secondReg="y";
+                    pa="(";
+                    pb=")";
+                }
+
+                    // Optimize for number or pure var
+                if (m_expr->getType(as)==TokenType::INTEGER_CONST || var!=nullptr) {
+                   as->ClearTerm();
+                   as->Term("ld"+secondReg +" ");
+                        m_expr->Build(as);
+                        as->Term();
+                        as->Asm("sta " +pa + value+ pb + "," + secondReg);
+
+                        return;
+                    }
+                    // Just regular var optimize
+                    // Regular expression
+                    as->Asm("pha");
+                    as->ClearTerm();
+                    m_expr->Build(as);
+                    as->Term();
+                    as->Asm("ta" + secondReg);
+                    as->Asm("pla");
+                    as->Asm("sta " +pa + value+pb+","+ secondReg);
+
             }
             return;
         }
@@ -161,8 +210,9 @@ public:
             ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?", m_op.m_lineNumber);
         }
         if (m_expr!=nullptr) {
+            LoadVariable(as);
 
-            LoadByteArray(as);
+            //LoadByteArray(as);
         }
         else {
             bool isOK = true;

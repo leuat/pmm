@@ -42,7 +42,9 @@ begin
 	for y:=@y_start to #23 do begin
 		val:=siny[y];
 		for x:=#1 to #36 do begin
-			pokescreen((sinx[x] +val)/#8 + #64, x);
+			asm(";slow");
+			screenmemory[x]:=(sinx[x] +val)/#8 + #64;
+			//pokescreen((sinx[x] +val)/#8 + #64, x);
 
 		end;
 		incscreenx(#40);

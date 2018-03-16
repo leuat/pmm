@@ -29,6 +29,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="initsid") {
         InitSid(as);
     }
+    if (m_procName.toLower()=="initzeropage") {
+        InitZeroPage(as);
+    }
 
     if (m_procName.toLower()=="poke")
         Poke(as);
@@ -45,8 +48,6 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="peek")
         Peek(as);
 
-    if (m_procName.toLower()=="peekzp")
-        PeekZp(as);
 
     if (m_procName.toLower() == "copyimagecolordata")
         CopyImageColorData(as);
@@ -75,9 +76,6 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     }
     if (m_procName.toLower() =="setbank") {
         SetBank(as);
-    }
-    if (m_procName.toLower() =="renderlevel") {
-        RenderLevel(as);
     }
 
     if (m_procName.toLower() =="togglebit") {
@@ -263,6 +261,18 @@ void NodeBuiltinMethod::Peek(Assembler* as)
 {
     as->Comment("Peek");
 
+    // If pointer
+
+    if (m_params[0]->getType(as)==TokenType::POINTER) {
+        as->Term("ldy ");
+        m_params[1]->Build(as);
+        as->Term();
+        as->Term("lda (");
+        m_params[0]->Build(as);
+        as->Term("),y", true);
+        return;
+    }
+
     // Optimize if numeric
     NodeNumber* num = dynamic_cast<NodeNumber*>(m_params[1]);
     if (num!=nullptr) {
@@ -347,15 +357,15 @@ void NodeBuiltinMethod::InitMoveto(Assembler *as)
 
     QString lbl = as->NewLabel("moveto");
     as->Asm("jmp " + lbl);
-    as->Label("screenMemory = $fb ");
+    as->Label("screenmemory = $fb ");
     as->Label("screen_x .byte 0 ");
     as->Label("screen_y .byte 0 ");
 
     as->Label("SetScreenPosition");
     //as->Asm("lda #4");
-    as->Asm("sta screenMemory+1");
+    as->Asm("sta screenmemory+1");
     as->Asm("lda #0");
-    as->Asm("sta screenMemory");
+    as->Asm("sta screenmemory");
     as->Asm("ldy screen_y");
     as->Asm("cpy #0");
     as->Asm("beq sydone");
@@ -363,7 +373,7 @@ void NodeBuiltinMethod::InitMoveto(Assembler *as)
     as->Asm("clc");
     as->Asm("adc #40");
     as->Asm("bcc sskip");
-    as->Asm("inc screenMemory+1");
+    as->Asm("inc screenmemory+1");
     as->Label("sskip");
     as->Asm("dey");
     as->Asm("cpy #$00");
@@ -375,9 +385,9 @@ void NodeBuiltinMethod::InitMoveto(Assembler *as)
     as->Asm("clc");
     as->Asm("adc screen_x");
     as->Asm("bcc sxdone");
-    as->Asm("inc screenMemory+1");
+    as->Asm("inc screenmemory+1");
     as->Label("sxdone");
-    as->Asm("sta screenMemory");
+    as->Asm("sta screenmemory");
     as->Asm("rts");
     as->Label(lbl);
 
@@ -446,7 +456,7 @@ void NodeBuiltinMethod::InitPrintString(Assembler *as)
 //    as->Asm("cmp #28");
 //    as->Asm("bcs printstring_skip");
     as->Label("printstring_skip");
-    as->Asm("sta (screenMemory),y");
+    as->Asm("sta (screenmemory),y");
     as->Asm("iny");
     as->Asm("dex");
     as->Asm("cpx #0");
@@ -600,7 +610,7 @@ void NodeBuiltinMethod::PokeScreen(Assembler *as, int shift)
     as->Term("ldy ");
     m_params[1]->Build(as);
     as->Term();
-    as->Asm("sta (screenMemory),y");
+    as->Asm("sta (screenmemory),y");
 }
 
 void NodeBuiltinMethod::PokeScreenColor(Assembler *as, int hiAddress)
@@ -615,26 +625,26 @@ void NodeBuiltinMethod::PokeScreenColor(Assembler *as, int hiAddress)
     as->Term("ldy ");
     m_params[2]->Build(as);
     as->Term();
-    as->Asm("sta (screenMemory),y");
+    as->Asm("sta (screenmemory),y");
     for (int i=0;i<num->m_val-1;i++) {
         as->Asm("iny");
-        as->Asm("sta (screenMemory),y");
+        as->Asm("sta (screenmemory),y");
     }
 
-    as->Asm("lda screenMemory+1");
+    as->Asm("lda screenmemory+1");
     as->Asm("tax");
     as->Asm("adc #$D4");
-    as->Asm("sta screenMemory+1");
+    as->Asm("sta screenmemory+1");
     //LoadVar(as, 1);
    as->Asm("lda #$F2");
-    as->Asm("sta (screenMemory),y");
+    as->Asm("sta (screenmemory),y");
     for (int i=0;i<num->m_val-1;i++) {
         as->Asm("dey");
-        as->Asm("sta (screenMemory),y");
+        as->Asm("sta (screenmemory),y");
     }
 
     as->Asm("txa");
-    as->Asm("sta screenMemory+1");
+    as->Asm("sta screenmemory+1");
 }
 
 
@@ -815,6 +825,20 @@ void NodeBuiltinMethod::PlaySound(Assembler *as)
 
 }
 
+void NodeBuiltinMethod::InitZeroPage(Assembler* as) {
+    as->Asm("jmp initzeropage_continue");
+    as->Label("zeropage1 = $02");
+    as->Label("zeropage2 = $04");
+    as->Label("zeropage3 = $08");
+    as->Label("zeropage4 = $16");
+    as->Label("zeropage5 = $22");
+    as->Label("zeropage6 = $24");
+    as->Label("zeropage7 = $68");
+
+    as->Label("initzeropage_continue");
+}
+
+
 void NodeBuiltinMethod::InitSinusTable(Assembler *as)
 {
     if (m_isInitialized["sinetab"])
@@ -869,19 +893,28 @@ void NodeBuiltinMethod::IncZp(Assembler *as)
     as->m_labelStack["incscreenx"].push();
     QString lbl = as->getLabel("incscreenx");
 
+    NodeVar* var = dynamic_cast<NodeVar*>(m_params[0]);
+    if (var==nullptr) {
+        ErrorHandler::e.Error("IncZp: Left-hand parameter must be zeropage pointer");
+    }
+    if (var->getType(as)!=TokenType::POINTER) {
+        ErrorHandler::e.Error("IncZp: Left-hand parameter must be zeropage pointer");
+    }
+
+
     as->Term("lda ");
-    m_params[0]->Build(as);
+    m_params[1]->Build(as);
     as->Term();
     as->Asm("sta screen_x");
-    as->Asm("lda print_text");
+    as->Asm("lda "+ var->value);
     //as->Asm("cpx #0");
    // as->Asm("beq " + lbl);
     as->Asm("clc");
     as->Asm("adc screen_x");
     as->Asm("bcc " + lbl);
-    as->Asm("inc print_text+1");
+    as->Asm("inc "+ var->value + " +1");
     as->Label(lbl);
-    as->Asm("sta print_text");
+    as->Asm("sta "+ var->value);
 
 
     as->m_labelStack["incscreenx"].pop();
@@ -899,15 +932,15 @@ void NodeBuiltinMethod::IncScreenX(Assembler *as)
     m_params[0]->Build(as);
     as->Term();
     as->Asm("sta screen_x");
-    as->Asm("lda screenMemory");
+    as->Asm("lda screenmemory");
     //as->Asm("cpx #0");
    // as->Asm("beq " + lbl);
     as->Asm("clc");
     as->Asm("adc screen_x");
     as->Asm("bcc " + lbl);
-    as->Asm("inc screenMemory+1");
+    as->Asm("inc screenmemory+1");
     as->Label(lbl);
-    as->Asm("sta screenMemory");
+    as->Asm("sta screenmemory");
 
 
     as->m_labelStack["incscreenx"].pop();
@@ -1429,38 +1462,6 @@ void NodeBuiltinMethod::GetBit(Assembler *as)
 
 }
 
-void NodeBuiltinMethod::RenderLevel(Assembler *as)
-{
-// use print_text
-
-    NodeVar* var = dynamic_cast<NodeVar*>(m_params[0]);
-    if (var==nullptr)
-        ErrorHandler::e.Error("RenderLevel: param 0 must be level variable pointer");
-
-/*    ba[0] = m_sizex;
-    ba[1] = m_sizey;
-    ba[2] = m_width;
-    ba[3] = m_height;
-    ba[4] = m_startx;
-    ba[5] = m_starty;
-    ba[6] = (uchar)(m_levelSize >>8)&0xFF;
-    ba[7] = (uchar)(m_levelSize&0xFF);
-    ba[8] = m_extraDataSize;
-  */
-    QString head = " +#13 ";
-    // dataSize = lvl + header + 6
-
-
-//    level +header + 0  = m_sizeX
-    as->Asm("lda #<" + var->value + head); // Data start
-    as->Asm("ldx #>" + var->value);  // Data start
-    as->Asm("sta print_text");
-    as->Asm("stx print_text+1");
-
-//    as->Asm("lda " + var->value + head + "#2"); // width
-//    as->Asm("ldx " + var->value + head + "#3"); // width
-
-}
 
 void NodeBuiltinMethod::CopyZPdata(Assembler *as)
 {
@@ -1484,14 +1485,6 @@ void NodeBuiltinMethod::CopyZPdata(Assembler *as)
 
 }
 
-void NodeBuiltinMethod::PeekZp(Assembler *as)
-{
-    as->Term("ldy ");
-    m_params[0]->Build(as);
-    as->Term();
-    as->Asm("lda (print_text),y");
-
-}
 
 void NodeBuiltinMethod::EnableInterrupts(Assembler* as) {
   //  as->Asm("lda $dc0d");

@@ -2,116 +2,11 @@ program Tutorial12;
 var  
 	mainChar: IncBin("charsets/tutorial11_mc.bin","$2800");
 	levels: IncBin("levels/test1.flf", "$4000");
-	m_posx, m_posy, wait : byte; 
-
-  
-@define header "#0"
+	m_posx, m_posy, wait, i : byte; 
 
 
-procedure RenderMyLevel(m_li, m_lj: byte);
-var
-   m_width, m_height : byte;
-   m_sizex, m_sizey : byte;
-   m_startx, m_starty : byte;
-   m_dataSize, m_pos : byte;
-   m_i, m_j, m_val, m_idx : byte;
-
-begin
-	RenderLevel(levels, #0, #0);
-
-	m_sizex := peekzp(#0);
-	m_sizey := peekzp(#1);
-
-	m_width := peekzp(#2);
-	m_height := peekzp(#3);
-
-	m_startx := peekzp(#4);
-	m_starty := peekzp(#5);
-
-	m_dataSize := peekzp(#8);
-
-	m_height := #10;
-	
-	moveto(m_startx, m_starty, #$04);
-	
-	// Go past header
-	inczp(#9);
-
-	//if (m_j<>#0 or m_i<>#0) then
-	m_pos := m_sizex*m_lj + m_li;
-	
-	m_val := m_width*m_height;
-	m_val := m_val + m_width;// + m_width; 
-	for m_j:=#0 to m_pos do begin
-			inczp(m_val);
-			inczp(m_val);
-			inczp(m_dataSize);
-	end;
-
-
-
-	for m_j:=#0 to m_height+#1 do begin
-		for m_i:=#0 to m_width do begin
-			m_val := peekzp(m_i);
-			m_idx:=m_i*#2;
-			
-			pokescreen( m_val, m_idx);
-			m_val:=m_val+#1;
-			m_idx:=m_idx+#1;
-			pokescreen( m_val, m_idx);
-			m_val:=m_val+#39;
-			m_idx:=m_idx+#39;
-			pokescreen( m_val, m_idx);
-			m_val:=m_val+#1;
-			m_idx:=m_idx+#1;
-			pokescreen( m_val, m_idx);
-			
-	 	end;
-		incscreenx(#80);
-		inczp(m_width);
-	
-	end;
-	// Then colors
-	moveto(m_startx, m_starty, #$D8);
-
-	for m_j:=#0 to m_height+#1 do begin
-		for m_i:=#0 to m_width do begin
-			m_val := peekzp(m_i) + #8;
-			m_idx:=m_i*#2;
-			
-			pokescreen( m_val, m_idx);
-			m_idx:=m_idx+#1;
-			pokescreen( m_val, m_idx);
-			m_idx:=m_idx+#39;
-			pokescreen( m_val, m_idx);
-			m_idx:=m_idx+#1;
-			pokescreen( m_val, m_idx);
-			
-	 	end;
-		incscreenx(#80);
-		inczp(m_width);
-	
-	end;
-
-	m_val :=  peekzp(#0);
-	poke(MULTICOLOR_CHAR_COL, #0, m_val);
-	m_val :=  peekzp(#1);
-	poke(MULTICOLOR_CHAR_COL, #2, m_val); 
-	m_val :=  peekzp(#2);
-	poke(MULTICOLOR_CHAR_COL, #1, m_val);
-	
-
-
-
-//	copyzpdata($0400, #255);
-end;
-
-procedure InitStuff() ;
-begin
-//	moveto(#0,#0, $04);
-	printstring("hei",#0, #1);
-
-end;
+@define levelpointer "zeropage7"
+@include "RasLib/Levels.ras"  
 
 
 procedure Update();
@@ -129,13 +24,17 @@ begin
 			m_posy:=m_posy-#1;
    		if joystickdown<>#0 then
 			m_posy:=m_posy+#1;
-   	    RenderMyLevel(m_posx, m_posy);
+		
+		@levelpointer := levels;
+   	    RenderLevel(m_posx, m_posy);
 		poke(SCREEN_BG_COL, #0, #0);
 		wait:=#10;
 	end;
 	if wait<>#0 then
 		wait:=wait-#1;
 	
+
+
 	
 end;
 
@@ -158,11 +57,9 @@ begin
 	m_posx:=#0;
 	m_posy:=#0;
 
-	RenderMyLevel(m_posx, m_posy);
+	@levelpointer := levels;
+	RenderLevel(m_posx, m_posy);
 	wait:=#0;
-
-
-
 
 	while #1<>#2 do
 		Update();

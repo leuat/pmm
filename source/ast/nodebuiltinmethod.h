@@ -64,9 +64,8 @@ public:
     void TransformColors(Assembler* as);
     void ToggleBit(Assembler* as);
     void GetBit(Assembler* as);
-    void RenderLevel(Assembler* as);
     void CopyZPdata(Assembler* as);
-    void PeekZp(Assembler* as);
+    void InitZeroPage(Assembler* as);
 
 
     void LoadVar(Assembler* as, int paramNo, QString register, QString load="");

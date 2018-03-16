@@ -61,6 +61,7 @@ void Parser::InitBuiltinFunctions()
     InitBuiltinFunction(QStringList()<< "moveto", "initmoveto");
     InitBuiltinFunction(QStringList()<< "printstring" << "printnumber", "initprintstring");
     InitBuiltinFunction(QStringList()<< "joystick" , "initjoystick");
+    InitBuiltinFunction(QStringList()<< "peekzp" << "inczp" , "initzeropage");
  }
 
 void Parser::InitBuiltinFunction(QStringList methodName, QString builtinFunctionName)

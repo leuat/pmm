@@ -20,6 +20,8 @@ public:
             return TokenType::REAL;
         if (m_type.toLower()=="address")
             return TokenType::ADDRESS;
+        if (m_type.toLower()=="pointer")
+            return TokenType::POINTER;
         if (m_type.toLower()=="byte")
             return TokenType::BYTE;
         if (m_type.toLower()=="string")
