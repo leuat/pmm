@@ -40,10 +40,12 @@ public:
         SidFile sid;
         sid.Load(t->m_filename, as->m_projectDir);
         sid.Convert();
-
+       // qDebug() << "SID LOAD: " << QString::number(sid.m_initAddress,16);
+      // qDebug() << "SID PLAY: " << QString::number(sid.m_playAddress,16);
         as->m_symTab->DefineSid(sid.m_initAddress, sid.m_playAddress);
 
-        as->Appendix("org $" +QString::number(sid.m_loadAddress,16),1);
+        // Init address or load address? hmmm
+        as->Appendix("org $" +QString::number(sid.m_initAddress,16),1);
         as->Appendix(v->value,0);
         as->Appendix("incbin \"" + as->m_projectDir + sid.m_outFile + "\"",1);
 

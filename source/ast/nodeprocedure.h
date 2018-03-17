@@ -44,12 +44,9 @@ public:
             + QString::number(m_parameters.count()) + ".", m_op.m_lineNumber);
 
         for (int i=0; i<m_parameters.count();i++) {
-            qDebug() << "Load variable";
             m_parameters[i]->LoadVariable(as);
             NodeVarDecl* vd = (NodeVarDecl*)m_procedure->m_paramDecl[i];
-            qDebug() << "Store variable";
             vd->m_varNode->StoreVariable(as);
-            qDebug() << "Done Store variable";
         }
 
         as->Asm("jsr " + m_procedure->m_procName);

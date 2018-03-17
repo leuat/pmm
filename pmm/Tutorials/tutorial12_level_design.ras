@@ -1,35 +1,122 @@
 program Tutorial12;
 var  
 	mainChar: IncBin("charsets/tutorial11_mc.bin","$2800");
+	music1 : incsid("fliptape2.sid");
 	levels: IncBin("levels/test1.flf", "$4000");
-	m_posx, m_posy, wait, i : byte; 
+	sprite0data : incbin("sprites/fastfood.bin");
+	m_posx, m_posy, wait, i, redraw : byte; 
+	
+	sprite1_counter, tmp2 : byte;
+	spritex, spritey, tmp : integer;
+
+
+	playerCollide: byte;
+
+
 
 
 @define levelpointer "zeropage7"
 @include "RasLib/Levels.ras"  
 
+@define playerSprite "#0"
+@define monsterSprite "#0"
+@define playerSpeed "#2"
+
+
+
+procedure UpdatePlayerSprite();
+begin
+	spritepos(spritex, spritey,@playerSprite);
+	sprite1_counter:=sprite1_counter-#1;
+	if sprite1_counter=#10 then 
+		setSpriteLoc(#0, #$90, #0);
+
+	if sprite1_counter=#0 then begin
+		sprite1_counter := #20;
+		setSpriteLoc(#0, #$91, #0);
+	
+	end;
+
+end;
+
 
 procedure Update();
 begin
-
-	WaitForRaster(#0);
 	Joystick();
-	//RenderLevel(levels, #0, #0);
-	if (wait=#0 and (joystickright<>#0 or (joystickleft<>#0 or (joystickup<>#0 or joystickdown<>#0)))) then begin
-		if joystickright<>#0 then
+
+	redraw:=#0;
+
+	joystickdown:=joystickdown*@playerSpeed;	
+	joystickup:=joystickup*@playerSpeed;	
+	joystickleft:=joystickleft*@playerSpeed;	
+	joystickright:=joystickright*@playerSpeed;	
+
+	spritex:=spritex + joystickright;
+	spritex:=spritex - joystickleft;
+	spritey:=spritey + joystickdown - joystickup;
+
+	tmp2 := getbit($D01F, @playerSprite);
+
+	UpdatePlayerSprite();
+
+	if tmp2=#0 then begin
+		spritex:=spritex - joystickright;
+		spritex:=spritex + joystickleft;
+		spritey:=spritey - joystickdown + joystickup;
+
+	end;
+
+
+	
+	if spritex>#318 then begin
+		if m_posx<>m_rl_sizex-#1 then begin
 			m_posx:=m_posx+#1;
-   		if joystickleft<>#0 then
+			spritex:=#25;
+			redraw:=#1;
+		end
+	else
+		spritex:=#317;
+	end;
+	if spritex<#24 then begin
+		if m_posx<>#0 then begin
+			spritex:= #317;
 			m_posx:=m_posx-#1;
-   		if joystickup<>#0 then
+			redraw:=#1;
+		end
+	else
+		spritex:=#25;
+	end;
+	
+	if spritey<#60 then begin
+		if m_posy<>#0 then begin
+
+			spritey:=#229;
 			m_posy:=m_posy-#1;
-   		if joystickdown<>#0 then
+			redraw:=#1;
+		end
+		else
+			spritey:=#61;
+
+	end;
+	if spritey>#230 then begin
+		if m_posy<>m_rl_sizey-#1 then begin
+			spritey:=#61;
 			m_posy:=m_posy+#1;
-		
+			redraw:=#1;
+		end
+		else
+			spritey:=#229;
+	end;
+
+	if redraw=#1 then begin
 		@levelpointer := levels;
    	    RenderLevel(m_posx, m_posy);
-		poke(SCREEN_BG_COL, #0, #0);
-		wait:=#10;
 	end;
+
+		poke(SCREEN_BG_COL, #0, #0);
+
+//		wait:=#10;
+
 	if wait<>#0 then
 		wait:=wait-#1;
 	
@@ -39,6 +126,55 @@ begin
 end;
 
 
+procedure InitSprites();
+begin
+	setSpriteLoc(#0, #$90, #0);
+	
+	setSpriteLoc(#1, #$92, #0);
+	
+    setSpriteLoc(#2, #$93, #0);
+	
+
+	poke(SPRITE_MULTICOLOR_REG1, #0, BLACK);
+	poke(SPRITE_MULTICOLOR_REG2, #0, YELLOW);
+
+    poke(SPRITE_BITMASK,#0, #%00000011);
+
+	poke(SPRITE_COLOR,#0, RED);
+	poke(SPRITE_COLOR,#1, RED);
+	poke(SPRITE_COLOR,#2, RED);
+
+
+    memcpy(sprite0data, #64, SPRITE_LOC1, #63);
+    memcpy(sprite0data, #128, SPRITE_LOC1 + 64, #63);
+
+    memcpy(sprite0data, #192, SPRITE_LOC2, #63);
+
+    memcpy(sprite0data, #256, SPRITE_LOC3, #63);
+
+
+	poke(SPRITE_STRETCH_X, #0, #%00000010);
+	poke(SPRITE_STRETCH_Y, #0, #%00000010);
+
+	togglebit(SPRITE_MULTICOLOR, @playerSprite, #1);
+	togglebit(SPRITE_MULTICOLOR, @monsterSprite, #1);
+//	togglebit(SPRITE_MULTICOLOR, @_bulletSprite, #1);
+
+
+end;
+
+
+interrupt rasterUpdate();
+begin
+	call(SIDFILE_1_PLAY);
+	Update();
+
+	kernelInterrupt();
+end;
+
+
+
+
 
 
 begin
@@ -46,7 +182,7 @@ begin
 	// Set character location at $2800 = $A*$400
 	poke(VIC_DATA_LOC, #0, #$1A);
 
-
+	initsid(SIDFILE_1_INIT);
 	poke(SCREEN_BG_COL, #0, #2);
 
 
@@ -61,7 +197,16 @@ begin
 	RenderLevel(m_posx, m_posy);
 	wait:=#0;
 
-	while #1<>#2 do
-		Update();
+	spritex := #160;
+	spritey := #100;
 
+	sprite1_counter := #1;
+
+	InitSprites();
+
+
+	DisableInterrupts();
+	Rasterirq(rasterUpdate(), #0);
+	enableInterrupts();
+	Loop();
 end.

@@ -4,12 +4,6 @@
 #include "node.h"
 
 
-/*if (  a=b and c<>d   ) then
-      BC       BC
-
-          LC
-*/
-
 class NodeBinaryClause : public Node
 {
 public:
@@ -34,6 +28,7 @@ public:
 //    void OnlyNumVar(Assembler* as, QString a, QString b);
 
     void BinaryClause(Assembler* as );
+    void BinaryClauseInteger(Assembler* as );
     void LogicalClause(Assembler* as );
 
 

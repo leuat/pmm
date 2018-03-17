@@ -40,7 +40,8 @@ void SidFile::Convert()
 
     QFile file(m_path + m_outFile);
     file.open(QIODevice::WriteOnly);
-    int headerSize = 0x7C;
+    int headerSize = 0x7C +2;
+    // Should the +2 be included? FUCK!
     m_blob.remove(0,headerSize);
     file.write(m_blob);
     file.close();
