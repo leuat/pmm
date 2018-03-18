@@ -52,6 +52,7 @@ begin
 	moveto(m_rl_startx, m_rl_starty, #$04);
 	
 	// Fill screen with chars
+	call(SIDFILE_1_PLAY);
 	
 	for m_rl_j:=#0 to m_rl_height do begin
 		for m_rl_i:=#0 to m_rl_width do begin
@@ -85,7 +86,7 @@ begin
 	
 	end;
 	// Set multicolor colors
-
+	call(SIDFILE_1_PLAY);
 	m_rl_val :=  peek(@levelpointer,#0);
 	poke(MULTICOLOR_CHAR_COL, #0, m_rl_val);
 	m_rl_val :=  peek(@levelpointer,#1);

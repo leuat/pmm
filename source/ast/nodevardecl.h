@@ -40,8 +40,9 @@ public:
         SidFile sid;
         sid.Load(t->m_filename, as->m_projectDir);
         sid.Convert();
-       // qDebug() << "SID LOAD: " << QString::number(sid.m_initAddress,16);
-      // qDebug() << "SID PLAY: " << QString::number(sid.m_playAddress,16);
+        qDebug() << "SID LOAD: " << QString::number(sid.m_loadAddress,16);
+        qDebug() << "SID INIT: " << QString::number(sid.m_initAddress,16);
+       qDebug() << "SID PLAY: " << QString::number(sid.m_playAddress,16);
         as->m_symTab->DefineSid(sid.m_initAddress, sid.m_playAddress);
 
         // Init address or load address? hmmm
@@ -56,7 +57,7 @@ public:
         NodeVarType* t = (NodeVarType*)m_typeNode;
         QString filename = as->m_projectDir + "/" + t->m_filename;
         if (!QFile::exists(filename))
-            ErrorHandler::e.Error("Could not locate sid file for inclusion :" +filename);
+            ErrorHandler::e.Error("Could not locate binary file for inclusion :" +filename);
 
 
 

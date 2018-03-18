@@ -1,5 +1,5 @@
 #include "sidfile.h"
-
+#include <QDebug>
 SidFile::SidFile()
 {
 
@@ -26,6 +26,8 @@ void SidFile::Load(QString filename, QString path)
     m_loadAddress = m_blob.at(8)<<8 | m_blob.at(8+1)<<0;
     m_initAddress = m_blob.at(0xa)<<8 | m_blob.at(0xa+1)<<0;
     m_playAddress = m_blob.at(0xc)<<8 | m_blob.at(0xc+1)<<0;
+
+    qDebug() << "INIT:" << QString::number((unsigned short)m_initAddress,16);
 
     file.close();
 }

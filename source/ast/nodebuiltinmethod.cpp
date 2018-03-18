@@ -71,7 +71,7 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower() =="settextmode") {
         as->Comment("Regular text mode ");
         as->Asm("lda $D011");
-        as->Asm("lda #%11011111");
+        as->Asm("and #%11011111");
         as->Asm("sta $D011");
     }
     if (m_procName.toLower() =="setbank") {
@@ -99,7 +99,8 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower() =="regularcolormode") {
         as->Comment("Regularcolor mode");
-        as->Asm("lda #$4");
+        as->Asm("lda $d016");
+        as->Asm("and #%11101111");
         as->Asm("sta $d016");
 
     }

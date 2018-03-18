@@ -1,0 +1,280 @@
+program Tutorial13;
+var  
+	mainChar: IncBin("charsets/charset_regular_tutorial13.bin","$2800");
+
+	levelChar: IncBin("charsets/tutorial13.bin","$3000");
+
+
+	levels: IncBin("levels/tutorial13.flf", "$4000");
+	sprite0data : incbin("sprites/fastfood.bin");
+	music1 : incsid("fliptape3.sid");
+	m_posx, m_posy : byte; // current level position in grid
+ 	i, redraw : byte;  // i is temp, redraw states that the map should be redrawn
+	
+	sprite1_counter, tmp2 : byte; // sprite1_counter shifts between sprite animations 
+	spritex, spritey, tmp : integer; // Sprite positions and temp integer
+
+	intro_image_color: IncBin("images/lemonspawn_color.bin", "$9000");
+	intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000");
+
+
+
+@define levelpointer "zeropage7"
+@include "RasLib/Levels.ras"  
+
+@define playerSprite "#0"
+@define monsterSprite "#0"
+@define playerSpeed "#2"
+
+
+// Updates the sprite & the sprite animation
+procedure UpdatePlayerSprite();
+begin
+	spritepos(spritex, spritey,@playerSprite);
+	sprite1_counter:=sprite1_counter-#1;
+	// Animation hits at 0 and 10
+	if sprite1_counter=#10 then 
+		setSpriteLoc(#0, #$90, #0);
+
+	if sprite1_counter=#0 then begin
+		sprite1_counter := #20;
+		setSpriteLoc(#0, #$91, #0);
+	
+	end;
+
+end;
+
+
+procedure Update();
+begin
+	// Update joystick routines
+	Joystick();
+
+	// Default: don't redraw
+	redraw:=#0;
+
+	// Move sprite
+	joystickdown:=joystickdown*@playerSpeed;	
+	joystickup:=joystickup*@playerSpeed;	
+	joystickleft:=joystickleft*@playerSpeed;	
+	joystickright:=joystickright*@playerSpeed;	
+
+	spritex:=spritex + joystickright;
+	spritex:=spritex - joystickleft;
+	spritey:=spritey + joystickdown - joystickup;
+
+	// Get sprite collision
+	tmp2 := getbit(SPRITE_BG_COLLISION, @playerSprite);
+
+	UpdatePlayerSprite();
+	// If collision, abort abort
+	if tmp2=#0 then begin
+		spritex:=spritex - joystickright;
+		spritex:=spritex + joystickleft;
+		spritey:=spritey - joystickdown + joystickup;
+
+	end;
+
+
+	// Sprite border check
+	if spritex>#318 then begin
+		if m_posx<>m_rl_sizex-#1 then begin
+			m_posx:=m_posx+#1;
+			spritex:=#25;
+			redraw:=#1;
+		end
+	else
+		spritex:=#317;
+	end;
+	if spritex<#24 then begin
+		if m_posx<>#0 then begin
+			spritex:= #317;
+			m_posx:=m_posx-#1;
+			redraw:=#1;
+		end
+	else
+		spritex:=#25;
+	end;
+	
+	if spritey<#65 then begin
+		if m_posy<>#0 then begin
+
+			spritey:=#229;
+			m_posy:=m_posy-#1;
+			redraw:=#1;
+		end
+		else
+			spritey:=#66;
+
+	end;
+	if spritey>#230 then begin
+		if m_posy<>m_rl_sizey-#1 then begin
+			spritey:=#66;
+			m_posy:=m_posy+#1;
+			redraw:=#1;
+		end
+		else
+			spritey:=#229;
+	end;
+	
+
+	if redraw=#1 then begin
+		// Render me baby!
+		setbank(VIC_BANK2);
+		poke(VIC_DATA_LOC, #0, #$1A);
+
+		@levelpointer := levels;
+		// Defined in Levels.ras
+   	    RenderLevel(m_posx, m_posy);
+		setbank(VIC_BANK0);
+
+	end;
+end;
+
+// Initialize sprites 
+procedure InitSprites();
+begin
+	setSpriteLoc(#0, #$90, #0);
+	
+	setSpriteLoc(#1, #$92, #0);
+	
+    setSpriteLoc(#2, #$93, #0);
+	
+
+	poke(SPRITE_MULTICOLOR_REG1, #0, BLACK);
+	poke(SPRITE_MULTICOLOR_REG2, #0, YELLOW);
+
+    poke(SPRITE_BITMASK,#0, #%00000011);
+
+	// All sprites have red as base color. Just one sprite here I guess.
+	poke(SPRITE_COLOR,#0, RED);
+	poke(SPRITE_COLOR,#1, RED);
+	poke(SPRITE_COLOR,#2, RED);
+
+	
+
+
+	// Copy sprite data
+    memcpy(sprite0data, #64, SPRITE_LOC1, #63);
+    memcpy(sprite0data, #128, SPRITE_LOC1 + 64, #63);
+
+    memcpy(sprite0data, #192, SPRITE_LOC2, #63);
+
+    memcpy(sprite0data, #256, SPRITE_LOC3, #63);
+
+
+	poke(SPRITE_STRETCH_X, #0, #%00000010);
+	poke(SPRITE_STRETCH_Y, #0, #%00000010);
+
+	togglebit(SPRITE_MULTICOLOR, @playerSprite, #1);
+	togglebit(SPRITE_MULTICOLOR, @monsterSprite, #1);
+end;
+
+
+
+procedure PrintText();
+begin
+	//moveto(#2, #0, #$04);
+	//printstring("HEISANN", #0, #30);
+	for i:=#0 to #25 do begin
+		poke($0400, i, i + #120);
+		poke($0400+ #40, i, i + #160);
+		poke($8400, i, i + #120);
+		poke($8400+ #40, i, i + #160);
+		// Color: Red
+		poke($D800, i, RED + #8);
+		poke($D800+ #40, i, RED + #8);
+
+	end;
+
+end;
+
+
+interrupt rasterUpdate();
+begin
+	// Call sid
+	call(SIDFILE_1_PLAY);
+	setRegularColorMode();
+//	setBank(VIC_BANK3);
+	//PrintText();
+	tmp:=peek(MULTICOLOR_CHAR_COL,#0);
+	poke(MULTICOLOR_CHAR_COL, #0, BLACK);
+	waitForRaster(#1);
+	poke(VIC_DATA_LOC, #0, #$1A);
+
+	waitforRaster(#67);
+	poke(MULTICOLOR_CHAR_COL, #0, tmp);
+	poke(VIC_DATA_LOC, #0, #$1C);
+	
+	//setBank(VIC_BANK0);
+//	setMulticolorMode();
+
+	// Call update
+	Update();
+	// Acknowledge interrupt
+	waitForRaster(#250);
+	kernelInterrupt();
+end;
+
+
+procedure Intro();
+begin
+	setmulticolormode();
+	setbitmapmode();
+	poke(VIC_DATA_LOC, #0,#$18);
+	setbank(VIC_BANK2);
+	copyimagecolordata(intro_image_color,#2);
+
+	while joystickbutton<>#1 do begin
+		Joystick();
+		WaitForRaster(#1);
+		WaitForRaster(##250);
+		call(SIDFILE_1_PLAY);
+	end;
+	setTextMode();
+	setbank(VIC_BANK0);
+
+end;
+
+
+
+
+begin
+	
+	initsid(SIDFILE_1_INIT);
+	poke(SCREEN_BG_COL, #0, #0);
+	Intro();
+	setmulticolormode();
+	poke(VIC_DATA_LOC, #0, #$1A);
+
+	ClearScreen(#$20, SCREEN_CHAR_LOC);
+	ClearScreen(#$05 + #08, SCREEN_COL_LOC);
+
+	ClearScreen(#$20, $8400);
+	CopyFullScreen($2800, $2800 + $8000);
+	CopyFullScreen($2b00, $2b00 + $8000);
+
+	// Initial map position
+	m_posx:=#0;
+	m_posy:=#0;
+
+	// Initial map rendering
+	@levelpointer := levels;
+	RenderLevel(m_posx, m_posy);
+
+	// Initial sprite position
+	spritex := #160;
+	spritey := #100;
+
+	sprite1_counter := #1;
+
+	InitSprites();
+	PrintText();
+
+
+	// Hook that raster!
+	DisableInterrupts();
+	RasterIRQ(rasterUpdate(), #0);
+	enableInterrupts();
+	Loop();
+end.

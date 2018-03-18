@@ -206,7 +206,7 @@ Node *Parser::AssignStatement()
 
     if (m_currentToken.m_type!=TokenType::ASSIGN) {
 //        qDebug() << m_currentToken;
-        ErrorHandler::e.Error("Could not find variable or procedure '" + t.m_value+  "'", t.m_lineNumber);
+        ErrorHandler::e.Error("Could not find variable or procedure '" + t.m_value+  "'", token.m_lineNumber);
     }
     Eat(TokenType::ASSIGN);
     Node* right = Expr();
@@ -269,6 +269,8 @@ Node *Parser::Statement()
         return Empty();
     }
 
+    if (node==nullptr)
+        ErrorHandler::e.Error("CAAARGH  ",0);
 
 
     return node;
@@ -540,6 +542,7 @@ Node* Parser::Parse()
 
 Node *Parser::FindProcedure()
 {
+    Token procToken = m_currentToken;
     if (m_procedures.contains(m_currentToken.m_value)) {
         QString procName = m_currentToken.m_value;
         Token t = m_currentToken;
@@ -563,6 +566,7 @@ Node *Parser::FindProcedure()
 
         return new NodeProcedure(p, paramList, t);
     }
+
     //qDebug() << m_currentToken.getType() << " with value " << m_currentToken.m_value;
     return nullptr;
 }

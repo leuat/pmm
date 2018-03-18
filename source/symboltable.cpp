@@ -42,7 +42,7 @@ void SymbolTable::Initialize()
     m_constants["SPRITE_COLOR"] = new Symbol("53287","ADDRESS", 0xD027);
     m_constants["SPRITE_DATA"] = new Symbol("$0340","ADDRESS", 0x0340);
     m_constants["SPRITE_COLLISION"] = new Symbol("$D01E","ADDRESS", 0xD01E);
-
+    m_constants["SPRITE_BG_COLLISION"] = new Symbol("$D01F","ADDRESS", 0xD01F);
     m_constants["SPRITE_LOC1"] = new Symbol("", "ADDRESS", 0);
     m_constants["SPRITE_LOC2"] = new Symbol("", "ADDRESS", 0);
     m_constants["SPRITE_LOC3"] = new Symbol("", "ADDRESS", 0);

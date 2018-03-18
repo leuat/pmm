@@ -1,18 +1,14 @@
-program Tutorial12;
+program Tutorial13;
 var  
-	mainChar: IncBin("charsets/tutorial11_mc.bin","$2800");
+	mainChar: IncBin("charsets/tutorial12_mc.bin","$2800");
 	music1 : incsid("fliptape2.sid");
-	levels: IncBin("levels/test1.flf", "$4000");
+	levels: IncBin("levels/tutorial12.flf", "$4000");
 	sprite0data : incbin("sprites/fastfood.bin");
-	m_posx, m_posy, wait, i, redraw : byte; 
+	m_posx, m_posy : byte; // current level position in grid
+ 	i, redraw : byte;  // i is temp, redraw states that the map should be redrawn
 	
-	sprite1_counter, tmp2 : byte;
-	spritex, spritey, tmp : integer;
-
-
-	playerCollide: byte;
-
-
+	sprite1_counter, tmp2 : byte; // sprite1_counter shifts between sprite animations 
+	spritex, spritey, tmp : integer; // Sprite positions and temp integer
 
 
 @define levelpointer "zeropage7"
@@ -23,11 +19,12 @@ var
 @define playerSpeed "#2"
 
 
-
+// Updates the sprite & the sprite animation
 procedure UpdatePlayerSprite();
 begin
 	spritepos(spritex, spritey,@playerSprite);
 	sprite1_counter:=sprite1_counter-#1;
+	// Animation hits at 0 and 10
 	if sprite1_counter=#10 then 
 		setSpriteLoc(#0, #$90, #0);
 
@@ -42,10 +39,13 @@ end;
 
 procedure Update();
 begin
+	// Update joystick routines
 	Joystick();
 
+	// Default: don't redraw
 	redraw:=#0;
 
+	// Move sprite
 	joystickdown:=joystickdown*@playerSpeed;	
 	joystickup:=joystickup*@playerSpeed;	
 	joystickleft:=joystickleft*@playerSpeed;	
@@ -55,10 +55,11 @@ begin
 	spritex:=spritex - joystickleft;
 	spritey:=spritey + joystickdown - joystickup;
 
-	tmp2 := getbit($D01F, @playerSprite);
+	// Get sprite collision
+	tmp2 := getbit(SPRITE_BG_COLLISION, @playerSprite);
 
 	UpdatePlayerSprite();
-
+	// If collision, abort abort
 	if tmp2=#0 then begin
 		spritex:=spritex - joystickright;
 		spritex:=spritex + joystickleft;
@@ -67,7 +68,7 @@ begin
 	end;
 
 
-	
+	// Sprite border check
 	if spritex>#318 then begin
 		if m_posx<>m_rl_sizex-#1 then begin
 			m_posx:=m_posx+#1;
@@ -107,25 +108,17 @@ begin
 		else
 			spritey:=#229;
 	end;
+	
 
 	if redraw=#1 then begin
+		// Render me baby!
 		@levelpointer := levels;
+		// Defined in Levels.ras
    	    RenderLevel(m_posx, m_posy);
 	end;
-
-		poke(SCREEN_BG_COL, #0, #0);
-
-//		wait:=#10;
-
-	if wait<>#0 then
-		wait:=wait-#1;
-	
-
-
-	
 end;
 
-
+// Initialize sprites 
 procedure InitSprites();
 begin
 	setSpriteLoc(#0, #$90, #0);
@@ -140,11 +133,13 @@ begin
 
     poke(SPRITE_BITMASK,#0, #%00000011);
 
+	// All sprites have red as base color. Just one sprite here I guess.
 	poke(SPRITE_COLOR,#0, RED);
 	poke(SPRITE_COLOR,#1, RED);
 	poke(SPRITE_COLOR,#2, RED);
 
 
+	// Copy sprite data
     memcpy(sprite0data, #64, SPRITE_LOC1, #63);
     memcpy(sprite0data, #128, SPRITE_LOC1 + 64, #63);
 
@@ -158,17 +153,16 @@ begin
 
 	togglebit(SPRITE_MULTICOLOR, @playerSprite, #1);
 	togglebit(SPRITE_MULTICOLOR, @monsterSprite, #1);
-//	togglebit(SPRITE_MULTICOLOR, @_bulletSprite, #1);
-
-
 end;
 
 
 interrupt rasterUpdate();
 begin
+	// Call sid
 	call(SIDFILE_1_PLAY);
+	// Call update
 	Update();
-
+	// Acknowledge interrupt
 	kernelInterrupt();
 end;
 
@@ -189,14 +183,15 @@ begin
 	ClearScreen(#$20, SCREEN_CHAR_LOC);
 	ClearScreen(#$05 + #08, SCREEN_COL_LOC);
 
-
+	// Initial map position
 	m_posx:=#0;
 	m_posy:=#0;
 
+	// Initial map rendering
 	@levelpointer := levels;
 	RenderLevel(m_posx, m_posy);
-	wait:=#0;
 
+	// Initial sprite position
 	spritex := #160;
 	spritey := #100;
 
@@ -204,9 +199,9 @@ begin
 
 	InitSprites();
 
-
+	// Hook that raster!
 	DisableInterrupts();
-	Rasterirq(rasterUpdate(), #0);
+	RasterIRQ(rasterUpdate(), #0);
 	enableInterrupts();
 	Loop();
 end.
