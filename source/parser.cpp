@@ -311,14 +311,16 @@ Node *Parser::Conditional(bool isWhileLoop)
 
     // Start
     bool done=false;
+    int linenum = m_currentToken.m_lineNumber;
 
     Node* clause = BinaryClause();
 
 
     if (m_currentToken.m_type==TokenType::THEN || m_currentToken.m_type==TokenType::DO)
         Eat(m_currentToken.m_type);
-    else
-        ErrorHandler::e.Error("Expected THEN or DO after conditional", m_currentToken.m_lineNumber);
+    else {
+        ErrorHandler::e.Error("Expected THEN or DO after conditional", linenum);
+    }
 
     Node* block = Block(false);
 

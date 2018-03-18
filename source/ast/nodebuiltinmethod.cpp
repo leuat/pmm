@@ -318,15 +318,27 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
         ErrorHandler::e.Error("Second parameter must be pure numeric", m_op.m_lineNumber);
     }
 
+    QString ap1 = "";
+    QString ap2 = "";
+    QString bp1 = "";
+    QString bp2 = "";
 
+    if (m_params[2]->getType(as)==TokenType::POINTER) {
+        bp1="(";
+        bp2=")";
+    }
 
 
     as->Comment("memcpy");
     QString lbl = as->NewLabel("memcpy");
-    as->Asm("ldx #0");
+    as->Asm("ldy #0");
     as->Label(lbl);
     //LoadVar(as, 0, "x");
-    as->Asm("lda " + addr + " + #" + num2->HexValue() + ",x");
+
+    if (m_params[0]->getType(as)==TokenType::POINTER)
+        as->Asm("lda ("+ addr +"),y");
+    else
+        as->Asm("lda " +addr +" +  #" + num2->HexValue() + ",y");
     as->ClearTerm();
     /*as->Term("lda ");
     m_params[0]->Build(as);
@@ -334,9 +346,13 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     */
   //  LoadVar(as,0, "x");
 
-    SaveVar(as, 2, "x");
-    as->Asm("inx");
-    as->Term("cpx ");
+    //SaveVar(as, 2, "y");
+    as->Term("sta " + bp1);
+    m_params[2]->Build(as);
+    as->Term(bp2 + ",y", true);
+
+    as->Asm("iny");
+    as->Term("cpy ");
     m_params[3]->Build(as);
     as->Term();
     as->Asm("bne " + lbl);
@@ -479,6 +495,8 @@ void NodeBuiltinMethod::PrintNumber(Assembler *as)
 {
 
     QString lbl= as->NewLabel("printnumber_call");
+    QString lbl1= as->NewLabel("printnumber_l1");
+    QString lbl2= as->NewLabel("printnumber_l2");
     as->Asm("ldx #0");
 
     as->ClearTerm();
@@ -494,10 +512,10 @@ void NodeBuiltinMethod::PrintNumber(Assembler *as)
 
 
     as->Asm("cmp #$0A");
-    as->Asm("bcc printnumber_l1");
+    as->Asm("bcc " + lbl1);
     as->Asm("sec");
     as->Asm("sbc #$39");
-    as->Label("printnumber_l1");
+    as->Label(lbl1);
     as->Asm("adc #$30 + #64");
     as->Asm("sta print_number_text,x");
     as->Asm("inx");
@@ -505,10 +523,10 @@ void NodeBuiltinMethod::PrintNumber(Assembler *as)
     as->Asm("and #$0F");
 
     as->Asm("cmp #$0A");
-    as->Asm("bcc printnumber_l2");
+    as->Asm("bcc " + lbl2);
     as->Asm("sec");
     as->Asm("sbc #$39");
-    as->Label("printnumber_l2");
+    as->Label(lbl2);
 
     as->Asm("adc #$30 + #64");
     as->Asm("sta print_number_text,x");
@@ -527,6 +545,8 @@ void NodeBuiltinMethod::PrintNumber(Assembler *as)
     as->Asm("jsr printstring");
 
     as->PopLabel("printnumber_call");
+    as->PopLabel("printnumber_l1");
+    as->PopLabel("printnumber_l2");
 }
 
 void NodeBuiltinMethod::PrintString(Assembler *as)

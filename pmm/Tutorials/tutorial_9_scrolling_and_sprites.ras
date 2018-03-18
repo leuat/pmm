@@ -101,16 +101,16 @@ begin
 	poke(SPRITE_COLOR,#2, GREEN);
 
 
-    memcpy(sprite0data, #0, SPRITE_LOC1, #63);
-    memcpy(sprite0data, #0, SPRITE_LOC1 + $4000, #63);
-    memcpy(sprite0data, #64, SPRITE_LOC1 + 64, #63);
-    memcpy(sprite0data, #64, SPRITE_LOC1 + $4000 + 64, #63);
+    memcpy(sprite0data, #0, #$90*#64, #63);
+    memcpy(sprite0data, #0, #$90*#64 + $4000, #63);
+    memcpy(sprite0data, #64, #$90*#64 + 64, #63);
+    memcpy(sprite0data, #64, #$90*#64 + $4000 + 64, #63);
 
-    memcpy(sprite0data, #128, SPRITE_LOC2, #63);
-    memcpy(sprite0data, #128, SPRITE_LOC2 + $4000, #63);
+    memcpy(sprite0data, #128, #$92*#64, #63);
+    memcpy(sprite0data, #128, #$92*#64 + $4000, #63);
 
-    memcpy(sprite0data, #192, SPRITE_LOC3, #63);
-    memcpy(sprite0data, #192, SPRITE_LOC3 + $4000, #63);
+    memcpy(sprite0data, #192, #$93*#64, #63);
+    memcpy(sprite0data, #192, #$93*#64 + $4000, #63);
 
 
 	poke(SPRITE_STRETCH_X, #0, #%00000010);
@@ -181,7 +181,9 @@ begin
 	spritepos(monster_x, monster_y, @_monsterSprite);
 	monster_x:=sine[time]/#2 + #80;	
 
-	if getBit(SPRITE_COLLISION, @_monsterSprite)=#0 then
+
+	val:=getBit(SPRITE_COLLISION, @_monsterSprite);
+	if val=#0 then
 	begin
 		ShootSoundEffect(SID_NOISE, #5);
 		monster_dy:=#253;		

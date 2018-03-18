@@ -5,42 +5,74 @@ var
 	levelChar: IncBin("charsets/tutorial13.bin","$3000");
 
 
-	levels: IncBin("levels/tutorial13.flf", "$4000");
-	sprite0data : incbin("sprites/fastfood.bin");
-	music1 : incsid("fliptape3.sid");
+	levels: IncBin("levels/tutorial13.flf", "$3800");
+//	music1 : incsid("fliptape3.sid");
+	sprite0data : incbin("sprites/fastfood.bin", "$8800");
 	m_posx, m_posy : byte; // current level position in grid
- 	i, redraw, j: byte;  // i is temp, redraw states that the map should be redrawn
+ 	i, redraw, j,k: byte;  // i is temp, redraw states that the map should be redrawn
 	
 	sprite1_counter, tmp2,val : byte; // sprite1_counter shifts between sprite animations 
 	spritex, tmp : integer; // Sprite positions and temp integer
-	spritey : byte;
+	spritey, frameCounter : byte;
 
-//	intro_image_color: IncBin("images/lemonspawn_color.bin", "$9000");
-//	intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000");
+	intro_image_color: IncBin("images/lemonspawn_color.bin", "$9000");
+	intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000");
 
 	current_background : byte;
 
 	entity_sprites : array[8] of byte = (
-		$92, $93, $94, $95, $96, $97, $98, $92);
+		$91, $90, $93, $94, $95, $96, $97, $98, $92);
+
+    fade : array [16] of byte = (11,6,6,12,4,14,15,1,1,15,14,4,12,6,6,11); 
+
+	prev_dx, prev_dy : byte;
 
 
 	// Entities
 	no_entities : byte;
 	entity_pos_x : array[8] of byte;
 	entity_pos_y : array[8] of byte;
+	entity_curpos_x : array[8] of byte;
+	entity_curpos_y : array[8] of byte;
+	entity_dd_x : array[8] of byte;
+	entity_dd_y : array[8] of byte;
+	entity_pos_spread : array[8] of byte;
 	entity_type : array[8] of byte;
 	entity_color : array[8] of byte;
 
+	entity_framecounter_x : array[8] of byte;
+	entity_framecounter_y : array[8] of byte;
+
+	entity_framecounter_maxx : array[8] of byte;
+	entity_framecounter_maxy : array[8] of byte;
 
 
+	player_health : byte;
+	bullet_count : byte;
+
+	bullet_x : byte;
+	bullet_y, bullet_dx, bullet_dy : byte;
+	bullet_wait : byte;
+
+	joystick_pressed : byte;
+	
+	
+
+@define monster_speed "#1"
 
 
 @define levelpointer "zeropage7"
 @include "RasLib/Levels.ras"  
 
-@define playerSprite "#0"
-@define player_sprite_loc "#$90"
+@include "RasLib/sprites.ras"  
 
+@define playerSprite "#0"
+@define bulletSprite "#7"
+
+@define player_sprite_loc "#$90"
+@define bullet_sprite_loc "#$96"
+
+@define crashDistance "#12"
 
 @define playerSpeed "#2"
 
@@ -48,16 +80,15 @@ var
 // Updates the sprite & the sprite animation
 procedure UpdatePlayerSprite();
 begin
-	asm(";crash one");
 	spritepos(spritex, spritey, @playerSprite);
 	sprite1_counter:=sprite1_counter-#1;
 	// Animation hits at 0 and 10
 	if sprite1_counter=#10 then 
-		setSpriteLoc(@playerSprite, #$90, #0);
+		setSpriteLoc(@playerSprite, #$91, #0);
 
 	if sprite1_counter=#0 then begin
 		sprite1_counter := #20;
-		setSpriteLoc(@playerSprite, #$91, #0);
+		setSpriteLoc(@playerSprite, #$92, #0);
 	
 	end;
 
@@ -77,11 +108,20 @@ begin
 		poke($D800+ #40, i, BLUE);
 	end;
 	moveto(#2, #24, #$D8);
-	for i:=#0 to #25 do 
+	for i:=#0 to #40 do 
 		pokescreen(RED, i);
 	moveto(#2, #24, #$04);
 
 	printstring("SCORE", #0, #10);
+
+	moveto(#20, #24, #$04);
+
+	printstring("LIFE", #0, #10);
+
+	moveto(#30, #24, #$04);
+
+	printstring("AMMO", #0, #10);
+
 end;
 
 procedure ClearText();
@@ -119,8 +159,21 @@ begin
 		begin
 			entity_pos_x[no_entities] := @levelpointer[#1]*#4 + #10;
 			entity_pos_y[no_entities] := @levelpointer[#2]*#8+#45;
+			entity_curpos_x[no_entities] := entity_pos_x[no_entities];
+			entity_curpos_y[no_entities] := entity_pos_y[no_entities];
 			entity_type[no_entities] := @levelpointer[#0];
 			entity_color[no_entities] := @levelpointer[#4];
+
+			entity_pos_spread[no_entities] := @levelpointer[#5];
+
+			entity_dd_x[no_entities] := #1;
+			entity_dd_y[no_entities] := #1;
+
+			entity_framecounter_x[no_entities] := @levelpointer[#6];;
+			entity_framecounter_y[no_entities] := @levelpointer[#7];;
+
+			entity_framecounter_maxx[no_entities] := @levelpointer[#6];;
+			entity_framecounter_maxy[no_entities] := @levelpointer[#7];;
 
 			no_entities:=no_entities+#1;
 			
@@ -152,38 +205,251 @@ end;
 
 procedure UpdateEntities();
 begin
+
+	// Move all
+	
+		for i:=#0 to no_entities do begin
+					
+			entity_framecounter_x[i]:= entity_framecounter_x[i] - #1;
+			if entity_framecounter_x[i]=#0 then begin
+				entity_framecounter_x[i]:=entity_framecounter_maxx[i];
+				entity_curpos_x[i] := entity_curpos_x[i] + entity_dd_x[i];
+
+				val := entity_curpos_x[i] - entity_pos_x[i];
+				j:=entity_pos_spread[i];
+				if val>j then
+					entity_dd_x[i] := #0 - entity_dd_x[i];
+
+			end;
+	
+			entity_framecounter_y[i] := entity_framecounter_y[i] - #1;
+			if entity_framecounter_y[i]=#0 then begin
+				entity_framecounter_y[i]:=entity_framecounter_maxy[i];
+				entity_curpos_y[i] := entity_curpos_y[i] + entity_dd_y[i];
+
+	
+				val := entity_curpos_y[i] - entity_pos_y[i];
+				if val>j then
+					entity_dd_y[i] := #0 - entity_dd_y[i];
+
+
+			end;
+	end;
+
 	for i:=#0 to no_entities do begin
 		val:=i+#1;
-		tmp:=entity_pos_x[i];
+		tmp:=entity_curpos_x[i];
 		tmp:=tmp*#2;
-		spritepos(tmp, entity_pos_y[i], val );
+		spritepos(tmp, entity_curpos_y[i], val );
 
 	end;
 
 end;
 
 
-procedure Update();
+procedure InitGameOver();
+
+
+procedure AbsDistance(ab_x1, ab_y1, ab_x2, ab_y2:byte);
+var
+	ab_tmp1, ab_tmp2: byte;
+begin
+
+	ab_tmp1 := ab_x1 - ab_x2;
+	if ab_tmp1>#128 then 
+		ab_tmp1:=#0 - ab_tmp1;
+
+	ab_tmp2 := ab_y1 - ab_y2;
+	if ab_tmp2>#128 then 
+		ab_tmp2:=#0 - ab_tmp2;
+
+	return := ab_tmp1 + ab_tmp2;
+
+end; 
+
+procedure findCollider(fc_x,fc_y:byte);
+begin
+	val := #255;
+	j:=#0;
+	for i:=#0 to no_entities do begin
+		if entity_type[i]<>#0 then begin
+			// Create an abs tester
+			tmp2 := entity_curpos_x[i] - fc_x;
+			if tmp2>#128 then 
+				tmp2:=#0 - tmp2;
+
+			k := entity_curpos_y[i] -fc_y;
+			if k>#128 then 
+				k:=#0 - k;
+
+			tmp2:=tmp2 + k;
+//			asm(";cras");
+	//		tmp2 := AbsDistance(entity_curpos_x[i], fc_x, entity_curpos_y[i], fc_y);
+			if tmp2<val then begin
+				val:=tmp2;
+				j:=i;
+			end;
+		end;
+	end;
+	// Winner in val, index in j
+
+end;
+
+
+
+
+procedure UpdateBullet();
+begin
+	val := getbit(SPRITE_BITMASK, @bulletSprite);
+	//val:=#1;
+	//togglebit(SPRITE_BITMASK, #7, #1);
+	if val=#0 then
+	begin
+		tmp:=bullet_x;
+		tmp:=tmp*#2;
+
+		bullet_x := bullet_x + bullet_dx;
+		bullet_y := bullet_y + bullet_dy;
+
+		spritepos(tmp, bullet_y, @bulletSprite);
+
+
+		findCollider(bullet_x, bullet_y);
+		if val<#5 then begin
+			togglebit(SPRITE_BITMASK, @bulletSprite, #0);
+			togglebit(SPRITE_BITMASK, j+#1, #0);
+			entity_type[j] :=#0; // Turn off 
+			PlaySound(SID_CHANNEL3, 
+				#15,  // Volume
+				#5,  // Hi byte frequency 
+				#0*#16+#0,  // Attack voice 1
+				#5*#16 + #9,   // Sustain = 16*15 + release=6
+				#1 +SID_NOISE,  // Waveform
+			SID_NOISE);  // waveform
+
+		end;
+		waitnoraster(#2);
+		tmp2 := getbit(SPRITE_BG_COLLISION, @bulletSprite);
+		if tmp2=#0 then begin
+			togglebit(SPRITE_BITMASK, @bulletSprite, #0);
+//			poke(SPRITE_BITMASK, #0, #0);
+		end;
+
+		
+	end;
+    setSpriteLoc(#7, @bullet_sprite_loc, #0);
+
+end;
+
+
+procedure Shoot();
+begin
+
+	if (joystickbutton=#1 and (bullet_count<>#0 and bullet_wait=#0)) then begin
+		// Shoot!
+		bullet_x := spritex/#2;
+		bullet_y := spritey;
+		bullet_dy := prev_dy*#2;
+		bullet_dx := prev_dx;
+
+		bullet_x := bullet_x + bullet_dx * #4;
+		bullet_y := bullet_y + bullet_dy * #4;
+		togglebit(SPRITE_BITMASK, @bulletSprite, #0);
+
+		if (bullet_dy<>#0 or bullet_dx<>#0) then begin
+			tmp:=bullet_x;
+			tmp:=tmp*#2;
+			spritepos(tmp, bullet_y, @bulletSprite);
+			togglebit(SPRITE_BITMASK, @bulletSprite, #1);
+			PlaySound(SID_CHANNEL3, 
+				#15,  // Volume
+				#15,  // Hi byte frequency 
+				#0*#16+#0,  // Attack voice 1
+				#5*#16 + #6,   // Sustain = 16*15 + release=6
+				#1 +SID_NOISE,  // Waveform
+			SID_NOISE);  // waveform
+			bullet_count:=bullet_count-#1;
+			
+		end;
+		bullet_wait := #30;
+		joystick_pressed := #0;
+
+	end;
+
+	if bullet_wait<>#0 then
+		bullet_wait:=bullet_wait - #1;
+
+
+end;
+
+
+
+
+
+
+
+procedure UpdatePlayer();
 begin
 	// Update joystick routines
 	Joystick();
+
+//	if joystickbutton=#1 then
+	Shoot();
+
+	// Hit
+	//val:=getBit(SPRITE_COLLISION, @playerSprite);
+	tmp2:=spritex/#2;
+	findCollider(tmp2, spritey);
+	// returns distance
+	if val<@crashDistance then begin
+		val:=#0;
+	end;
+
+
+	if val=#0 then begin
+		player_health := player_health -#1;
+			PlaySound(SID_CHANNEL3, 
+				#15,  // Volume
+			#25,  // Hi byte frequency 
+			#0*#16+#0,  // Attack voice 1
+			#5*#16 + #3,   // Sustain = 16*15 + release=6
+			#1 +SID_SAW,  // Waveform
+			SID_NOISE);  // waveform
+
+	end;
+	if player_health = #0 then
+		InitGameOver();
 
 	// Default: don't redraw
 	redraw:=#0;
 
 	// Move sprite
-	joystickdown:=joystickdown*@playerSpeed;	
-	joystickup:=joystickup*@playerSpeed;	
-	joystickleft:=joystickleft*@playerSpeed;	
-	joystickright:=joystickright*@playerSpeed;	
 
-	spritex:=spritex + joystickright;
-	spritex:=spritex - joystickleft;
-	spritey:=spritey + joystickdown - joystickup;
+	//if joystick_pressed=#0 then begin
+
+		if (joystickright<>#0 or joystickleft<>#0) then begin
+			prev_dx := joystickright - joystickleft;
+			prev_dy := #0;
+		end;
+
+		if (joystickup<>#0 or joystickdown<>#0) then begin
+			prev_dy := joystickdown - joystickup;
+			prev_dx := #0;
+		end;
+		joystickdown:=joystickdown*@playerSpeed;	
+		joystickup:=joystickup*@playerSpeed;	
+		joystickleft:=joystickleft*@playerSpeed;	
+		joystickright:=joystickright*@playerSpeed;	
+
+
+		spritex:=spritex + joystickright;
+		spritex:=spritex - joystickleft;
+		spritey:=spritey + joystickdown - joystickup;
+	//end;
 
 	// Get sprite collision
 	tmp2 := getbit(SPRITE_BG_COLLISION, @playerSprite);
-
+	
 	UpdatePlayerSprite();
 	// If collision, abort abort
 	if tmp2=#0 then begin
@@ -217,7 +483,7 @@ begin
 	if spritey<#65 then begin
 		if m_posy<>#0 then begin
 
-			spritey:=#229;
+			spritey:=#219;
 			m_posy:=m_posy-#1;
 			redraw:=#1;
 		end
@@ -225,14 +491,14 @@ begin
 			spritey:=#66;
 
 	end;
-	if spritey>#230 then begin
+	if spritey>#220 then begin
 		if m_posy<>m_rl_sizey-#1 then begin
 			spritey:=#66;
 			m_posy:=m_posy+#1;
 			redraw:=#1;
 		end
 		else
-			spritey:=#229;
+			spritey:=#219;
 	end;
 	
 
@@ -255,12 +521,17 @@ begin
 	end;
 
 
-	UpdateEntities();
 end;
 
-// Initialize sprites 
+
+
+
+
+
+
 procedure InitSprites();
 begin
+
 	setSpriteLoc(#0, @player_sprite_loc, #0);
 	
 	setSpriteLoc(#1, #$92, #0);
@@ -271,6 +542,8 @@ begin
 
     setSpriteLoc(#4, #$95, #0);
 
+    setSpriteLoc(#7, @bullet_sprite_loc, #0);
+
 	poke(SPRITE_MULTICOLOR_REG1, #0, BLACK);
 	poke(SPRITE_MULTICOLOR_REG2, #0, YELLOW);
 
@@ -279,36 +552,70 @@ begin
 	poke(SPRITE_COLOR,#0, RED);
 
 	
+	zeropage2:=sprite0data;
+	zeropage3:=#$2400;
+	CopySprites(#9);
 
-
-	// Copy sprite data
-    memcpy(sprite0data, #64, @player_sprite_loc*#64, #63);
-    memcpy(sprite0data, #128, @player_sprite_loc*#64 + 64, #63);
-
-    memcpy(sprite0data, #192, #$92*#64, #63);
-
-    memcpy(sprite0data, #256, #$93*#64, #63);
-
-    memcpy(sprite0data, #0, #$94*#64, #63);
-
-    memcpy(sprite0data, #384, #$95*#64, #63);
-
-
-//	poke(SPRITE_STRETCH_X, #0, #%00000010);
-//	poke(SPRITE_STRETCH_Y, #0, #%00000010);
-
-//	togglebit(SPRITE_MULTICOLOR, #0, #1);
-//	togglebit(SPRITE_MULTICOLOR, #1, #1);
 	poke(SPRITE_MULTICOLOR, #0, #$FF); // ALL multicolor
 end;
 
 
 
 
+interrupt GameOverLoop();
+begin
+	setRegularColormode();
+	poke(VIC_DATA_LOC, #0, #$1A);
+	val:=val+#1;
+	moveto(#15,#10, #$04);
+	printstring("GAME OVER", #0, #20);
+	moveto(#0,#10, #$D8);
+	j:=fade[val&#15];
+	for i:=#0 to #39 do
+		pokescreen(j, i);
+
+
+
+
+	waitForRaster(#200);
+	kernelInterrupt();
+end;
+
+procedure InitGameOver();
+begin
+	rasterIRQ(GameOverLoop(), #1);
+	for i:=#0 to #100 do begin
+		poke(SPRITE_COLOR, #0, i);
+		poke(SPRITE_COLOR, #1, i);
+		waitForRaster(#1);
+		val:=#120-i;
+		PlaySound(SID_CHANNEL3, 
+			#15,  // Volume
+			val,  // Hi byte frequency 
+			#0*#16+#0,  // Attack voice 1
+			#5*#16 + #6,   // Sustain = 16*15 + release=6
+			#1 +SID_NOISE,  // Waveform
+			SID_SAW);  // waveform
+
+		waitForRaster(#255);
+	end;
+
+
+	Setbank(VIC_BANK0);
+	poke(SPRITE_BITMASK, #0, #0);
+	ClearScreen(#$20, SCREEN_CHAR_LOC);
+	ClearScreen(#$02, SCREEN_COL_LOC);
+	poke(VIC_DATA_LOC, #0, #$1A);
+	poke(SCREEN_BG_COL, #0, BLACK);
+
+end;
+
+
+
 interrupt rasterUpdate();
 begin
 	// Call sid
-	call(SIDFILE_1_PLAY);
+//	call(SIDFILE_1_PLAY);
 	// Make sure upper part of screen renders text
 	setRegularColorMode();
 	poke(MULTICOLOR_CHAR_COL, #0, BLACK);
@@ -323,8 +630,16 @@ begin
 	poke(MULTICOLOR_CHAR_COL, #0, current_background);
 	poke(VIC_DATA_LOC, #0, #$1C);
 	setMulticolorMode();
+	moveto(#25, #24, #$04);
+	printnumber(player_health);
 
-	Update();
+	moveto(#35, #24, #$04);
+	printnumber(bullet_count);
+
+	UpdateBullet();
+	UpdatePlayer();
+	UpdateEntities();
+	
 
 	waitForRaster(#243);
 	// Go back to regular font
@@ -345,7 +660,7 @@ begin
 end;
 
 
-/*procedure Intro();
+procedure Intro();
 begin
 	setmulticolormode();
 	setbitmapmode();
@@ -357,7 +672,7 @@ begin
 		Joystick();
 		WaitForRaster(#1);
 		WaitForRaster(#250);
-		call(SIDFILE_1_PLAY);
+	//	call(SIDFILE_1_PLAY);
 	end;
 	setTextMode();
 	setbank(VIC_BANK0);
@@ -365,13 +680,13 @@ begin
 end;
 
 
-*/
+
 
 begin
 	
-	initsid(SIDFILE_1_INIT);
+	//initsid(SIDFILE_1_INIT);
 	poke(SCREEN_BG_COL, #0, #0);
-	//Intro();
+	Intro();
 	setmulticolormode();
 	poke(VIC_DATA_LOC, #0, #$1A);
 
@@ -395,7 +710,11 @@ begin
 	spritex := #160;
 	spritey := #100;
 
+	player_health := #100;
+
 	sprite1_counter := #1;
+	bullet_count :=#5;
+	bullet_wait := #0;
 
 	InitSprites();
 	PrintText();
@@ -405,8 +724,8 @@ begin
 
 
 	//setbank(VIC_BANK2);
-
-
+	joystick_pressed := #0;
+	frameCounter:=#0;
 	// Hook that raster!
 	DisableInterrupts();
 	RasterIRQ(rasterUpdate(), #0);
