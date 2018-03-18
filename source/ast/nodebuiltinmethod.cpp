@@ -97,7 +97,7 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         as->Asm("sta $d011");
     }
 
-    if (m_procName.toLower() =="regularcolormode") {
+    if (m_procName.toLower() =="setregularcolormode") {
         as->Comment("Regularcolor mode");
         as->Asm("lda $d016");
         as->Asm("and #%11101111");
@@ -142,6 +142,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower() == "initeightbitmul")
             InitEightBitMul(as);
+
+    if (m_procName.toLower() == "init16x8mul")
+            InitMul16x8(as);
 
     if (m_procName.toLower()=="fill")
         Fill(as);
@@ -251,9 +254,12 @@ void NodeBuiltinMethod::Poke(Assembler* as)
         return;
     }
 
+    LoadVar(as,2);
+    as->Asm("pha");
     LoadVar(as,1);
     as->Asm("tax");
-    LoadVar(as,2);
+    as->Asm("pla");
+
     SaveVar(as,0,"x");
 
 }
@@ -480,7 +486,13 @@ void NodeBuiltinMethod::PrintNumber(Assembler *as)
     as->Term();
 
     as->Asm("tay");
-    as->Asm("and #$0F");
+    as->Asm("and #$F0");
+    as->Asm("lsr");
+    as->Asm("lsr ");
+    as->Asm("lsr ");
+    as->Asm("lsr ");
+
+
     as->Asm("cmp #$0A");
     as->Asm("bcc printnumber_l1");
     as->Asm("sec");
@@ -490,11 +502,7 @@ void NodeBuiltinMethod::PrintNumber(Assembler *as)
     as->Asm("sta print_number_text,x");
     as->Asm("inx");
     as->Asm("tya");
-    as->Asm("and #$F0");
-    as->Asm("lsr");
-    as->Asm("lsr ");
-    as->Asm("lsr ");
-    as->Asm("lsr ");
+    as->Asm("and #$0F");
 
     as->Asm("cmp #$0A");
     as->Asm("bcc printnumber_l2");
@@ -665,45 +673,98 @@ void NodeBuiltinMethod::SetSpritePos(Assembler *as)
     QString lbl = as->NewLabel("spritepos");
     QString lbl2 = as->NewLabel("spriteposcontinue");
 
-    NodeNumber* sprite = dynamic_cast<NodeNumber*>(m_params[2]);
-    if (sprite==nullptr)
-        ErrorHandler::e.Error("For now, parameter 3 in setSpritePos must be number 0-7");
-
-    uchar v = 1 << (uchar)sprite->m_val;
 
 
     as->Comment("Setting sprite position");
-    as->Asm("ldx #" +QString::number((int)sprite->m_val*2) );
+
+
+    NodeNumber* spriteNum = dynamic_cast<NodeNumber*>(m_params[2]);
+    if (spriteNum!=nullptr) {
+        uchar v = 1 << (uchar)spriteNum->m_val;
+        as->Asm("ldx #" +QString::number((int)spriteNum->m_val*2) );
+        LoadVar(as, 0);
+        as->Asm("sta $D000,x");
+        m_params[0]->Build(as);
+        as->Term("+1",true);
+        as->Asm("cmp #0");
+        as->Asm("beq " + lbl);
+
+
+        as->Asm("lda $D010");
+        as->Asm("ora #%" + QString::number(v,2) );
+        //m_params[3]->Build(as);
+    //    as->Term();
+        as->Asm("sta $D010");
+        as->Asm("jmp "+lbl2);
+        as->Label(lbl);
+
+        as->Asm("lda $D010");
+        as->Asm("and #%" + QString::number(~v,2) );
+      //  m_params[4]->Build(as);
+      //  as->Term();
+        as->Asm("sta $D010");
+
+        as->Label(lbl2);
+
+        as->Asm("inx");
+        as->Asm("txa");
+        as->Asm("tay");
+        LoadVar(as, 1); // In case we load from an array
+        as->Asm("sta $D000,y");
+
+    }
+    else {
+        m_params[2]->Build(as);
+        as->Term();
+        // Shift left number of blah
+        as->Asm("pha");
+        as->Asm("tax");
+
+        QString var = BitShiftX(as);
+
+        as->Asm("pla"); // Get back the original støff
+
+        as->Asm("asl"); // Multiply by two in the end
+        as->Asm("tax"); // X is the counter
+
+        LoadVar(as, 0);
+        as->Asm("sta $D000,x");
+        m_params[0]->Build(as);
+        as->Term("+1",true);
+        as->Asm("cmp #0");
+        as->Asm("beq " + lbl);
+
+        as->Asm("lda $D010");
+        as->Asm("ora " + var );
+        //m_params[3]->Build(as);
+    //    as->Term();
+        as->Asm("sta $D010");
+        as->Asm("jmp "+lbl2);
+        as->Label(lbl);
+
+        as->Asm("lda #$FF");
+        as->Asm("eor "+var);
+        as->Asm("sta "+var);
+        as->Asm("lda $D010");
+        as->Asm("and " + var);
+      //  m_params[4]->Build(as);
+      //  as->Term();
+        as->Asm("sta $D010");
+
+        as->Label(lbl2);
+
+        as->Asm("inx");
+        as->Asm("txa");
+        as->Asm("tay");
+        LoadVar(as, 1); // In case we load from an array
+        as->Asm("sta $D000,y");
+
+
+    }
+
 
 //    as->Asm("tay");
 
-    LoadVar(as, 0);
-    as->Asm("sta $D000,x");
-    m_params[0]->Build(as);
-    as->Term("+1",true);
-    as->Asm("cmp #0");
-    as->Asm("beq " + lbl);
-
-
-    as->Asm("lda $D010");
-    as->Asm("ora #%" + QString::number(v,2) );
-    //m_params[3]->Build(as);
-//    as->Term();
-    as->Asm("sta $D010");
-    as->Asm("jmp "+lbl2);
-    as->Label(lbl);
-
-    as->Asm("lda $D010");
-    as->Asm("and #%" + QString::number(~v,2) );
-  //  m_params[4]->Build(as);
-  //  as->Term();
-    as->Asm("sta $D010");
-
-    as->Label(lbl2);
-
-    as->Asm("inx");
-    LoadVar(as, 1);
-    as->Asm("sta $D000,x");
 
     as->PopLabel("spritepos");
     as->PopLabel("spriteposcontinue");
@@ -837,6 +898,25 @@ void NodeBuiltinMethod::InitZeroPage(Assembler* as) {
     as->Label("zeropage7 = $68");
 
     as->Label("initzeropage_continue");
+}
+
+QString NodeBuiltinMethod::BitShiftX(Assembler *as)
+{
+    QString lblshiftbit = as->NewLabel("shiftbit");
+    QString lblshiftbitDone = as->NewLabel("shiftbitdone");
+    as->Asm("lda #1");
+    as->Label(lblshiftbit);
+    as->Asm("cpx #0");
+    as->Asm("beq " + lblshiftbitDone);
+    as->Asm("asl");
+    as->Asm("dex");
+    as->Asm("jmp "+lblshiftbit);
+    as->Label(lblshiftbitDone);
+
+    as->PopLabel("shiftbit");
+    as->PopLabel("shiftbitdone");
+    return as->StoreInTempVar("bitmask");
+
 }
 
 
@@ -985,6 +1065,46 @@ void NodeBuiltinMethod::InitSid(Assembler *as)
 
 }
 
+void NodeBuiltinMethod::InitMul16x8(Assembler *as)
+{
+
+//     Multiplies "num1" by "num2" and stores result in .A (low byte, also in .X) and .Y (high byte)
+    as->Asm("jmp mul16x8_def_end");
+    as->Label("mul16x8_procedure_defs");
+
+    as->Label("mul16x8_num1Hi .byte 0 ");
+    as->Label("mul16x8_num1 .byte 0 ");
+    as->Label("mul16x8_num2 .byte 0 ");
+
+    as->Label("mul16x8_procedure");
+
+    as->Asm("lda #$00");
+    as->Asm("tay");
+    //as->Asm("sty num1Hi  ; remove this line for 16*8=16bit multiply
+    as->Asm("beq mul16x8_enterLoop");
+
+    as->Label("mul16x8_doAdd");
+    as->Asm("clc");
+    as->Asm("adc mul16x8_num1");
+    as->Asm("tax");
+
+    as->Asm("tya");
+    as->Asm("adc mul16x8_num1Hi");
+    as->Asm("tay");
+    as->Asm("txa");
+
+    as->Label("mul16x8_loop");
+    as->Asm("asl mul16x8_num1");
+    as->Asm("rol mul16x8_num1Hi");
+    as->Label("mul16x8_enterLoop  ; accumulating multiply entry point (enter with .A=lo, .Y=hi)");
+    as->Asm("lsr mul16x8_num2");
+    as->Asm("bcs mul16x8_doAdd");
+    as->Asm("bne mul16x8_loop");
+    as->Asm("rts");
+
+    as->Label("mul16x8_def_end");
+}
+
 void NodeBuiltinMethod::DisableInterrupts(Assembler *as)
 {
     as->Comment("Disable interrupts");
@@ -1095,14 +1215,16 @@ void NodeBuiltinMethod::WaitForRaster(Assembler *as)
 
 void NodeBuiltinMethod::SetSpriteLoc(Assembler *as)
 {
+
+  /*  NodeNumber* num2 = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (num2==nullptr)
+        ErrorHandler::e.Error("SetSpriteLoc parameter 0 must be constant");
+
     NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
     if (num==nullptr)
         ErrorHandler::e.Error("SetSpriteLoc parameter 1 must be constant");
 
-    NodeNumber* num2 = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
-    if (num2==nullptr)
-        ErrorHandler::e.Error("SetSpriteLoc parameter 0 must be constant");
-
+*/
     NodeNumber* num3 = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[2]);
     if (num3==nullptr)
         ErrorHandler::e.Error("SetSpriteLoc parameter 2 (bank) must be constant 0-3");
@@ -1117,13 +1239,12 @@ void NodeBuiltinMethod::SetSpriteLoc(Assembler *as)
 //    SaveVar(as,0,"x");
     as->Asm("sta $07f8 + "+bank+",x");
 
-    int newLoc = 64*num->m_val;
-    qDebug() << newLoc;
+/*    int newLoc = 64*num->m_val;
     QString c = "SPRITE_LOC" +QString::number((int)num2->m_val+1);
 //    qDebug() << "sprite num : " << ("$" + QString::number((int)(newLoc),16)) << " with value " << c;
     as->m_symTab->m_constants[c]->m_value->m_fVal = newLoc;
     as->m_symTab->m_constants[c]->m_value->m_strVal = "$" + QString::number((int)(newLoc),16);
-
+*/
 }
 
 void NodeBuiltinMethod::Swap(Assembler *as)
@@ -1414,31 +1535,50 @@ void NodeBuiltinMethod::TransformColors(Assembler *as)
 
 void NodeBuiltinMethod::ToggleBit(Assembler *as)
 {
-    NodeNumber* sprite = dynamic_cast<NodeNumber*>(m_params[1]);
-    if (sprite==nullptr)
-        ErrorHandler::e.Error("ToggleBit (for now) needs param 2 to be a number");
-
     NodeNumber* toggle = dynamic_cast<NodeNumber*>(m_params[2]);
     if (toggle==nullptr)
         ErrorHandler::e.Error("TogglesBit (for now) needs param 3 to be a number");
 
-    uchar v = 1 << (uchar)sprite->m_val;
-//    qDebug() << QString::number((uchar)v,2);;
-//    qDebug() << QString::number((uchar)~v,2);;
-  //  exit(1);
-    as->Comment("Toggle bit");
+
+    NodeNumber* spriteNum = dynamic_cast<NodeNumber*>(m_params[1]);
+
+    if (spriteNum!=nullptr) {
+
+        uchar v = 1 << (uchar)spriteNum->m_val;
+        as->Comment("Toggle bit with constant");
+        if (toggle->m_val==0) { // turn off}
+            LoadVar(as, 0);
+            as->Asm("and #%"+QString::number((uchar)~v,2));
+            SaveVar(as,0);
+        }
+        if (toggle->m_val==1) { // turn off}
+            LoadVar(as, 0);
+            as->Asm("ora #%"+QString::number((uchar)v,2));
+            SaveVar(as,0);
+        }
+    }
+    m_params[1]->Build(as);
+    as->Term();
+    as->Asm("tax");
+    QString var = BitShiftX(as);
+
     if (toggle->m_val==0) { // turn off}
+        as->Asm("lda #$FF");
+        as->Asm("eor " + var);
+        as->Asm("sta " + var);
         LoadVar(as, 0);
-        as->Asm("and #%"+QString::number((uchar)~v,2));
+        as->Asm("and " + var);
         SaveVar(as,0);
     }
     if (toggle->m_val==1) { // turn off}
         LoadVar(as, 0);
-        as->Asm("ora #%"+QString::number((uchar)v,2));
+        as->Asm("ora " +var);
         SaveVar(as,0);
     }
 
+    // Else, perform the full shit...
 }
+
 
 void NodeBuiltinMethod::GetBit(Assembler *as)
 {

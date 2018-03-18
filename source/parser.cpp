@@ -58,6 +58,7 @@ void Parser::InitBuiltinFunctions()
     InitBuiltinFunction(QStringList()<< "rand", "initrandom");
     InitBuiltinFunction(QStringList()<< "sine", "initsinetable");
     InitBuiltinFunction(QStringList()<< "*", "initeightbitmul");
+    InitBuiltinFunction(QStringList()<< "*", "init16x8mul");
     InitBuiltinFunction(QStringList()<< "moveto", "initmoveto");
     InitBuiltinFunction(QStringList()<< "printstring" << "printnumber", "initprintstring");
     InitBuiltinFunction(QStringList()<< "joystick" , "initjoystick");

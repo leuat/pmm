@@ -1,13 +1,13 @@
 
 
-procedure RenderLevel(m_li, m_lj: byte);
+procedure RenderLevel(m_li, m_lj, m_screen: byte);
 var
    m_rl_width, m_rl_height : byte;
    m_rl_sizex, m_rl_sizey : byte;
    m_rl_startx, m_rl_starty : byte;
    m_rl_dataSize, m_rl_pos : byte;
    m_rl_i, m_rl_j, m_rl_val, m_rl_idx: byte;
-
+   m_rl_chunksize : byte;
 
 begin
 	// Fluff files have 13 byte headers
@@ -24,6 +24,7 @@ begin
 	m_rl_startx := @levelpointer[#4];
 	m_rl_starty := @levelpointer[#5];
 
+	m_rl_chunksize := @levelpointer[#7];
 
 	m_rl_dataSize := @levelpointer[#8];
 
@@ -49,7 +50,7 @@ begin
 
 	// Set screen position 
 
-	moveto(m_rl_startx, m_rl_starty, #$04);
+	moveto(m_rl_startx, m_rl_starty, m_screen);
 	
 	// Fill screen with chars
 	call(SIDFILE_1_PLAY);
@@ -94,5 +95,7 @@ begin
 	m_rl_val :=  peek(@levelpointer,#2);
 	poke(MULTICOLOR_CHAR_COL, #1, m_rl_val);
 
+	inczp(@levelpointer, #3);
+	// levelpointer now points to chunk data!
 
 end;

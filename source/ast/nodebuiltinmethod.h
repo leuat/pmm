@@ -48,6 +48,7 @@ public:
     void IncZp(Assembler* as);
     void Call(Assembler* as);
     void InitSid(Assembler* as);
+    void InitMul16x8(Assembler* as);
     void DisableInterrupts(Assembler* as);
     void EnableInterrupts(Assembler* as);
     void RasterIRQ(Assembler* as);
@@ -67,6 +68,8 @@ public:
     void CopyZPdata(Assembler* as);
     void InitZeroPage(Assembler* as);
 
+
+    QString BitShiftX(Assembler* as);
 
     void LoadVar(Assembler* as, int paramNo, QString register, QString load="");
     void LoadVar(Assembler* as, int paramNo);

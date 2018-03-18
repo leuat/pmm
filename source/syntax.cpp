@@ -75,7 +75,6 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER
                //  << BuiltInFunction::Type::INTEGER
                 );
-
     builtInFunctions["getbit"] = BuiltInFunction(
                 "getbit",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
@@ -119,6 +118,11 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["initeightbitmul"] = BuiltInFunction(
                 "initeightbitmul",
                 QList<BuiltInFunction::Type>());
+
+    builtInFunctions["init16x8mul"] = BuiltInFunction(
+                "init16x8mul",
+                QList<BuiltInFunction::Type>());
+
 
 
 

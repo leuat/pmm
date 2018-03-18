@@ -163,6 +163,22 @@ public:
 
     }
 
+    void Mul16x8(Assembler* as) {
+        as->Asm("");
+        m_left->LoadVariable(as);
+        as->Term();
+        as->Asm("sty mul16x8_num1");
+        as->Asm("sta mul16x8_num1Hi");
+
+        as->Asm("");
+        m_right->LoadVariable(as);
+        as->Term();
+        as->Asm("sta mul16x8_num2");
+        as->Asm("jsr mul16x8_procedure");
+
+    }
+
+
     void RightIsPureNumericMulDiv16bit(Assembler* as) {
         int val = ((NodeNumber*)m_right)->m_val;
 
@@ -181,8 +197,10 @@ public:
         QString varName;
         if (m_op.m_type == TokenType::DIV)
             command = "lsr";
-        if (m_op.m_type == TokenType::MUL)
-            command = "asl";
+        if (m_op.m_type == TokenType::MUL) {
+            Mul16x8(as);
+            return;
+        }
 
 
         as->Asm("");

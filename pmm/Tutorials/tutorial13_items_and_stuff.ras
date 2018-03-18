@@ -9,13 +9,29 @@ var
 	sprite0data : incbin("sprites/fastfood.bin");
 	music1 : incsid("fliptape3.sid");
 	m_posx, m_posy : byte; // current level position in grid
- 	i, redraw : byte;  // i is temp, redraw states that the map should be redrawn
+ 	i, redraw, j: byte;  // i is temp, redraw states that the map should be redrawn
 	
-	sprite1_counter, tmp2 : byte; // sprite1_counter shifts between sprite animations 
-	spritex, spritey, tmp : integer; // Sprite positions and temp integer
+	sprite1_counter, tmp2,val : byte; // sprite1_counter shifts between sprite animations 
+	spritex, tmp : integer; // Sprite positions and temp integer
+	spritey : byte;
 
-	intro_image_color: IncBin("images/lemonspawn_color.bin", "$9000");
-	intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000");
+//	intro_image_color: IncBin("images/lemonspawn_color.bin", "$9000");
+//	intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000");
+
+	current_background : byte;
+
+	entity_sprites : array[8] of byte = (
+		$92, $93, $94, $95, $96, $97, $98, $92);
+
+
+	// Entities
+	no_entities : byte;
+	entity_pos_x : array[8] of byte;
+	entity_pos_y : array[8] of byte;
+	entity_type : array[8] of byte;
+	entity_color : array[8] of byte;
+
+
 
 
 
@@ -23,23 +39,125 @@ var
 @include "RasLib/Levels.ras"  
 
 @define playerSprite "#0"
-@define monsterSprite "#0"
+@define player_sprite_loc "#$90"
+
+
 @define playerSpeed "#2"
 
 
 // Updates the sprite & the sprite animation
 procedure UpdatePlayerSprite();
 begin
-	spritepos(spritex, spritey,@playerSprite);
+	asm(";crash one");
+	spritepos(spritex, spritey, @playerSprite);
 	sprite1_counter:=sprite1_counter-#1;
 	// Animation hits at 0 and 10
 	if sprite1_counter=#10 then 
-		setSpriteLoc(#0, #$90, #0);
+		setSpriteLoc(@playerSprite, #$90, #0);
 
 	if sprite1_counter=#0 then begin
 		sprite1_counter := #20;
-		setSpriteLoc(#0, #$91, #0);
+		setSpriteLoc(@playerSprite, #$91, #0);
 	
+	end;
+
+end;
+
+procedure PrintText();
+begin
+	//moveto(#2, #0, #$04);
+	//printstring("HEISANN", #0, #30);
+	for i:=#0 to #25 do begin
+		poke($0400, i, i + #120);
+		poke($0400+ #40, i, i + #160);
+		poke($8400, i, i + #120);
+		poke($8400+ #40, i, i + #160);
+		// Color: Red
+		poke($D800, i, BLUE);
+		poke($D800+ #40, i, BLUE);
+	end;
+	moveto(#2, #24, #$D8);
+	for i:=#0 to #25 do 
+		pokescreen(RED, i);
+	moveto(#2, #24, #$04);
+
+	printstring("SCORE", #0, #10);
+end;
+
+procedure ClearText();
+begin
+	for i:=#0 to #25 do begin
+		poke($0400, i, #$20);
+		poke($0400+ #40, i, #$20);
+
+	end;
+	moveto(#0, #24, #$D8);
+	for i:=#0 to #40 do 
+		pokescreen(#$20, i);
+
+
+end;
+
+
+procedure debug(db_posx, db_posy, db_val : byte);
+begin
+	moveto(db_posx, db_posy, #$04);
+	printnumber(db_val);
+end;
+
+
+
+procedure LoadEntities();
+begin
+	// levelPointer
+	val:=#1;
+	no_entities := #0;
+
+	while val=#1 do begin
+		// Check if entity is not zero
+		if @levelpointer[#0]<>#0 then
+		begin
+			entity_pos_x[no_entities] := @levelpointer[#1]*#4 + #10;
+			entity_pos_y[no_entities] := @levelpointer[#2]*#8+#45;
+			entity_type[no_entities] := @levelpointer[#0];
+			entity_color[no_entities] := @levelpointer[#4];
+
+			no_entities:=no_entities+#1;
+			
+
+		end
+		else
+			val:=#0; // break loop
+		inczp(@levelpointer, m_rl_chunksize);
+
+	end;
+	debug(#15, #24, entity_pos_y[#0]);
+end;
+
+
+procedure InitEntities();
+begin
+	// Clear sprite bitmask
+	poke(SPRITE_BITMASK, #0, #1);
+	for val:=#0 to no_entities do begin
+		i:=val+#1;
+		j:=	entity_sprites[ entity_type[val] ];
+		SetSpriteLoc(i, j ,#0);
+		toggleBit(SPRITE_BITMASK, i, #1);
+		poke(SPRITE_COLOR,i, entity_color[val]);
+	end;
+
+end;
+
+
+procedure UpdateEntities();
+begin
+	for i:=#0 to no_entities do begin
+		val:=i+#1;
+		tmp:=entity_pos_x[i];
+		tmp:=tmp*#2;
+		spritepos(tmp, entity_pos_y[i], val );
+
 	end;
 
 end;
@@ -119,105 +237,115 @@ begin
 	
 
 	if redraw=#1 then begin
+    	poke(SPRITE_BITMASK,#0, #%00000000);
+		ClearText();
+		poke(SCREEN_FG_COL, #0, BLACK);
 		// Render me baby!
-		setbank(VIC_BANK2);
-		poke(VIC_DATA_LOC, #0, #$1A);
-
 		@levelpointer := levels;
 		// Defined in Levels.ras
-   	    RenderLevel(m_posx, m_posy);
-		setbank(VIC_BANK0);
+   	    RenderLevel(m_posx, m_posy, #$84);
+		LoadEntities();
+		InitEntities();
 
+		current_background := peek(MULTICOLOR_CHAR_COL,#0);
+
+		CopyFullScreen($8400, $0400);
+
+		PrintText();
 	end;
+
+
+	UpdateEntities();
 end;
 
 // Initialize sprites 
 procedure InitSprites();
 begin
-	setSpriteLoc(#0, #$90, #0);
+	setSpriteLoc(#0, @player_sprite_loc, #0);
 	
 	setSpriteLoc(#1, #$92, #0);
 	
     setSpriteLoc(#2, #$93, #0);
 	
+    setSpriteLoc(#3, #$94, #0);
+
+    setSpriteLoc(#4, #$95, #0);
 
 	poke(SPRITE_MULTICOLOR_REG1, #0, BLACK);
 	poke(SPRITE_MULTICOLOR_REG2, #0, YELLOW);
 
-    poke(SPRITE_BITMASK,#0, #%00000011);
+    poke(SPRITE_BITMASK,#0, #%00000001);
 
-	// All sprites have red as base color. Just one sprite here I guess.
 	poke(SPRITE_COLOR,#0, RED);
-	poke(SPRITE_COLOR,#1, RED);
-	poke(SPRITE_COLOR,#2, RED);
 
 	
 
 
 	// Copy sprite data
-    memcpy(sprite0data, #64, SPRITE_LOC1, #63);
-    memcpy(sprite0data, #128, SPRITE_LOC1 + 64, #63);
+    memcpy(sprite0data, #64, @player_sprite_loc*#64, #63);
+    memcpy(sprite0data, #128, @player_sprite_loc*#64 + 64, #63);
 
-    memcpy(sprite0data, #192, SPRITE_LOC2, #63);
+    memcpy(sprite0data, #192, #$92*#64, #63);
 
-    memcpy(sprite0data, #256, SPRITE_LOC3, #63);
+    memcpy(sprite0data, #256, #$93*#64, #63);
+
+    memcpy(sprite0data, #0, #$94*#64, #63);
+
+    memcpy(sprite0data, #384, #$95*#64, #63);
 
 
-	poke(SPRITE_STRETCH_X, #0, #%00000010);
-	poke(SPRITE_STRETCH_Y, #0, #%00000010);
+//	poke(SPRITE_STRETCH_X, #0, #%00000010);
+//	poke(SPRITE_STRETCH_Y, #0, #%00000010);
 
-	togglebit(SPRITE_MULTICOLOR, @playerSprite, #1);
-	togglebit(SPRITE_MULTICOLOR, @monsterSprite, #1);
+//	togglebit(SPRITE_MULTICOLOR, #0, #1);
+//	togglebit(SPRITE_MULTICOLOR, #1, #1);
+	poke(SPRITE_MULTICOLOR, #0, #$FF); // ALL multicolor
 end;
 
 
-
-procedure PrintText();
-begin
-	//moveto(#2, #0, #$04);
-	//printstring("HEISANN", #0, #30);
-	for i:=#0 to #25 do begin
-		poke($0400, i, i + #120);
-		poke($0400+ #40, i, i + #160);
-		poke($8400, i, i + #120);
-		poke($8400+ #40, i, i + #160);
-		// Color: Red
-		poke($D800, i, RED + #8);
-		poke($D800+ #40, i, RED + #8);
-
-	end;
-
-end;
 
 
 interrupt rasterUpdate();
 begin
 	// Call sid
 	call(SIDFILE_1_PLAY);
+	// Make sure upper part of screen renders text
 	setRegularColorMode();
-//	setBank(VIC_BANK3);
-	//PrintText();
-	tmp:=peek(MULTICOLOR_CHAR_COL,#0);
 	poke(MULTICOLOR_CHAR_COL, #0, BLACK);
 	waitForRaster(#1);
+	// Set regular text font
 	poke(VIC_DATA_LOC, #0, #$1A);
+	// Wait until level starts
 
 	waitforRaster(#67);
-	poke(MULTICOLOR_CHAR_COL, #0, tmp);
-	poke(VIC_DATA_LOC, #0, #$1C);
-	
-	//setBank(VIC_BANK0);
-//	setMulticolorMode();
+	// Set multi color & level font
 
-	// Call update
+	poke(MULTICOLOR_CHAR_COL, #0, current_background);
+	poke(VIC_DATA_LOC, #0, #$1C);
+	setMulticolorMode();
+
 	Update();
+
+	waitForRaster(#243);
+	// Go back to regular font
+	
+	poke(MULTICOLOR_CHAR_COL, #0, BLACK);
+	poke(VIC_DATA_LOC, #0, #$1A);
+
+
+	waitForRaster(#255);
+	// Make sure multicolor font is loaded afterwards
+	poke(VIC_DATA_LOC, #0, #$1C);
+		
 	// Acknowledge interrupt
-	waitForRaster(#250);
+
 	kernelInterrupt();
+
+
 end;
 
 
-procedure Intro();
+/*procedure Intro();
 begin
 	setmulticolormode();
 	setbitmapmode();
@@ -228,7 +356,7 @@ begin
 	while joystickbutton<>#1 do begin
 		Joystick();
 		WaitForRaster(#1);
-		WaitForRaster(##250);
+		WaitForRaster(#250);
 		call(SIDFILE_1_PLAY);
 	end;
 	setTextMode();
@@ -237,13 +365,13 @@ begin
 end;
 
 
-
+*/
 
 begin
 	
 	initsid(SIDFILE_1_INIT);
 	poke(SCREEN_BG_COL, #0, #0);
-	Intro();
+	//Intro();
 	setmulticolormode();
 	poke(VIC_DATA_LOC, #0, #$1A);
 
@@ -260,7 +388,8 @@ begin
 
 	// Initial map rendering
 	@levelpointer := levels;
-	RenderLevel(m_posx, m_posy);
+	RenderLevel(m_posx, m_posy, #$04);
+	current_background := peek(MULTICOLOR_CHAR_COL,#0);
 
 	// Initial sprite position
 	spritex := #160;
@@ -270,6 +399,12 @@ begin
 
 	InitSprites();
 	PrintText();
+
+	LoadEntities();
+	InitEntities();
+
+
+	//setbank(VIC_BANK2);
 
 
 	// Hook that raster!
