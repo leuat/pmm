@@ -9,4 +9,15 @@ begin
 		writeln("TRUE",#0)
 	else
 		writeln("FALSE",#0);
+
+	poke($D800, #0, #$F0);
+
+	moveto(#20,#20, #$04);
+
+	printnumber(b);
+
+	b := peek($D800, #0);
+
+	printnumber(b);
+
 end.

@@ -69,10 +69,20 @@ public:
             ErrorHandler::e.Error("Error assigning pointer: right-hand must be variable or number");
 
         if (bVar!=nullptr) {
-           as->Asm("lda #<" + bVar->value);
-           as->Asm("ldx #>" + bVar->value);
-           as->Asm("sta " + aVar->value);
-           as->Asm("stx "+ aVar->value+"+1");
+
+            if (bVar->getType(as)!=TokenType::POINTER) {
+                as->Asm("lda #<" + bVar->value);
+                as->Asm("ldx #>" + bVar->value);
+                as->Asm("sta " + aVar->value);
+                as->Asm("stx "+ aVar->value+"+1");
+            }
+            else
+            {
+                as->Asm("lda " + bVar->value);
+                as->Asm("ldx " + bVar->value + "+1");
+                as->Asm("sta " + aVar->value);
+                as->Asm("stx "+ aVar->value+"+1");
+            }
         }
         if (bNum!=nullptr) {
             as->Asm("lda #" + QString::number(((int)bNum->m_val) & 255));

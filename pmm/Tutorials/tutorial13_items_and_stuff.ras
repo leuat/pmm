@@ -15,8 +15,8 @@ var
 	spritex, tmp : integer; // Sprite positions and temp integer
 	spritey, frameCounter : byte;
 
-	intro_image_color: IncBin("images/lemonspawn_color.bin", "$9000");
-	intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000");
+	//intro_image_color: IncBin("images/lemonspawn_color.bin", "$9000");
+	//intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000");
 
 	current_background : byte;
 
@@ -62,7 +62,109 @@ var
 
 
 @define levelpointer "zeropage7"
-@include "RasLib/Levels.ras"  
+//@include "RasLib/Levels.ras"  
+
+
+procedure RenderLevel(m_li, m_lj, m_screen: byte);
+var
+   m_rl_width, m_rl_height : byte;
+   m_rl_sizex, m_rl_sizey : byte;
+   m_rl_startx, m_rl_starty : byte;
+   m_rl_dataSize, m_rl_pos : byte;
+   m_rl_i, m_rl_j, m_rl_val, m_rl_idx: byte;
+   m_rl_chunksize : byte;
+
+begin
+	// Fluff files have 13 byte headers
+	inczp(@levelpointer, #13); // Fluff header
+
+	// Read level header info
+
+	m_rl_sizex := @levelpointer[#0];
+	m_rl_sizey := @levelpointer[#1];
+
+	m_rl_width := @levelpointer[#2];
+	m_rl_height := @levelpointer[#3];
+
+	m_rl_startx := @levelpointer[#4];
+	m_rl_starty := @levelpointer[#5];
+
+	m_rl_chunksize := @levelpointer[#7];
+
+	m_rl_dataSize := @levelpointer[#8];
+
+	
+	// Go past header
+
+	inczp(@levelpointer, #9);
+
+	// Calculate position in level layout
+
+	m_rl_pos := m_rl_sizex*m_lj + m_li;
+	
+	m_rl_val := m_rl_width*m_rl_height;
+	m_rl_val := m_rl_val;// + m_width; 
+
+	// Skip levels
+
+	for m_rl_j:=#0 to m_rl_pos do begin
+			inczp(@levelpointer,m_rl_val);
+			inczp(@levelpointer,m_rl_val);
+			inczp(@levelpointer,m_rl_dataSize);
+	end;
+
+	// Set screen position 
+
+	moveto(m_rl_startx, m_rl_starty, m_screen);
+	
+	// Fill screen with chars
+	//call(SIDFILE_1_PLAY);
+	
+	for m_rl_j:=#0 to m_rl_height do begin
+		for m_rl_i:=#0 to m_rl_width do begin
+			m_rl_val := peek(@levelpointer,m_rl_i);
+			m_rl_idx:=m_rl_i*#2;
+
+			screenmemory[m_rl_idx]:=m_rl_val;
+			screenmemory[m_rl_idx+#1]:=m_rl_val+#1;
+			screenmemory[m_rl_idx+#40]:=m_rl_val+#40;
+			screenmemory[m_rl_idx+#41]:=m_rl_val+#41;
+		 end;
+		incscreenx(#80);
+		inczp(@levelpointer,m_rl_width);
+	end;
+	// Then colors
+	moveto(m_rl_startx, m_rl_starty, #$D8);
+//	call(SIDFILE_1_PLAY);
+	zeropage4:=@levelpointer;
+	for m_rl_j:=#0 to m_rl_height do begin
+		for m_rl_i:=#0 to m_rl_width do begin
+			m_rl_val := peek(@levelpointer,m_rl_i)&#7 + #8;
+			m_rl_idx:=m_rl_i*#2;
+			
+			screenmemory[m_rl_idx]:=m_rl_val;
+			screenmemory[m_rl_idx+#1]:=m_rl_val;
+			screenmemory[m_rl_idx+#40]:=m_rl_val;
+			screenmemory[m_rl_idx+#41]:=m_rl_val;
+			
+	 	end;
+		incscreenx(#80);
+		inczp(@levelpointer, m_rl_width);
+	
+	end;
+	// Set multicolor colors
+	//call(SIDFILE_1_PLAY);
+	m_rl_val :=  peek(@levelpointer,#0);
+	poke(MULTICOLOR_CHAR_COL, #0, m_rl_val);
+	m_rl_val :=  peek(@levelpointer,#1);
+	poke(MULTICOLOR_CHAR_COL, #2, m_rl_val); 
+	m_rl_val :=  peek(@levelpointer,#2);
+	poke(MULTICOLOR_CHAR_COL, #1, m_rl_val);
+
+	inczp(@levelpointer, #3);
+	// levelpointer now points to chunk data!
+
+end;
 
 @include "RasLib/sprites.ras"  
 
@@ -448,11 +550,24 @@ begin
 	//end;
 
 	// Get sprite collision
-	tmp2 := getbit(SPRITE_BG_COLLISION, @playerSprite);
+	//tmp2 := getbit(SPRITE_BG_COLLISION, @playerSprite);
 	
+	tmp:=spritex+#5;	
+	i:=tmp/#8-m_rl_startx;
+	j:=(spritey-#55)/#8;
+	i:=i-m_rl_starty;
+	i:=i/#2;
+	j:=j/#2;
+	val := j*m_rl_width;
+	val := val + i;
+	val:=peek(zeropage4, val);
+	tmp2:=getbit(val, #3);
+
+
+
 	UpdatePlayerSprite();
 	// If collision, abort abort
-	if tmp2=#0 then begin
+	if tmp2=#1 then begin
 		spritex:=spritex - joystickright;
 		spritex:=spritex + joystickleft;
 		spritey:=spritey - joystickdown + joystickup;
@@ -660,7 +775,7 @@ begin
 end;
 
 
-procedure Intro();
+/*procedure Intro();
 begin
 	setmulticolormode();
 	setbitmapmode();
@@ -679,14 +794,14 @@ begin
 
 end;
 
-
+*/
 
 
 begin
 	
 	//initsid(SIDFILE_1_INIT);
 	poke(SCREEN_BG_COL, #0, #0);
-	Intro();
+	//Intro();
 	setmulticolormode();
 	poke(VIC_DATA_LOC, #0, #$1A);
 
@@ -713,7 +828,7 @@ begin
 	player_health := #100;
 
 	sprite1_counter := #1;
-	bullet_count :=#5;
+	bullet_count :=#15;
 	bullet_wait := #0;
 
 	InitSprites();

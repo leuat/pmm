@@ -71,9 +71,10 @@ begin
 	// Then colors
 	moveto(m_rl_startx, m_rl_starty, #$D8);
 //	call(SIDFILE_1_PLAY);
+	zeropage4:=@levelpointer;
 	for m_rl_j:=#0 to m_rl_height do begin
 		for m_rl_i:=#0 to m_rl_width do begin
-			m_rl_val := peek(@levelpointer,m_rl_i) + #8;
+			m_rl_val := peek(@levelpointer,m_rl_i)&#7 + #8;
 			m_rl_idx:=m_rl_i*#2;
 			
 			screenmemory[m_rl_idx]:=m_rl_val;
