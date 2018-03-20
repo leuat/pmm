@@ -4,16 +4,16 @@ var
 	mainChar: IncBin("charsets/charset_regular_tutorial13.bin","$4800"); // $800 bytes
 
 	levelChar: IncBin("charsets/tutorial13.bin","$5000");// $800 bytes
-	sprite0data : incbin("sprites/fastfood.bin", "$6000"); // will be $1000 bytes // locally 2000
+	sprite0data : incbin("sprites/fastfood.bin", "$5800"); // will be $1000 bytes // locally 2000
 
-	levels: IncBin("levels/tutorial13.flf", "$7000"); // 2400 in hex
+	levels: IncBin("levels/tutorial13.flf", "$6800"); // 2400 in hex
 //	intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000"); // $2000 suze
 
 
 
 //	music1 : incsid("fliptape3.sid");
 	m_posx, m_posy : byte; // current level position in grid
- 	i, redraw, j,k: byte;  // i is temp, redraw states that the map should be redrawn
+ 	i, redraw, j,k,l: byte;  // i is temp, redraw states that the map should be redrawn
 	time : byte;
 	
 	sprite1_counter, tmp2,val : byte; // sprite1_counter shifts between sprite animations 
@@ -25,7 +25,7 @@ var
 	current_background : byte;
 
 	entity_sprites : array[8] of byte = (
-		$81, $80, $83, $84, $85, $86, $87, $88, $82);
+		$61, $60, $63, $64, $65, $66, $67, $68, $69,$6A);
 
     fade : array [16] of byte = (11,6,6,12,4,14,15,1,1,15,14,4,12,6,6,11); 
 
@@ -42,6 +42,7 @@ var
 	entity_dd_y : array[8] of byte;
 	entity_pos_spread : array[8] of byte;
 	entity_type : array[8] of byte;
+	entity_sprite : array[8] of byte;
 	entity_color : array[8] of byte;
 	entity_health : array[8] of byte;
 
@@ -58,6 +59,10 @@ var
 	player_health : byte;
 	bullet_count : byte;
 
+
+	player_maxhealth : byte;
+	bullet_max  : byte;
+
 	bullet_x : byte;
 	bullet_y, bullet_dx, bullet_dy : byte;
 	bullet_wait : byte;
@@ -69,7 +74,8 @@ var
 	
 
 
-// pizza is 5, heart is 6
+// pizza is 5, heart is 6, health upgrade is 7, ammo upgrade is 8,
+// hotdog is 9
 
 @define entity_id "#0"
 	
@@ -77,6 +83,12 @@ var
 @define entity_damage "#9"
 @define entity_ammo "#10"
 @define entity_sound "#11"
+@define entity_upgrade "#12"
+
+@define upgrade_health_bit "#0"
+@define upgrade_ammo_bit "#1"
+@define upgrade_scroll_bit "#2"
+
 
 @define screen1hi "#$44"
 @define screenmem1 "$4400"
@@ -93,6 +105,9 @@ var
 
 @define monster_speed "#1"
 @define levelpointer "zeropage7"
+
+
+
 
 @define sidchannel "SID_CHANNEL3"
 //@include "RasLib/Levels.ras"  
@@ -209,8 +224,8 @@ end;
 @define playerSprite "#0"
 @define bulletSprite "#7"
 
-@define player_sprite_loc "#$80"
-@define bullet_sprite_loc "#$86"
+@define player_sprite_loc "#$60"
+@define bullet_sprite_loc "#$66"
 
 @define crashDistance "#12"
 
@@ -224,11 +239,11 @@ begin
 	sprite1_counter:=sprite1_counter-#1;
 	// Animation hits at 0 and 10
 	if sprite1_counter=#10 then 
-		setSpriteLoc(@playerSprite, #$81, @spritebank);
+		setSpriteLoc(@playerSprite, #$61, @spritebank);
 
 	if sprite1_counter=#0 then begin
 		sprite1_counter := #20;
-		setSpriteLoc(@playerSprite, #$82, @spritebank);
+		setSpriteLoc(@playerSprite, #$62, @spritebank);
 	
 	end;
 
@@ -273,7 +288,7 @@ begin
 	for i:=#0 to #40 do 
 		pokescreen(RED, i);
 
-	moveto(#30, #24, @screen1hi);
+	moveto(#30, #1, @screen1hi);
 
 	printstring("SCORE", #0, #10);
 
@@ -281,7 +296,7 @@ begin
 
 	printstring("LIFE", #0, #10);
 
-	moveto(#15, #24, @screen1hi);
+	moveto(#30, #24, @screen1hi);
 
 	printstring("AMMO", #0, #10);
 
@@ -328,6 +343,7 @@ begin
 			entity_curpos_x[no_entities] := entity_pos_x[no_entities];
 			entity_curpos_y[no_entities] := entity_pos_y[no_entities];
 			entity_type[no_entities] := @levelpointer[#0];
+//			entity_sprite
 			entity_color[no_entities] := @levelpointer[#4];
 
 			entity_pos_spread[no_entities] := @levelpointer[#5];
@@ -352,6 +368,9 @@ begin
 				entity_pickup[no_entities]:=#1;
 			if @levelpointer[@entity_damage]>#128 then
 				entity_pickup[no_entities]:=#1;
+			if @levelpointer[@entity_upgrade]>#1 then
+				entity_pickup[no_entities]:=#1;
+			
 			
 
 			entity_hurt[no_entities]:=#0;
@@ -392,7 +411,7 @@ begin
 	
 		for i:=#0 to no_entities do begin
 			
-					
+								
 			entity_framecounter_x[i]:= entity_framecounter_x[i] - #1;
 			if entity_framecounter_x[i]=#0 then begin
 				entity_framecounter_x[i]:=entity_framecounter_maxx[i];
@@ -518,6 +537,18 @@ begin
 			zeropage5[@entity_isdead]:=#1;
 			PlayDeathSound(zeropage5[@entity_sound]);
 			player_score:=player_score +#1;		
+
+			val:=zeropage5[@entity_upgrade];
+			// UPGRADES!
+			j:=getbit(val, @upgrade_ammo_bit);
+			if j=#0 then bullet_max:=bullet_max+#5;
+			j:=getbit(val, @upgrade_health_bit);	
+			if j=#0 then begin
+				player_health := player_health + #10;	
+				player_maxhealth := player_maxhealth + #10;	
+			end;
+
+
 		end
 		else
 			PlaySound(SID_CHANNEL3, 
@@ -716,6 +747,9 @@ begin
 	if val<@crashDistance then begin
 		pointToEntityData(j);
 		player_health := player_health - zeropage5[@entity_damage];
+		if player_health>player_maxhealth then
+			player_health := player_maxhealth;
+
 		bullet_count := bullet_count + zeropage5[@entity_ammo];
 		HitEntity(j, #1);	
 //		debug(#25, #0, zeropage5[#9]);
@@ -905,9 +939,9 @@ begin
 	end;
 
 
-	Setbank(VIC_BANK0);
+	Setbank(VIC_BANK1);
 	poke(SPRITE_BITMASK, #0, #0);
-	ClearScreen(#$20, SCREEN_CHAR_LOC);
+	ClearScreen(#$20, #$4400);
 	ClearScreen(#$02, SCREEN_COL_LOC);
 	poke(VIC_DATA_LOC, #0, @charmapText);
 	poke(SCREEN_BG_COL, #0, BLACK);
@@ -918,21 +952,24 @@ end;
 procedure RenderHealthBar();
 begin
 
-	moveto(#6, #24, #@screen1hi);
-	for i:=#0 to #8 do begin
-		j:=player_health-i*#8;
-		if j>#127 then j:=#0;
-		if j>#15 then j:=#15;
-		val := #65 + j;
-		screenmemory[i] := val;
-	end;
-
-
 	moveto(#6, #24, #$D8);
-	for i:=#0 to #8 do begin
-		screenmemory[i]:=YELLOW +#8;
+	zeropage1 := screenmemory;
+	moveto(#6, #24, #@screen1hi);
+
+	tmp2 := player_maxhealth/#8;
+	k := player_health/#8;
+
+	for i:=#0 to tmp2 do begin
+		screenmemory[i] := #96;
+				
+		if i<k then
+			zeropage1[i] := YELLOW
+		else
+			zeropage1[i] := RED;
+
 
 	end;
+
 
 
 
@@ -952,7 +989,9 @@ begin
 	// Set regular text font
 	poke(VIC_DATA_LOC, #0, @charmapText);
 	// Wait until level starts
-	PrintTextColor();
+//	PrintTextColor();
+	UpdateBullet();
+	UpdateEntities();
 
 	waitforRaster(#67);
 	// Set multi color & level font
@@ -961,14 +1000,12 @@ begin
 	poke(VIC_DATA_LOC, #0, @charmapLevel);
 	setMulticolorMode();
 	RenderHealthBar();
-	moveto(#20, #24, @screen1hi);
-	printnumber(bullet_count);
 	moveto(#36, #24, @screen1hi);
+	printnumber(bullet_count);
+	moveto(#36, #1, @screen1hi);
 	printnumber(player_score);
 
-	UpdateBullet();
 	UpdatePlayer();
-	UpdateEntities();
 	
 
 	waitForRaster(#243);
@@ -1045,13 +1082,17 @@ begin
 	spritex := #160;
 	spritey := #100;
 
-	player_health := #64;
 
 	sprite1_counter := #1;
-	bullet_count :=#5;
 	bullet_wait := #0;
 	bullet_dmg:=#5;
 	player_score := #0;
+
+	player_health := #30;
+	player_maxhealth := #30;
+
+	bullet_count :=#5;
+	bullet_max := #10;
 
 	// TURN OFF Kernal Basic! WHOO!
 	togglebit($1, #0, #0);
