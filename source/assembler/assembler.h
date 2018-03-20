@@ -30,9 +30,19 @@ class LabelStack {
 public:
     QVector<QString> m_vars;
     QString m_current;
-    void push() {
 
-        m_current = QString::number(rand()%50000);
+    QMap<QString, bool> sNumbersUsed;
+
+    void push() {
+        bool ok=false;
+        while (!ok) {
+            m_current = QString::number(rand()%100000);
+            ok=true;
+            if (sNumbersUsed.contains(m_current))
+                ok = false;
+        }
+        sNumbersUsed[m_current] = true;
+
         m_vars.push_back(m_current);
     }
     void pop() {

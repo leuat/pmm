@@ -1,7 +1,10 @@
 #include "assembler.h"
 
+//QMap<QString, bool> LabelStack::sNumbersUsed;
+
 Assembler::Assembler()
 {
+  //  LabelStack::sNumbersUsed.clear();
     m_symTab = new SymbolTable();
 }
 

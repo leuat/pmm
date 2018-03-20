@@ -1,7 +1,7 @@
 #include "mos6502.h"
 #include "source/syntax.h"
 
-AsmMOS6502::AsmMOS6502()
+AsmMOS6502::AsmMOS6502() :Assembler()
 {
 //    m_stack["for"] = new Stack();
 
