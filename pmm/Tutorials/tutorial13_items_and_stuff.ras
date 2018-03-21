@@ -24,11 +24,13 @@ var
 
 	current_background : byte;
 
+	// Entity sprite locations in memory *64 on current bank
 	entity_sprites : array[8] of byte = (
 		$61, $60, $63, $64, $65, $66, $67, $68, $69,$6A);
 
     fade : array [16] of byte = (11,6,6,12,4,14,15,1,1,15,14,4,12,6,6,11); 
 
+	// Used to calculate direction of pizza bullet
 	prev_dx, prev_dy : byte;
 
 
@@ -77,8 +79,9 @@ var
 // pizza is 5, heart is 6, health upgrade is 7, ammo upgrade is 8,
 // hotdog is 9
 
+
+// Location in .flf files of entity values
 @define entity_id "#0"
-	
 @define entity_isdead "#8"
 @define entity_damage "#9"
 @define entity_ammo "#10"
@@ -89,7 +92,7 @@ var
 @define upgrade_ammo_bit "#1"
 @define upgrade_scroll_bit "#2"
 
-
+// Screen writing positions
 @define screen1hi "#$44"
 @define screenmem1 "$4400"
 
@@ -103,19 +106,16 @@ var
 
 @define spritebank "#1"
 
-@define monster_speed "#1"
 @define levelpointer "zeropage7"
-
-
-
 
 @define sidchannel "SID_CHANNEL3"
 //@include "RasLib/Levels.ras"  
 
 
 
-
-
+/*
+   Renders a .flf level at map pos x,y
+*/
 procedure RenderLevel(m_li, m_lj, m_screen: byte);
 var
    m_rl_width, m_rl_height : byte;
@@ -221,6 +221,7 @@ end;
 
 @include "RasLib/sprites.ras"  
 
+// Sprite 0 and 7 are reserved, so we can only have 6 entity sprites in one screen
 @define playerSprite "#0"
 @define bulletSprite "#7"
 
@@ -249,6 +250,7 @@ begin
 
 end;
 
+// Sets zeropage 5 to entity data of a given index
 procedure pointToEntityData(pte_idx : byte);
 begin
 	zeropage5:=zeropage3;
@@ -258,6 +260,7 @@ begin
 end;
 
 
+// Prints colored text (slow, unused for now)
 Procedure PrintTextColor();
 begin
 	j:=time/#4;
@@ -270,16 +273,15 @@ begin
 
 end;
 
+// Renders upper and lower text
 procedure PrintText();
 begin
+	// The "Rogue Burger" logo
 	for i:=#0 to #25 do begin
 		poke(@screenmem1, i, i + #120);
 		poke(@screenmem1+ #40, i, i + #160);
 		poke(@screenmem2, i, i + #120);
 		poke(@screenmem2+ #40, i, i + #160);
-		// Color: Red
-		//poke($D800, i, BLUE);
-		//poke($D800+ #40, i, BLUE);
 		val := fade[i&#15];
 		poke($D800, i,val );
 		poke($D800+ #40, i, val);
@@ -326,7 +328,9 @@ end;
 
 
 
-
+/*
+ Sets up entity data when a new level is loaded
+*/
 procedure LoadEntities();
 begin
 	// levelPointer
@@ -343,7 +347,7 @@ begin
 			entity_curpos_x[no_entities] := entity_pos_x[no_entities];
 			entity_curpos_y[no_entities] := entity_pos_y[no_entities];
 			entity_type[no_entities] := @levelpointer[#0];
-//			entity_sprite
+
 			entity_color[no_entities] := @levelpointer[#4];
 
 			entity_pos_spread[no_entities] := @levelpointer[#5];
@@ -371,7 +375,6 @@ begin
 			if @levelpointer[@entity_upgrade]>#1 then
 				entity_pickup[no_entities]:=#1;
 			
-			
 
 			entity_hurt[no_entities]:=#0;
 
@@ -383,10 +386,11 @@ begin
 		inczp(@levelpointer, m_rl_chunksize);
 
 	end;
-//	debug(#15, #24, entity_pos_y[#0]);
 end;
 
-
+/*
+  After loading entity data on a new level, initialize sprites and corresponding colors
+*/
 procedure InitEntities();
 begin
 	// Clear sprite bitmask
@@ -403,7 +407,10 @@ begin
 
 end;
 
-
+/*
+ Called for each frame: Moves entities according to definition, aggressive if hurt
+ 
+*/
 procedure UpdateEntities();
 begin
 
@@ -416,7 +423,7 @@ begin
 			if entity_framecounter_x[i]=#0 then begin
 				entity_framecounter_x[i]:=entity_framecounter_maxx[i];
 
-				if entity_hurt[i]=#0 then begin
+				if entity_hurt[i]=#0 then begin // Passive movement
 					entity_curpos_x[i] := entity_curpos_x[i] + entity_dd_x[i];
 
 					val := entity_curpos_x[i] - entity_pos_x[i];
@@ -424,7 +431,7 @@ begin
 					if val>j then
 						entity_dd_x[i] := #0 - entity_dd_x[i];
 				end
-				else begin
+				else begin // Aggressive behaviour
 					val:=spritex/#2;
 					val:=val-entity_curpos_x[i];
 					if val<#128 then val:=#1 else val:=#255;
@@ -436,7 +443,7 @@ begin
 			if entity_framecounter_y[i]=#0 then begin
 				entity_framecounter_y[i]:=entity_framecounter_maxy[i];
 
-				if entity_hurt[i]=#0 then begin
+				if entity_hurt[i]=#0 then begin // Passive
 				
 					entity_curpos_y[i] := entity_curpos_y[i] + entity_dd_y[i];
 
@@ -447,7 +454,7 @@ begin
 						entity_dd_y[i] := #0 - entity_dd_y[i];
 				end
 		
-				else begin
+				else begin  // Aggressive behaviour
 					val:=spritey - entity_curpos_y[i];
 					if val<#128 then val:=#1 else val:=#255;
 					entity_curpos_y[i] := entity_curpos_y[i] + val;
@@ -457,7 +464,7 @@ begin
 			end;
 
 
-			// Color stuff
+			// Color stuff. Fix. 
 			val:=i+#1;
 			if entity_pickup[i]=#1 then begin
 				j := time &#7;
@@ -523,6 +530,10 @@ begin
 end;
 
 
+/*
+   Hit a certain entity of index de_i with damage de_dmg
+*/
+
 procedure HitEntity(de_i, de_dmg : byte);
 begin
 	entity_health[de_i]:=entity_health[de_i] -de_dmg;
@@ -564,7 +575,7 @@ end;
 
 procedure InitGameOver();
 
-
+// Doesn't work right now, rwrite to asm
 procedure AbsDistance(ab_x1, ab_y1, ab_x2, ab_y2:byte);
 var
 	ab_tmp1, ab_tmp2: byte;
@@ -582,6 +593,10 @@ begin
 
 end; 
 
+/*
+	Entity software collider: check closest sprite to x,y
+
+*/
 procedure findCollider(fc_x,fc_y:byte);
 begin
 	val := #255;
@@ -610,7 +625,9 @@ begin
 
 end;
 
-
+/*
+	Reverse sprite position, check level data background color bit 3 for bg collision
+*/
 
 procedure BackgroundCollideBullet();
 begin
@@ -809,7 +826,7 @@ begin
 	end;
 
 
-	// Sprite border check
+	// Sprite border check, boring stuff, extract numbers to defines
 	if spritex>#318 then begin
 		if m_posx<>m_rl_sizex-#1 then begin
 			m_posx:=m_posx+#1;
@@ -874,14 +891,10 @@ end;
 
 
 
-
-
-
-
 procedure InitSprites();
 begin
 
-
+	// Black and yellow are our colors
 	poke(SPRITE_MULTICOLOR_REG1, #0, BLACK);
 	poke(SPRITE_MULTICOLOR_REG2, #0, YELLOW);
 
@@ -889,11 +902,6 @@ begin
 
 	poke(SPRITE_COLOR,#0, RED);
 
-	// Load sprite directly at $80*64 on vic2	
-/*	zeropage2:=sprite0data;
-	zeropage3:=#$2400;
-	CopySprites(#9);
-*/
 	poke(SPRITE_MULTICOLOR, #0, #$FF); // ALL multicolor
 end;
 
@@ -919,6 +927,7 @@ begin
 	kernelInterrupt();
 end;
 
+// Funky sprite flashing and noises on game over
 procedure InitGameOver();
 begin
 	rasterIRQ(GameOverLoop(), #1);
@@ -948,7 +957,9 @@ begin
 
 end;
 
-
+/*
+   Draw some hearts
+*/ 
 procedure RenderHealthBar();
 begin
 
@@ -1050,26 +1061,8 @@ end;
 
 */
 
-
+procedure InitNewGame();
 begin
-	
-
-
-
-	//initsid(SIDFILE_1_INIT);
-	poke(SCREEN_BG_COL, #0, #0);
-//	Intro();
-	setmulticolormode();
-
-	ClearScreen(@clearchar, @screenmem1);
-	ClearScreen(@clearchar, SCREEN_CHAR_LOC);
-	ClearScreen(#$05 + #08, SCREEN_COL_LOC);
-
-	
-
-
-
-	// Initial map position
 	m_posx:=#0;
 	m_posy:=#0;
 
@@ -1077,6 +1070,8 @@ begin
 	@levelpointer := levels;
 	RenderLevel(m_posx, m_posy, @screen1hi);
 	current_background := peek(MULTICOLOR_CHAR_COL,#0);
+	LoadEntities();
+	InitEntities();
 
 	// Initial sprite position
 	spritex := #160;
@@ -1094,6 +1089,24 @@ begin
 	bullet_count :=#5;
 	bullet_max := #10;
 
+	joystick_pressed := #0;
+	frameCounter:=#0;
+
+	// Remember to implement resetting all "isdead" flag. also, make this part of flags bit.
+end;
+
+
+begin
+
+	//initsid(SIDFILE_1_INIT);
+	poke(SCREEN_BG_COL, #0, #0);
+//	Intro();
+	setmulticolormode();
+
+	ClearScreen(@clearchar, @screenmem1);
+	ClearScreen(@clearchar, SCREEN_CHAR_LOC);
+	ClearScreen(#$05 + #08, SCREEN_COL_LOC);
+
 	// TURN OFF Kernal Basic! WHOO!
 	togglebit($1, #0, #0);
 	
@@ -1101,16 +1114,12 @@ begin
 	InitSprites();
 	PrintText();
 
-	LoadEntities();
-	InitEntities();
+	InitNewGame();
 
-
-	joystick_pressed := #0;
-	frameCounter:=#0;
-	// Hook that raster!
-
+	// My VID of chosing	
 	setbank(VIC_BANK1);
 
+	// Hook that raster!
 	DisableInterrupts();
 	RasterIRQ(rasterUpdate(), #0);
 	enableInterrupts();
