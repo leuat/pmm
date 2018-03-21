@@ -1116,7 +1116,7 @@ begin
 
 	InitNewGame();
 
-	// My VID of chosing	
+	// My VIC of chosing	
 	setbank(VIC_BANK1);
 
 	// Hook that raster!
