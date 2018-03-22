@@ -14,8 +14,11 @@ public:
     uint level = 0;
     Node* m_left = nullptr, *m_right = nullptr;
     bool m_isWord = false;
+    int m_cycleCounter;
+
     virtual PVar Execute(SymbolTable* symTab, uint lvl) = 0;
     virtual void ExecuteSym(SymbolTable* symTab) = 0;
+    virtual bool DataEquals(Node* other) { return false;}
     virtual void Delete() {
         if (m_left!=nullptr) {
             m_left->Delete();

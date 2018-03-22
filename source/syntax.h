@@ -74,7 +74,7 @@ public:
     Token GetID(QString val) {
         for (Token& t: reservedWords)
             if (val.toUpper()==t.m_value) {
-
+                t.m_lineNumber = Pmm::Data::d.lineNumber;
                 return t;
             }
 

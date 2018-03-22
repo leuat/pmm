@@ -280,24 +280,25 @@ public:
             else {
                 as->Comment("Add/sub right value is variable/expression");
 
-                QString lbl = as->NewLabel("rightvar");
-                QString lblJmp = as->NewLabel("jmprightvar");
-                as->Asm("jmp " + lblJmp);
-                as->Write(lbl +"\t.byte\t0");
-                as->Label(lblJmp);
+         //       QString lbl = as->NewLabel("rightvar");
+                //QString lblJmp = as->NewLabel("jmprightvar");
+                //as->Asm("jmp " + lblJmp);
+                //as->Write(lbl +"\t.byte\t0");
+                //as->Label(lblJmp);
                 as->ClearTerm();
                 m_right->Build(as);
                 as->Term();
-                as->Asm("sta " +lbl);
-                as->Term();
+                QString lbl = as->StoreInTempVar("rightvarAddSub");
+                //as->Asm("sta " +lbl);
+                //as->Term();
 
                 m_left->Build(as);
                 as->Term();
 
                 as->BinOP(m_op.m_type);
                 as->Term(lbl,true);
-                as->PopLabel("rightvar");
-                as->PopLabel("jmprightvar");
+                //as->PopLabel("rightvar");
+                //as->PopLabel("jmprightvar");
             }
         }
         else {

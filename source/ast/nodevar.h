@@ -53,51 +53,70 @@ public:
         return m_op.m_type;
     }
 
+
+    bool DataEquals(Node *other) override {
+        NodeVar* var = dynamic_cast<NodeVar*>(other);
+        if (var==nullptr)
+            return nullptr;
+        return var->value==value;
+    }
+
     void LoadPointer(Assembler* as) {
         as->Comment("Load pointer array");
         NodeNumber* number = dynamic_cast<NodeNumber*>(m_expr);
         QString m = as->m_term;
 
         as->ClearTerm();
-        as->Asm("pha");
-        m_expr->Build(as);
-        as->Term();
-        as->Asm("tay");
-        as->Asm("pla");
+        if (!LoadXYVarOrNum(as, m_expr,false))
+        {
 
-            if (m=="")
-                m="lda ";
-            as->Asm(m+  "(" + value+"),y");
+            as->Asm("pha");
+            m_expr->Build(as);
+            as->Term();
+            as->Asm("tay");
+            as->Asm("pla");
+        }
+        if (m=="")
+            m="lda ";
+        as->Asm(m+  "(" + value+"),y");
 
     }
 
+    bool LoadXYVarOrNum(Assembler* as, Node* node, bool isx) {
+        NodeVar* var = dynamic_cast<NodeVar*>(node);
+        NodeNumber* num = dynamic_cast<NodeNumber*>(node);
+        QString operand = "ldx ";
+        if (!isx) operand="ldy ";
+        if (var!=nullptr && var->m_expr == nullptr) {
+            as->Asm(operand + var->value);
+            return true;
+        }
+        if (num!=nullptr) {
+            as->Asm(operand  + num->StringValue());
+            return true;
+        }
+        return false;
 
+    }
 
     void LoadByteArray(Assembler *as) {
         // Optimizer: if expression is number, just return direct
         as->Comment("Load Byte array");
-        NodeNumber* number = dynamic_cast<NodeNumber*>(m_expr);
-        if (number!=nullptr) { // IS NUMBER optimize}
-            QString v = value + "+"+ QString::number(number->m_val);
-            if (as->m_term=="")
-                as->Asm("lda " + v);
-            else as->Term(v);
-        }
-        else {
-            QString m = as->m_term;
+        QString m = as->m_term;
 
-            as->ClearTerm();
-            as->Asm("pha");
+        as->ClearTerm();
+        if (!LoadXYVarOrNum(as, m_expr,true))
+        {
+            //       as->Asm("pha");
             m_expr->Build(as);
             as->Term();
             as->Asm("tax");
-            as->Asm("pla");
-
-            if (m=="")
-                m="lda ";
-            as->Asm(m+  value+",x");
-
+            //          as->Asm("pla");
         }
+        if (m=="")
+            m="lda ";
+        as->Asm(m+  value+",x");
+
     }
 
     void LoadVariable(Assembler* as) override {

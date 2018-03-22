@@ -2,6 +2,7 @@
 
 
 QString NodeConditional::Build(Assembler *as) {
+    as->PushCounter();
     QString labelStartOverAgain = as->NewLabel("while");
     QString lblstartTrueBlock = as->NewLabel("ConditionalTrueBlock");
 
@@ -50,7 +51,7 @@ QString NodeConditional::Build(Assembler *as) {
     as->PopLabel("elsedoneblock");
 //    as->PopLabel("conditionalfailed");
 
-
+    as->PopCounter(m_op.m_lineNumber);
 
     return "";
 }

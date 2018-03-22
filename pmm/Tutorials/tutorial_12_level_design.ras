@@ -114,7 +114,7 @@ begin
 		// Render me baby!
 		@levelpointer := levels;
 		// Defined in Levels.ras
-   	    RenderLevel(m_posx, m_posy);
+   	    RenderLevel(m_posx, m_posy, #$04);
 	end;
 end;
 
@@ -189,7 +189,7 @@ begin
 
 	// Initial map rendering
 	@levelpointer := levels;
-	RenderLevel(m_posx, m_posy);
+	RenderLevel(m_posx, m_posy, #$04);
 
 	// Initial sprite position
 	spritex := #160;

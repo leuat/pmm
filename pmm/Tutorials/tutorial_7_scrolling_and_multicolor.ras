@@ -25,8 +25,7 @@ begin
 
 	for x:=#0 to #36 do begin
 		val:=fade[((x+colorIndex)/#2)&#15];
-		pokescreen(val, #0);
-		incscreenx(#1);
+		screenmemory[x]:=val;
 
 	end;
 end;

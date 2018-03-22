@@ -81,7 +81,6 @@ public:
         NodeVar* v = (NodeVar*)m_varNode;
         NodeVarType* t = (NodeVarType*)m_typeNode;
         if (t->m_op.m_type==TokenType::ARRAY) {
-            qDebug() << "Declaring array: " <<v->value;
             as->DeclareArray(v->value, t->m_arrayVarType.m_value, t->m_op.m_intVal, t->m_data, t->m_position);
             //qDebug() << "IS: " << TokenType::types[as->m_symTab->Lookup(v->value)->getTokenType()];
             as->m_symTab->Lookup(v->value)->m_type="address";

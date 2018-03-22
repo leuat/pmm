@@ -51,6 +51,7 @@ void Lexer::Advance()
         m_currentChar = m_text[m_pos];
         if (Pmm::Data::d.lineNumber<m_lines.count())
         if (m_currentChar=="\n") {
+            //qDebug() << "Increase linenumber to " << Pmm::Data::d.lineNumber;
             Pmm::Data::d.lineNumber ++;
             if (Pmm::Data::d.lineNumber<m_lines.count())
             Pmm::Data::d.currentLineText = m_lines[Pmm::Data::d.lineNumber];

@@ -11,7 +11,8 @@
 class NodeCompound : public Node {
 public:
     QVector<Node*> children;
-    NodeCompound() {
+    NodeCompound(Token t) {
+        m_op = t;
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);

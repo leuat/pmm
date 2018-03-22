@@ -19,9 +19,10 @@ public:
     SymbolTable* m_symTab = nullptr;
     bool m_useOwnSymTab;
 
-    NodeBlock(QVector<Node*> decl, Node* comp, bool useOwnSymTab = true) {
+    NodeBlock(Token t, QVector<Node*> decl, Node* comp, bool useOwnSymTab = true) {
         m_compoundStatement = comp;
         m_decl = decl;
+        m_op = t;
         m_useOwnSymTab = useOwnSymTab;
     }
 
@@ -51,6 +52,9 @@ public:
 
    QString Build(Assembler* as) {
        //as->VarDeclHeader();
+
+       as->PushCounter();
+
        QString label = as->NewLabel("block");
        as->Asm("jmp " + label);
        bool blockLabel = false;
@@ -62,11 +66,17 @@ public:
                 }
             n->Build(as);
         }
+        as->VarDeclEnds();
+
         if (!blockLabel)
             as->Label(label);
         if (m_compoundStatement!=nullptr)
             m_compoundStatement->Build(as);
 
+
+        as->PopCounter(m_op.m_lineNumber-1);
+
+        //qDebug() << "Adding at linenumber: " << m_op.m_lineNumber << "  cycles " << m_cycleCounter;
         return "";
 
     }

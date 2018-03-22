@@ -56,6 +56,7 @@ public:
     }
 };
 
+
 class Assembler
 {
 public:
@@ -67,9 +68,25 @@ public:
     SymbolTable* m_symTab;
     QString m_projectDir;
 
+    QStringList m_tempVars;
+    int m_varDeclEndsLineNumber = 0;
+    int m_totalOptimizedLines;
 
+    QMap<int, int> m_cycles;
 
+    QVector<int> m_cycleCounter;
 
+    void PushCounter();
+    void PopCounter(int ln);
+
+    virtual int getLineCount() {return m_source.count();}
+    int CountCycles(QString s);
+    virtual int CountInstructionCycle(QStringList s) {return 0;}
+
+    void VarDeclEnds() {
+        if (m_varDeclEndsLineNumber == 0) // Only assign if not previously
+            m_varDeclEndsLineNumber = m_source.count();
+    }
 
     QString getLabel(QString s) {
         return s+m_labelStack[s].m_current;

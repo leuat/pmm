@@ -11,6 +11,7 @@ var
 
 
 
+
 //	music1 : incsid("fliptape3.sid");
 	m_posx, m_posy : byte; // current level position in grid
  	i, redraw, j,k,l: byte;  // i is temp, redraw states that the map should be redrawn
@@ -194,7 +195,7 @@ begin
 //			j:=m_rl_i+#1;
 	//		m_rl_val2 := peek(@levelpointer,j)&#7 + #8;
 			m_rl_idx:=m_rl_i*#2;
-			
+			asm(";test2");
 			screenmemory[m_rl_idx]:=m_rl_val;
 			screenmemory[m_rl_idx+#1]:=m_rl_val;
 			screenmemory[m_rl_idx+#40]:=m_rl_val;
@@ -219,7 +220,7 @@ begin
 
 end;
 
-@include "RasLib/sprites.ras"  
+//@include "RasLib/sprites.ras"  
 
 // Sprite 0 and 7 are reserved, so we can only have 6 entity sprites in one screen
 @define playerSprite "#0"
@@ -288,7 +289,7 @@ begin
 	end;
 	moveto(#0, #24, #$D8);
 	for i:=#0 to #40 do 
-		pokescreen(RED, i);
+		screenmemory[i] := RED;
 
 	moveto(#30, #1, @screen1hi);
 
@@ -313,7 +314,7 @@ begin
 	end;
 	moveto(#0, #24, #$D8);
 	for i:=#0 to #40 do 
-		pokescreen(@clearchar, i);
+		screenmemory[i] := @clearchar;
 
 
 end;
@@ -341,9 +342,9 @@ begin
 		// Check if entity is not zero
 		if @levelpointer[#0]<>#0 then
 		begin
-			
 			entity_pos_x[no_entities] := @levelpointer[#1]*#4 + #10;
 			entity_pos_y[no_entities] := @levelpointer[#2]*#8+#45;
+
 			entity_curpos_x[no_entities] := entity_pos_x[no_entities];
 			entity_curpos_y[no_entities] := entity_pos_y[no_entities];
 			entity_type[no_entities] := @levelpointer[#0];
@@ -472,6 +473,7 @@ begin
 					poke(SPRITE_COLOR,val, #1)
 				else
 					poke(SPRITE_COLOR,val, entity_color[i]);
+				
 
 			end;
 
@@ -630,21 +632,6 @@ end;
 */
 
 procedure BackgroundCollideBullet();
-begin
-
-	tmp:=bullet_x+#3;	
-	i:=tmp/#4-m_rl_startx;
-	j:=(bullet_y-#55)/#8;
-	i:=i-m_rl_starty;
-	i:=i/#2;
-	j:=j/#2;
-	val := j*m_rl_width;
-	val := val + i;
-	val:=peek(zeropage4, val); 
-	tmp2:=getbit(val, #3);
-
-end;
-
 
 procedure UpdateBullet();
 begin
@@ -729,19 +716,34 @@ end;
 
 
 
-procedure BackgroundCollide();
+procedure BackgroundCollideBullet();
 begin
 
-	tmp:=spritex+#5;	
-	i:=tmp/#8-m_rl_startx;
-	j:=(spritey-#55)/#8;
+	tmp:=bullet_x+#3;	
+	i:=tmp/#4-m_rl_startx;
+	j:=(bullet_y-#55)/#8;
 	i:=i-m_rl_starty;
 	i:=i/#2;
 	j:=j/#2;
-	val := j*m_rl_width;
-	val := val + i;
+	val := j*m_rl_width +i;
+//	val := val + i;
 	val:=peek(zeropage4, val); 
 	tmp2:=getbit(val, #3);
+
+end;
+
+
+
+procedure BackgroundCollide();
+begin
+
+	tmp:=spritex - #15;	
+	i:=(tmp)/#16;// -m_rl_startx;//-m_rl_startx;
+//	i:=i-m_rl_starty;
+	j:=(spritey-#53)/#16;
+	val := j*m_rl_width+i;
+	tmp2:=getbit(zeropage4[val], #3);
+
 
 end;
 
@@ -918,7 +920,7 @@ begin
 	moveto(#0,#10, #$D8);
 	j:=fade[val&#15];
 	for i:=#0 to #39 do
-		pokescreen(j, i);
+		screenmemory[i] := j;
 
 
 
@@ -1000,7 +1002,7 @@ begin
 	// Set regular text font
 	poke(VIC_DATA_LOC, #0, @charmapText);
 	// Wait until level starts
-//	PrintTextColor();
+	PrintTextColor();
 	UpdateBullet();
 	UpdateEntities();
 
@@ -1118,7 +1120,6 @@ begin
 
 	// My VIC of chosing	
 	setbank(VIC_BANK1);
-
 	// Hook that raster!
 	DisableInterrupts();
 	RasterIRQ(rasterUpdate(), #0);

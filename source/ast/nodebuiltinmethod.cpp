@@ -7,6 +7,9 @@
 QMap<QString, bool> NodeBuiltinMethod::m_isInitialized;
 
 QString NodeBuiltinMethod::Build(Assembler *as) {
+
+    as->PushCounter();
+
     if (m_procName.toLower()=="writeln") {
         as->Writeln();
 
@@ -230,6 +233,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
   //          s+=m_params[1]->Execute(symTab, level).toString();
 
     }
+
+
+    as->PopCounter(m_op.m_lineNumber-1);
     return "";
 }
 
@@ -254,11 +260,20 @@ void NodeBuiltinMethod::Poke(Assembler* as)
         return;
     }
 
+
     LoadVar(as,2);
-    as->Asm("pha");
-    LoadVar(as,1);
-    as->Asm("tax");
-    as->Asm("pla");
+
+    if (dynamic_cast<NodeVar*>(m_params[1])!=nullptr ||
+            dynamic_cast<NodeNumber*>(m_params[1])!=nullptr)
+        LoadVar(as,1, "", "ldx ");
+    else {
+      as->Asm("pha");
+      LoadVar(as,1); // Load expression through a
+
+      as->Asm("tax");
+      as->Asm("pla");
+    }
+
 
     SaveVar(as,0,"x");
 
@@ -700,6 +715,7 @@ void NodeBuiltinMethod::SetSpritePos(Assembler *as)
 
     NodeNumber* spriteNum = dynamic_cast<NodeNumber*>(m_params[2]);
     if (spriteNum!=nullptr) {
+        as->Comment("isi-pisi: value is constant");
         uchar v = 1 << (uchar)spriteNum->m_val;
         as->Asm("ldx #" +QString::number((int)spriteNum->m_val*2) );
         LoadVar(as, 0);
@@ -719,7 +735,7 @@ void NodeBuiltinMethod::SetSpritePos(Assembler *as)
         as->Label(lbl);
 
         as->Asm("lda $D010");
-        as->Asm("and #%" + QString::number(~v,2) );
+        as->Asm("and #%" + QString::number((uchar)(~v),2) );
       //  m_params[4]->Build(as);
       //  as->Term();
         as->Asm("sta $D010");

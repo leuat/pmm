@@ -38,6 +38,15 @@ public:
         return "$" + QString::number((int)m_val,16);
     }
 
+    bool DataEquals(Node *other) override {
+        NodeNumber* var = dynamic_cast<NodeNumber*>(other);
+        if (var==nullptr)
+            return false;
+        return var->m_val == m_val;
+    }
+
+
+
     QString StringValue() {
         QString val;
         if (m_op.m_type==TokenType::BYTE)

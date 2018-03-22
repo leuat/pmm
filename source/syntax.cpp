@@ -131,7 +131,7 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
                 BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER);
 
-    builtInFunctions["pokescreen"] = BuiltInFunction(
+/*    builtInFunctions["pokescreen"] = BuiltInFunction(
                 "pokescreen",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
                 BuiltInFunction::Type::INTEGER);
@@ -141,7 +141,7 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
                 BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER<<BuiltInFunction::Type::INTEGER);
 
-
+*/
     builtInFunctions["fill"] = BuiltInFunction(
                 "fill",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER

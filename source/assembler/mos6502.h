@@ -3,10 +3,47 @@
 
 #include "source/assembler/assembler.h"
 
+
+class MOSOperandCycle {
+public:
+    QString m_name;
+    int m_implied;
+  //  int m_acc;
+    int m_immediate;
+    int m_absolute;
+    int m_absoluteWithParam;
+    int m_zeropage;
+    int m_zeropageWithParam;
+    MOSOperandCycle() {}
+    MOSOperandCycle(QString name, int implied, int immediate, int absolute, int abswp, int zp, int zpwp) {
+        m_name = name;
+        m_implied = implied;
+ //       m_acc = acc;
+        m_immediate = immediate;
+        m_absolute = absolute;
+        m_absoluteWithParam = abswp;
+        m_zeropage = zp;
+        m_zeropageWithParam = zpwp;
+    }
+};
+
+class MOSOperation {
+  public:
+    QString operand;
+    QString param1 = "";
+    QString param2 ="";
+    bool isNumeric = false;
+    bool is16bit = false;
+    bool isZeroPage = false;
+};
+
+
 class AsmMOS6502 : public Assembler
 {
 public:
     AsmMOS6502();
+
+    QMap<QString, MOSOperandCycle> m_opCycles;
 
     QVector<int> m_removeLines;
     bool endTerm() {
@@ -24,7 +61,7 @@ public:
     void Program(QString name) override;
     void EndProgram() override;
     void DeclareArray(QString name, QString type, int count, QStringList lst, QString pos) override;
-
+    void InitMosOpCycles();
 
     void VarDeclHeader();
     void DeclareVariable(QString name, QString type) override;
@@ -60,11 +97,19 @@ public:
 
     void Optimise() override;
     void OptimisePassStaLda();
+    void OptimisePassLdx(QString x);
     void OptimiseJumps();
     QString getLine(int i);
     QString getNextLine(int i, int &j);
     QString getToken(QString, int t);
     void RemoveLines();
+
+    int getLineCount();
+
+
+    MOSOperation GetOperand(QStringList s);
+    int CalculateCycles(MOSOperation op);
+    int CountInstructionCycle(QStringList s) override;
 };
 
 

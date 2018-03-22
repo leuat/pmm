@@ -4,7 +4,7 @@
 AsmMOS6502::AsmMOS6502() :Assembler()
 {
 //    m_stack["for"] = new Stack();
-
+    InitMosOpCycles();
 }
 
 void AsmMOS6502::Program(QString programName)
@@ -67,6 +67,7 @@ void AsmMOS6502::DeclareArray(QString name, QString type, int count, QStringList
 
     }
 }
+
 
 void AsmMOS6502::VarDeclHeader()
 {
@@ -190,12 +191,9 @@ void AsmMOS6502::Peek(bool start)
 QString AsmMOS6502::StoreInTempVar(QString name, QString type)
 {
     QString tmpVar = NewLabel(name+"_var");
-    QString tmpLab = NewLabel(name+"_label");
-    Asm("jmp " + tmpLab);
-    Label(tmpVar + "\t."+type+"\t0");
-    Label(tmpLab);
+    QString labelVar = tmpVar + "\t."+type+"\t0 ";
+    m_tempVars << labelVar;
     Asm("sta " + tmpVar);
-    PopLabel(name+ "_label");
     PopLabel(name+ "_var");
     return tmpVar;
 }
@@ -317,7 +315,10 @@ void AsmMOS6502::EndForLoop(QString endVal)
 
 void AsmMOS6502::Optimise()
 {
+    m_totalOptimizedLines = 0;
     OptimisePassStaLda();
+    OptimisePassLdx("x");
+    OptimisePassLdx("y");
     OptimiseJumps();
 }
 
@@ -344,6 +345,54 @@ void AsmMOS6502::OptimisePassStaLda()
     }
     RemoveLines();
 }
+
+void AsmMOS6502::OptimisePassLdx(QString x)
+{
+
+    bool allDone = false;
+
+    while (!allDone) {
+
+        m_removeLines.clear();
+        int j;
+        int shift=0;
+        for (int i=0;i<m_source.count()-1;i++) {
+            QString l0 = getLine(i);
+            if (l0.contains("ld"+x)) {
+                bool done = false;
+                //qDebug() << l0;
+                int k=i;
+                int cnt = 0;
+                while (!done) {
+                    QString l1 = getNextLine(k,j);
+                    k=j;
+                    if (l0==l1) {
+                        //qDebug () << "Removing because equal: " << l0 << ", " << l1;
+                        m_removeLines.append(j);
+                        //qDebug() << "Removing: " << l1 << " on line " << j;
+                        continue;
+                    }
+                    QString op = getToken(l1,0);
+                    //qDebug() << "curop:" << op;
+                    // Changex in x
+                    if (op==("ld"+x) || op==("ta"+x) || op=="jmp" || op=="rts" || op=="jsr" ||
+                            op==("in" +x) || op==("de"+x) || op.length()!=3) {
+                        //qDebug() << "Done because: " << l1;
+                        done = true;
+                    }
+
+                }
+                if (m_removeLines.count()!=0)
+                    break;
+            }
+
+        }
+        if (m_removeLines.count()==0)
+            allDone = true;
+        RemoveLines();
+    }
+}
+
 
 void AsmMOS6502::OptimiseJumps()
 {
@@ -412,9 +461,163 @@ void AsmMOS6502::RemoveLines()
         //qDebug() << "Removing line " << (i) << " : " << getLine(i-k);
         m_source.removeAt(i-k);
         k++;
+        m_totalOptimizedLines++;
     }
     m_removeLines.clear();
 }
 
+int AsmMOS6502::getLineCount()
+{
+    int lc = 0;
+    for (QString s: m_source) {
+        s=s.remove("\n");
+        s=s.remove("\t");
+        s=s.trimmed();
+        if (s=="")
+            continue;
+        if (s.startsWith(";"))
+            continue;
+        lc++;
+    }
+    return lc;
+}
+
+int AsmMOS6502::CountInstructionCycle(QStringList s)
+{
+    MOSOperation op = GetOperand(s);
+    return CalculateCycles(op);
+
+}
+
+MOSOperation AsmMOS6502::GetOperand(QStringList s)
+{
+    MOSOperation op;
+    bool ok= false;
+    op.operand = s[0].toLower();
+    if (s.count()==1)
+        return op;
+    QString data = s[1].toLower();
+    if (data.contains("(")) {
+        op.isZeroPage = true;
+        data = data.remove("(");
+        data = data.remove(")");
+    }
+
+    QStringList p2 = data.split(",");
+    op.param1 = p2[0];
+    if (p2.count()==2)
+        op.param2 = p2[1];
 
 
+    if (op.param1.startsWith("#"))
+        op.isNumeric = true;
+
+/*    op.param1 = op.param1.remove("#");
+    op.param1 = op.param1.remove("$");
+    op.param1 = op.param1.remove("%");
+
+    int i = op.param1.toInt(&ok);
+    if (ok) {
+        op.isNumeric = true;
+        if (i>255)
+            op.is16bit = true;
+    }
+*/
+    return op;
+
+}
+
+int AsmMOS6502::CalculateCycles(MOSOperation op)
+{
+    if (!m_opCycles.contains(op.operand)) {
+        qDebug() << "Error: could not count operands for type:" << op.operand;
+        return 0;
+    }
+    MOSOperandCycle oc = m_opCycles[op.operand];
+    // is immediate
+    if (op.param1=="")
+        return oc.m_implied;
+
+    if (op.param2!="") {
+        if (op.isZeroPage)
+            return oc.m_zeropageWithParam;
+        return oc.m_absoluteWithParam;
+    }
+    if (op.isZeroPage)
+        return oc.m_zeropage;
+
+    if (op.isNumeric)
+        return oc.m_immediate;
+
+    return oc.m_absolute;
+
+
+}
+
+void AsmMOS6502::InitMosOpCycles()
+{
+//   int implied, int immediate, int absolute, int abswp, int zp, int zpwp) {
+
+    m_opCycles.clear();
+    m_opCycles["lda"] = MOSOperandCycle("lda",0,2,4,4,3,5);
+    m_opCycles["sta"] = MOSOperandCycle("sta",0,0,4,5,4,6);
+    m_opCycles["sty"] = MOSOperandCycle("sty",0,0,4,0,3,4);
+    m_opCycles["stx"] = MOSOperandCycle("stx",0,0,4,0,3,4);
+
+    m_opCycles["tax"] = MOSOperandCycle("stx",2,0,0,0,0,0);
+    m_opCycles["tay"] = MOSOperandCycle("tay",2,0,0,0,0,0);
+    m_opCycles["tya"] = MOSOperandCycle("tya",2,0,0,0,0,0);
+    m_opCycles["txa"] = MOSOperandCycle("txa",2,0,0,0,0,0);
+
+    m_opCycles["pha"] = MOSOperandCycle("pha",3,0,0,0,0,0);
+    m_opCycles["pla"] = MOSOperandCycle("pla",4,0,0,0,0,0);
+
+    m_opCycles["dex"] = MOSOperandCycle("dex",2,0,0,0,0,0);
+    m_opCycles["dey"] = MOSOperandCycle("dey",2,0,0,0,0,0);
+    m_opCycles["inx"] = MOSOperandCycle("inx",2,0,0,0,0,0);
+    m_opCycles["iny"] = MOSOperandCycle("iny",2,0,0,0,0,0);
+
+    m_opCycles["and"] = MOSOperandCycle("and",0,2,4,4,3,5);
+    m_opCycles["ora"] = MOSOperandCycle("ora",0,2,4,4,3,5);
+    m_opCycles["eor"] = MOSOperandCycle("eor",0,2,4,4,3,5);
+    m_opCycles["bit"] = MOSOperandCycle("bit",0,0,4,0,3,3);
+
+    m_opCycles["sec"] = MOSOperandCycle("sec",2,0,0,0,0,0);
+    m_opCycles["cli"] = MOSOperandCycle("cli",2,0,0,0,0,0);
+    m_opCycles["sei"] = MOSOperandCycle("sei",2,0,0,0,0,0);
+    m_opCycles["clc"] = MOSOperandCycle("clc",2,0,0,0,0,0);
+
+    m_opCycles["lsr"] = MOSOperandCycle("lsr",0,2,6,7,5,6);
+    m_opCycles["asl"] = MOSOperandCycle("asl",0,2,6,7,5,6);
+    m_opCycles["ror"] = MOSOperandCycle("ror",0,2,6,7,5,6);
+    m_opCycles["rol"] = MOSOperandCycle("rol",0,2,6,7,5,6);
+
+    m_opCycles["org"] = MOSOperandCycle("org",0,0,0,0,0,0);
+    m_opCycles["nop"] = MOSOperandCycle("nop",2,0,0,0,0,0);
+
+    m_opCycles["sbc"] = MOSOperandCycle("sbc",0,2,4,4,3,5);
+    m_opCycles["adc"] = MOSOperandCycle("adc",0,2,4,4,3,5);
+
+
+    m_opCycles["ldy"] = MOSOperandCycle("ldy",0,2,4,4,3,0);
+    m_opCycles["ldx"] = MOSOperandCycle("ldx",0,2,4,4,3,0);
+    m_opCycles["cpy"] = MOSOperandCycle("cpy",0,2,4,4,3,0);
+    m_opCycles["cpx"] = MOSOperandCycle("cpx",0,2,4,4,3,0);
+
+    m_opCycles["cmp"] = MOSOperandCycle("cmp",0,2,4,4,3,5);
+    m_opCycles["jmp"] = MOSOperandCycle("jmp",0,0,3,3,0,5);
+    m_opCycles["jsr"] = MOSOperandCycle("jsr",0,0,0,6,0,0);
+    m_opCycles["rts"] = MOSOperandCycle("rts",0,0,0,6,0,0);
+    m_opCycles["beq"] = MOSOperandCycle("beq",0,0,2,0,0,0);
+    m_opCycles["bcs"] = MOSOperandCycle("bcs",0,0,2,0,0,0);
+    m_opCycles["bcc"] = MOSOperandCycle("bcc",0,0,2,0,0,0);
+    m_opCycles["bne"] = MOSOperandCycle("bne",0,0,2,0,0,0);
+    m_opCycles["bpl"] = MOSOperandCycle("bpl",0,0,2,0,0,0);
+
+    m_opCycles["inc"] = MOSOperandCycle("inc",0,0,6,7,5,6);
+    m_opCycles["dec"] = MOSOperandCycle("dec",0,0,6,7,5,6);
+
+
+
+
+}

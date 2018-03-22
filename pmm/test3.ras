@@ -1,23 +1,29 @@
 program test3;
 var  
-   index, b: byte; 
+   index, b,i : byte; 
+	c:array[#8] of byte;
 begin
 
-	index:=#10;
-	b:=#5;
-	if (index>#1 or b=#3) then 
-		writeln("TRUE",#0)
-	else
-		writeln("FALSE",#0);
+	while b<#10 do 
+	begin
+		if c>#5 then 
+		begin
+			c[#3]:=c[#3] +#1;
 
-	poke($D800, #0, #$F0);
+		end
+		else 
+		begin
+			moveto(#2,#2, #0);
+		end;
+	end;
 
-	moveto(#20,#20, #$04);
+	//asm(";wtf");
+	while b<#10 do 
+	begin
+			moveto(#2,#2, #0);
 
-	printnumber(b);
+	end;
 
-	b := peek($D800, #0);
-
-	printnumber(b);
+	screenmemory[#0] := #0;
 
 end.

@@ -10,11 +10,16 @@
 #include "source/ast/nodevar.h"
 #include "source/ast/nodestring.h"
 #include "source/ast/nodevararray.h"
+#include "source/ast/nodebinop.h"
 
+
+//class NodeBinop;
 
 class NodeAssign : public Node {
 public:
     Node* m_arrayIndex = nullptr;
+
+
     NodeAssign(Node* left, Token t, Node* r) {
         m_right = r;
         m_op = t;
@@ -92,6 +97,68 @@ public:
         }
     }
 
+
+    bool IsSimpleIncDec(NodeVar* var, Assembler* as) {
+        // Right is binop
+        NodeBinOP* rterm = dynamic_cast<NodeBinOP*>(m_right);
+        if (rterm==nullptr)
+            return false;
+
+        // right first is var
+        NodeVar* rvar = dynamic_cast<NodeVar*>(rterm->m_left);
+        if (rvar==nullptr)
+            return false;
+
+        if (rvar->value!=var->value)
+            return false;
+
+        NodeNumber* num = dynamic_cast<NodeNumber*>(rterm->m_right);
+        if (num==nullptr)
+            return false;
+
+        if (num->m_val!=1)
+            return false;
+
+        // OK: it is i:=i+1;
+        QString operand ="";
+        if (rterm->m_op.m_type==TokenType::PLUS)
+            operand="inc ";
+        if (rterm->m_op.m_type==TokenType::MINUS)
+            operand="dec ";
+        if (operand=="")
+            return false; // other operand
+
+
+
+        if (var->m_expr==nullptr && rvar->m_expr==nullptr) {
+            as->Asm(operand +var->value);
+            return true;
+        }
+        else {
+            if (rvar->m_expr==nullptr)
+                return false;
+            if (var->m_expr==nullptr)
+                return false;
+            // BOTH must have expressions
+            if (!rvar->m_expr->DataEquals(var->m_expr))
+                return false;
+            // Ok. Both are equal. OPTIMIZE!
+//            return false;
+            if (var->LoadXYVarOrNum(as, var->m_expr,true)) {
+                as->Comment("Optimize byte array " + operand);
+
+                as->Asm(operand + var->value+",x");
+                return true;
+            }
+
+            return false;
+        }
+
+
+        return false;
+
+    }
+
     QString AssignVariable(Assembler* as) {
         NodeVar* v = (NodeVar*)dynamic_cast<const NodeVar*>(m_left);
         if (v==nullptr)
@@ -119,6 +186,11 @@ public:
         if (m_left->getType(as)==TokenType::INTEGER)
             as->Asm("ldy #0");
 
+        // For constant i:=i+1;
+        if (IsSimpleIncDec(v,  as))
+            return v->value;
+
+
         m_right->Build(as);
         as->Term();
         v->StoreVariable(as);
@@ -126,7 +198,10 @@ public:
     }
 
     QString Build(Assembler* as) {
-        return AssignVariable(as);
+        as->PushCounter();
+        QString s = AssignVariable(as);
+        as->PopCounter(m_op.m_lineNumber);
+        return s;
 
     }
     void ExecuteSym(SymbolTable* symTab) override {

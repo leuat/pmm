@@ -21,7 +21,6 @@ void Parser::Eat(TokenType::Type t)
 {
     if (m_currentToken.m_type == t) {
         m_currentToken = m_lexer->GetNextToken();
-
         if (m_currentToken.m_type==TokenType::PREPROCESSOR && m_pass==1)
             HandlePreprocessorInParsing();
 
@@ -211,7 +210,7 @@ Node *Parser::AssignStatement()
     }
     Eat(TokenType::ASSIGN);
     Node* right = Expr();
-    return new NodeAssign(left, token, right);
+    return new NodeAssign(left, t, right);
 
 
 }
@@ -310,6 +309,7 @@ Node *Parser::Conditional(bool isWhileLoop)
     QVector<Token> compareTokens, conditionals;
 
     // Start
+    Token t = m_currentToken;
     bool done=false;
     int linenum = m_currentToken.m_lineNumber;
 
@@ -330,7 +330,7 @@ Node *Parser::Conditional(bool isWhileLoop)
         nodeElse = Block(false);
     }
 
-    return new NodeConditional(m_currentToken, clause, block, isWhileLoop, nodeElse);
+    return new NodeConditional(t, clause, block, isWhileLoop, nodeElse);
 }
 
 
@@ -365,10 +365,11 @@ Node *Parser::CompoundStatement()
 
         return n;
     }
+    Token t = m_currentToken;
     Eat(TokenType::BEGIN);
     QVector<Node*> nodes = StatementList();
     Eat(TokenType::END);
-    NodeCompound* root = new NodeCompound();
+    NodeCompound* root = new NodeCompound(t);
     for (Node* n: nodes)
         root->children.append(n);
 
@@ -432,7 +433,6 @@ Node* Parser::Factor()
         node = BuiltinFunction();
         if (node!=nullptr)
             return node;
-            qDebug() << m_currentToken.getType();
 
     }
     return Variable();
@@ -583,9 +583,7 @@ Node *Parser::Block(bool useOwnSymTab)
 */
     if (m_currentToken.m_type==TokenType::PROCEDURE)
         return nullptr;
-//    qDebug() << m_currentToken.getType() << " " << m_currentToken.m_value;
-
-    return new NodeBlock(Declarations(), CompoundStatement(), useOwnSymTab);
+    return new NodeBlock(m_currentToken, Declarations(), CompoundStatement(), useOwnSymTab);
 }
 
 QVector<Node *> Parser::Parameters()
@@ -645,7 +643,6 @@ QVector<Node*> Parser::Declarations()
     while (m_currentToken.m_type==TokenType::PROCEDURE || m_currentToken.m_type==TokenType::INTERRUPT) {
 
         bool isInterrupt= (m_currentToken.m_type==TokenType::PROCEDURE)?false:true;
-
         Eat(m_currentToken.m_type);
         QString procName = m_currentToken.m_value;
         Eat(TokenType::ID);
