@@ -15,6 +15,8 @@ var
 interrupt Update();
 begin
 
+//a	TUVA:=10;
+
 	waitForRaster(#30);
 	SetBank(VIC_BANK1);
 	poke(VIC_DATA_LOC, #0,#$18);

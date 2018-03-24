@@ -15,7 +15,7 @@ public:
     QString m_outFile, m_fileName, m_path;
 
     void Load(QString filename, QString path);
-    void Convert();
+    void Convert(int headerShift);
 };
 
 #endif // SID_H

@@ -1086,6 +1086,7 @@ void NodeBuiltinMethod::Call(Assembler *as)
 void NodeBuiltinMethod::InitSid(Assembler *as)
 {
     NodeNumber* num= (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+//    qDebug() << "initsid:" << num->HexValue();
     if (num!=nullptr) {
         as->Comment("initsid");
         as->Asm("lda #0");

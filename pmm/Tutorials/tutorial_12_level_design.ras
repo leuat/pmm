@@ -1,14 +1,16 @@
-program Tutorial13;
+program Tutorial12;
 var  
+	sprite0data : incbin("sprites/fastfood.bin","$2400");
+
 	mainChar: IncBin("charsets/tutorial12_mc.bin","$2800");
-	music1 : incsid("fliptape2.sid");
+
+	music1 : incsid("fliptape2.sid", "2");
 	levels: IncBin("levels/tutorial12.flf", "$4000");
-	sprite0data : incbin("sprites/fastfood.bin");
 	m_posx, m_posy : byte; // current level position in grid
  	i, redraw : byte;  // i is temp, redraw states that the map should be redrawn
 	
-	sprite1_counter, tmp2 : byte; // sprite1_counter shifts between sprite animations 
-	spritex, spritey, tmp : integer; // Sprite positions and temp integer
+	sprite1_counter, spritey, tmp2 : byte; // sprite1_counter shifts between sprite animations 
+	spritex, tmp : integer; // Sprite positions and temp integer
 
 
 @define levelpointer "zeropage7"
@@ -22,15 +24,15 @@ var
 // Updates the sprite & the sprite animation
 procedure UpdatePlayerSprite();
 begin
-	spritepos(spritex, spritey,@playerSprite);
+	spritepos(spritex, spritey, @playerSprite);
 	sprite1_counter:=sprite1_counter-#1;
 	// Animation hits at 0 and 10
 	if sprite1_counter=#10 then 
-		setSpriteLoc(#0, #$90, #0);
+		setSpriteLoc(@playerSprite, #$91, #0);
 
 	if sprite1_counter=#0 then begin
 		sprite1_counter := #20;
-		setSpriteLoc(#0, #$91, #0);
+		setSpriteLoc(@playerSprite, #$92, #0);
 	
 	end;
 
@@ -121,12 +123,6 @@ end;
 // Initialize sprites 
 procedure InitSprites();
 begin
-	setSpriteLoc(#0, #$90, #0);
-	
-	setSpriteLoc(#1, #$92, #0);
-	
-    setSpriteLoc(#2, #$93, #0);
-	
 
 	poke(SPRITE_MULTICOLOR_REG1, #0, BLACK);
 	poke(SPRITE_MULTICOLOR_REG2, #0, YELLOW);
@@ -137,15 +133,6 @@ begin
 	poke(SPRITE_COLOR,#0, RED);
 	poke(SPRITE_COLOR,#1, RED);
 	poke(SPRITE_COLOR,#2, RED);
-
-
-	// Copy sprite data
-    memcpy(sprite0data, #64, SPRITE_LOC1, #63);
-    memcpy(sprite0data, #128, SPRITE_LOC1 + 64, #63);
-
-    memcpy(sprite0data, #192, SPRITE_LOC2, #63);
-
-    memcpy(sprite0data, #256, SPRITE_LOC3, #63);
 
 
 	poke(SPRITE_STRETCH_X, #0, #%00000010);

@@ -5,12 +5,9 @@
 
 
 
-void NodeBinaryClause::BinaryClause(Assembler *as)
+void NodeBinaryClause::BuildToCmp(Assembler *as)
 {
     QString b="";
-
-    as->Comment("Binary clause: " + m_op.getType());
-//    as->Asm("pha"); // Push that baby
 
     NodeVar* varb = dynamic_cast<NodeVar*>(m_right);
     if (varb!=nullptr)
@@ -33,6 +30,37 @@ void NodeBinaryClause::BinaryClause(Assembler *as)
         as->Term();
         as->Asm("cmp " + tmpVar);
     }
+
+
+}
+
+void NodeBinaryClause::BuildSimple(Assembler *as, QString lblFailed)
+{
+
+    as->Comment("Binary clause Simplified: " + m_op.getType());
+//    as->Asm("pha"); // Push that baby
+
+    BuildToCmp(as);
+
+    if (m_op.m_type==TokenType::EQUALS)
+        as->Asm("bne " + lblFailed);
+    if (m_op.m_type==TokenType::NOTEQUALS)
+        as->Asm("beq " + lblFailed);
+    if (m_op.m_type==TokenType::GREATER)
+        as->Asm("bcc " + lblFailed);
+    if (m_op.m_type==TokenType::LESS)
+        as->Asm("bcs " + lblFailed);
+
+
+
+}
+
+void NodeBinaryClause::BinaryClause(Assembler *as)
+{
+
+    as->Comment("Binary clause: " + m_op.getType());
+
+    BuildToCmp(as);
 
     QString lblFailed = as->NewLabel("binaryclausefailed");
     QString lblFinished = as->NewLabel("binaryclausefinished");
@@ -180,6 +208,7 @@ void NodeBinaryClause::LogicalClause(Assembler *as)
 
     // Done comparing!
 }
+
 
 QString NodeBinaryClause::Build(Assembler *as)
 {

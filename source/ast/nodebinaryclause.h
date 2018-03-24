@@ -24,6 +24,17 @@ public:
             m_left->ExecuteSym(sym);
     }
 
+    void BuildToCmp(Assembler* as);
+
+    void BuildSimple(Assembler* as, QString failedLabel);
+
+
+    bool canBeSimplified(Assembler* as) {
+        return ((m_op.m_type==TokenType::AND || m_op.m_type == TokenType::OR)
+                || m_left->getType(as)==TokenType::INTEGER || m_right->getType(as)==TokenType::INTEGER
+
+                );
+    }
 
 //    void OnlyNumVar(Assembler* as, QString a, QString b);
 

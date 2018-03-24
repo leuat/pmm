@@ -10,6 +10,8 @@ var
 //	intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000"); // $2000 suze
 
 
+// 1 is monster
+// 5 is ..?
 
 
 //	music1 : incsid("fliptape3.sid");
@@ -201,6 +203,8 @@ begin
 			screenmemory[m_rl_idx+#40]:=m_rl_val;
 			screenmemory[m_rl_idx+#41]:=m_rl_val;
 			
+
+
 	 	end;
 		incscreenx(#80);
 		inczp(@levelpointer, m_rl_width);
@@ -553,8 +557,9 @@ begin
 
 			val:=zeropage5[@entity_upgrade];
 			// UPGRADES!
+			
 			j:=getbit(val, @upgrade_ammo_bit);
-			if j=#0 then bullet_max:=bullet_max+#5;
+			if #0=j then bullet_max:=bullet_max+#5;
 			j:=getbit(val, @upgrade_health_bit);	
 			if j=#0 then begin
 				player_health := player_health + #10;	
@@ -847,7 +852,7 @@ begin
 	else
 		spritex:=#25;
 	end;
-	
+
 	if spritey<#65 then begin
 		if m_posy<>#0 then begin
 
@@ -974,7 +979,7 @@ begin
 
 	for i:=#0 to tmp2 do begin
 		screenmemory[i] := #96;
-				
+		asm(";condopt");
 		if i<k then
 			zeropage1[i] := YELLOW
 		else
@@ -1082,16 +1087,16 @@ begin
 
 	sprite1_counter := #1;
 	bullet_wait := #0;
-	bullet_dmg:=#5;
 	player_score := #0;
+	joystick_pressed := #0;
+	bullet_dmg:=#5;
+	bullet_count :=#5;
 
 	player_health := #30;
 	player_maxhealth := #30;
 
-	bullet_count :=#5;
 	bullet_max := #10;
 
-	joystick_pressed := #0;
 	frameCounter:=#0;
 
 	// Remember to implement resetting all "isdead" flag. also, make this part of flags bit.

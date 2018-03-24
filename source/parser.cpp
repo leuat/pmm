@@ -153,6 +153,9 @@ Node *Parser::Variable()
     Node* n = nullptr;
     if (SymbolTable::m_constants.contains(m_currentToken.m_value)) {
         Symbol* s = SymbolTable::m_constants[m_currentToken.m_value];
+
+      //  qDebug() << "looking for " << m_currentToken.m_value << " , found symbol: " << s->m_name << " with value " << s->m_value->m_fVal;
+
         if (s->m_type=="ADDRESS") m_currentToken.m_type=TokenType::ADDRESS;
         if (s->m_type=="INTEGER") m_currentToken.m_type=TokenType::INTEGER;
         if (s->m_type=="BYTE") m_currentToken.m_type=TokenType::BYTE;
@@ -206,7 +209,7 @@ Node *Parser::AssignStatement()
 
     if (m_currentToken.m_type!=TokenType::ASSIGN) {
 //        qDebug() << m_currentToken;
-        ErrorHandler::e.Error("Could not find variable or procedure '" + t.m_value+  "'", token.m_lineNumber);
+        ErrorHandler::e.Error("Could not assign '" + t.m_value+  "', did you forget a colon?" , token.m_lineNumber);
     }
     Eat(TokenType::ASSIGN);
     Node* right = Expr();
@@ -696,9 +699,12 @@ QVector<Node *> Parser::VariableDeclarations()
 
     QVector<Node*> var_decleratons;
 
-//    vars.insert(0, VarDecl(varN));
     for (Node* n : vars) {
-        var_decleratons.append(new NodeVarDecl(n, typeNode));
+        NodeVarDecl* decl = new NodeVarDecl(n, typeNode);
+        var_decleratons.append(decl);
+        if (typeNode->m_op.m_type == TokenType::INCSID) {
+            decl->InitSid(m_lexer->m_path);
+        }
     }
 
 //    return vars;

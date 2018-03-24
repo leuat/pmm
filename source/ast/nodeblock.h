@@ -59,11 +59,12 @@ public:
        as->Asm("jmp " + label);
        bool blockLabel = false;
         for (Node* n: m_decl) {
-            if (!blockLabel)
+            if (!blockLabel) // Print label at end of vardecl
                 if (dynamic_cast<NodeVarDecl*>(n)==nullptr) {
                     as->Label(label);
                     blockLabel = true;
                 }
+            //qDebug() << "VarDeclBuild:" ;
             n->Build(as);
         }
         as->VarDeclEnds();

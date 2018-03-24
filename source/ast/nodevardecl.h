@@ -15,6 +15,8 @@ class NodeVarDecl : public Node {
 public:
     Node* m_varNode = nullptr;
     Node* m_typeNode;
+    SidFile sid;
+
     NodeVarDecl(Node* varNode, Node* typeNode) {
         m_varNode = varNode;
         m_typeNode = typeNode;
@@ -34,20 +36,10 @@ public:
 
 
     void IncSid(Assembler* as) {
-        NodeVar* v = (NodeVar*)m_varNode;
-        NodeVarType* t = (NodeVarType*)m_typeNode;
-
-        SidFile sid;
-        sid.Load(t->m_filename, as->m_projectDir);
-        sid.Convert();
-        qDebug() << "SID LOAD: " << QString::number(sid.m_loadAddress,16);
-        qDebug() << "SID INIT: " << QString::number(sid.m_initAddress,16);
-       qDebug() << "SID PLAY: " << QString::number(sid.m_playAddress,16);
-        as->m_symTab->DefineSid(sid.m_initAddress, sid.m_playAddress);
 
         // Init address or load address? hmmm
-        as->Appendix("org $" +QString::number(sid.m_initAddress,16),1);
-        as->Appendix(v->value,0);
+        as->Appendix("org $" +QString::number(sid.m_loadAddress,16),1);
+//        as->Appendix(v->value,0);
         as->Appendix("incbin \"" + as->m_projectDir + sid.m_outFile + "\"",1);
 
     }
@@ -66,13 +58,40 @@ public:
             as->Asm("incbin \"" + filename + "\"");
         }
         else {
+            qDebug() << "bin: "<<v->value << " at " << t->m_position;
             as->Appendix("org " +t->m_position,1);
             as->Appendix(v->value,0);
             as->Appendix("incbin \"" + filename + "\"",1);
         }
     }
 
+    void InitSid(QString projectDir) {
+        NodeVar* v = (NodeVar*)m_varNode;
+        NodeVarType* t = (NodeVarType*)m_typeNode;
 
+
+        int headerShift = 0;
+        if (t->m_position!="") {
+            QString val = t->m_position;
+            bool ok;
+            headerShift = val.toInt(&ok);
+            if (!ok)
+                headerShift = 0;
+        }
+
+        sid.Load(t->m_filename, projectDir);
+        sid.Convert(headerShift);
+/*        qDebug() << "SID LOAD: " << QString::number(sid.m_loadAddress,16);
+        qDebug() << "SID INIT: " << QString::number(sid.m_initAddress,16);
+       qDebug() << "SID PLAY: " << QString::number(sid.m_playAddress,16);
+*/
+       if (sid.m_loadAddress ==0 ) {
+           qDebug() << "BUG load sid at ZERO?";
+           sid.m_loadAddress = sid.m_initAddress;
+       }
+        SymbolTable::DefineSid(sid.m_initAddress, sid.m_playAddress);
+
+    }
 
     QString Build(Assembler* as) {
 

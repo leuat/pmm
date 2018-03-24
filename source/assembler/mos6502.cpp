@@ -336,7 +336,7 @@ void AsmMOS6502::OptimisePassStaLda()
             }
             QString var = getToken(l0,1);
             if (getToken(l1,1)==var && getToken(l1,0)=="lda") {
-                qDebug() << "Removing: " << l1 << " on line " << j;
+              //  qDebug() << "Removing: " << l1 << " on line " << j;
                 m_removeLines.append(j);
                 i++;
                 continue;
@@ -606,7 +606,7 @@ void AsmMOS6502::InitMosOpCycles()
 
     m_opCycles["cmp"] = MOSOperandCycle("cmp",0,2,4,4,3,5);
     m_opCycles["jmp"] = MOSOperandCycle("jmp",0,0,3,3,0,5);
-    m_opCycles["jsr"] = MOSOperandCycle("jsr",0,0,0,6,0,0);
+    m_opCycles["jsr"] = MOSOperandCycle("jsr",0,0,6,6,0,0);
     m_opCycles["rts"] = MOSOperandCycle("rts",0,0,0,6,0,0);
     m_opCycles["beq"] = MOSOperandCycle("beq",0,0,2,0,0,0);
     m_opCycles["bcs"] = MOSOperandCycle("bcs",0,0,2,0,0,0);

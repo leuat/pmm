@@ -48,6 +48,9 @@ public:
     }
 
 
+    void LargeLoop(Assembler* as);
+    void SmallLoop(Assembler* as);
+
     QString Build(Assembler *as) override;
 
 };

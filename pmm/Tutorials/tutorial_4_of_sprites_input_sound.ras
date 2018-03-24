@@ -2,39 +2,38 @@ PROGRAM tutorial4;
 VAR
 	a,b, c, i, j,k,val,mainloop, time : byte;
 	x,y : byte;
-	sprite0data: IncBin("data/sprite_blob.bin");
+	sprite0data: IncBin("data/sprite_blob.bin", "$0F00");
+	//sprite0data: IncBin("sprites/fastfood.bin", "$2400");
 
-	sprite_time : integer;
+	sprite_time : byte;
 
 	sprite_x : integer;
-	sprite_y : integer;
+	sprite_y : byte;
 
 	bullet_x : integer;
-	bullet_y : integer;
+	bullet_y : byte;
 
 
 
 
 procedure InitializeSprites();
 begin
-	Asm("	ldx #0");
 	sprite_x:=#160;
 	sprite_y:=#180;
 
-	Asm("	ldx #0");
 	bullet_x:=#400;
 	bullet_y:=#180;
 
+	asm(";wtf");
 	
-	setSpriteLoc(#0, #$0D, #0);
-	setSpriteLoc(#1, #$0E, #0);
+	setSpriteLoc(#0, #$3C, #0);
+	setSpriteLoc(#1, #$3E, #0);
 
     poke(SPRITE_BITMASK,#0, #%00000011);
+
 	poke(SPRITE_COLOR,#0, YELLOW);
 	poke(SPRITE_COLOR,#1, GREEN);
 
-    memcpy(sprite0data, #0, SPRITE_LOC1, #63);
-    memcpy(sprite0data, #128, SPRITE_LOC2, #63);
 end;
 
 procedure MoveSoundEffect(freq_move:byte);
@@ -79,6 +78,7 @@ end;
 
 procedure MoveSprite();
 begin
+
 	spritepos(sprite_x, sprite_y, #0);
 	Joystick();
 
@@ -95,7 +95,6 @@ begin
  
 
 
-	asm(";feil");
 	if joystickbutton=#1 then begin
 		ShootSoundEffect(SID_SAW, #15);
 		bullet_x:=sprite_x;
@@ -111,11 +110,12 @@ begin
 	if sprite_time>#20 then begin
 		sprite_time:=#0;
 	end;
+
 	if sprite_time=#10 then begin
-		memcpy(sprite0data, #0, SPRITE_LOC1, #63);
+		setSpriteLoc(#0, #$3C, #0);
 	end;
 	if sprite_time=#0 then begin
-		memcpy(sprite0data, #64, SPRITE_LOC1, #63);
+		setSpriteLoc(#0, #$3D, #0);
 	end;
 end;
 
@@ -132,15 +132,14 @@ begin
 	sprite_time := #0;
 
 	InitializeSprites();
-
-	While mainloop<#10 do begin
+	While #1<>#2 do begin
 		time:=time+#1;
 		UpdateSprite();	
 		PrintText();
 		
 		MoveSprite();
 		MoveBullet();
-		WaitForRaster(#0);
+		WaitForRaster(#1);
 	end;
 
 END.

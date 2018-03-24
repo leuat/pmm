@@ -1,12 +1,15 @@
 #include "symboltable.h"
 #include <qmath.h>
 bool SymbolTable::isInitialized = false;
+int SymbolTable::m_currentSid = 0;
 QMap<QString, Symbol*> SymbolTable::m_constants;
 
 SymbolTable::SymbolTable()
 {
+    m_currentSid = 0;
     InitBuiltins();
     Initialize();
+
 }
 
 void SymbolTable::Initialize()

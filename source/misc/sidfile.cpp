@@ -18,6 +18,7 @@ void SidFile::Load(QString filename, QString path)
 
     file.open(QIODevice::ReadOnly);
     m_blob = file.readAll();
+    //qDebug() << "sid file size: " << m_blob.count();
 
 
     if (!(m_blob.at(0)=='P' && m_blob.at(1)=='S' && m_blob.at(2)=='I' && m_blob.at(3)=='D'))
@@ -27,12 +28,11 @@ void SidFile::Load(QString filename, QString path)
     m_initAddress = m_blob.at(0xa)<<8 | m_blob.at(0xa+1)<<0;
     m_playAddress = m_blob.at(0xc)<<8 | m_blob.at(0xc+1)<<0;
 
-    qDebug() << "INIT:" << QString::number((unsigned short)m_initAddress,16);
 
     file.close();
 }
 
-void SidFile::Convert()
+void SidFile::Convert(int headerShift)
 {
     m_outFile = m_fileName.remove(".sid");
     m_outFile = "_" + m_outFile + ".dat";
@@ -42,7 +42,7 @@ void SidFile::Convert()
 
     QFile file(m_path + m_outFile);
     file.open(QIODevice::WriteOnly);
-    int headerSize = 0x7C +2;
+    int headerSize = 0x7C + headerShift;
     // Should the +2 be included? FUCK!
     m_blob.remove(0,headerSize);
     file.write(m_blob);

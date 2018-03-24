@@ -5,6 +5,7 @@
 #include "source/symboltable.h"
 #include "source/errorhandler.h"
 #include "source/assembler/assembler.h"
+#include "source/assembler/mos6502.h"
 
 
 class Node {
@@ -43,6 +44,18 @@ public:
     virtual TokenType::Type getType(Assembler* as) {
         return m_op.m_type;
     }
+    bool verifyBlockBranchSize(Assembler *as, Node* testBlock)
+    {
+        AsmMOS6502 tmpAsm;
+        tmpAsm.m_symTab = as->m_symTab;
+        testBlock->Build(&tmpAsm);
+        //qDebug() << "block count:" << tmpAsm.m_source.count();
+        int blockCount = tmpAsm.m_source.count();
+        return blockCount<80;
+
+    }
+
+
 };
 
 

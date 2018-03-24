@@ -2,7 +2,7 @@ PROGRAM FirstC64;
 VAR
 	a,b, c, i, j,k,val,mainloop, time : byte;
 	x,y : byte;
-	sprite0data: IncBin("data/sprite1.bin");
+	sprite0data: IncBin("data/sprite1.bin", "$1200");
 	fadeOut : array [8] of byte = ($00,$0d,$0b,$05,$02,$0a,$09,$0f,$04,$00,$0c,$06,$0e,$07,$08,$03 );
 	fadeRedBlue : array [8] of byte = (00,$0f,$09,$0e,$02,$0c,$00,$0c,$09,$00,$02,$00,$0b,$05,$06,$0c); 
 	fade : array [8] of byte = (00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00,11,6,12,4,14,15,1,1,15,14,4,12,6,11,00,00); 
@@ -32,12 +32,14 @@ begin
 	Asm("	ldx #0");
 	sprite_x:=#160;
 	sprite_y:=#180;
-    poke(SPRITE_DATA_LOC,#0, #$0D); 
-	poke(SPRITE_DATA_LOC,#1, #$0D);
+//    poke(SPRITE_DATA_LOC,#0, #$0D); 
+//	poke(SPRITE_DATA_LOC,#1, #$0D);
+	setspriteloc(#0, #$48, #0);
+	setspriteloc(#1, #$49, #0);
     poke(SPRITE_BITMASK,#0, #%00011111);
 	poke(SPRITE_COLOR,#0, WHITE);
     poke(SPRITE_COLOR,#1, YELLOW);
-    memcpy(sprite0data, #0, $0340, #63);
+   // memcpy(sprite0data, #0, $0340, #63);
 
 end;
 
@@ -48,7 +50,7 @@ begin
 
 //
 //
-	PlaySound(SID_CHANNEL1, #15, #10, #0*#16+#0, #15*#16 + #6, #1 +wave_type, wave_type);
+//	PlaySound(SID_CHANNEL1, #15, #10, #0*#16+#0, #15*#16 + #6, #1 +wave_type, wave_type);
 
  end;
 
@@ -64,7 +66,7 @@ end;
 
 procedure MoveSprite();
 begin
-	spritepos(sprite_x, sprite_y, #0, #$01, #$FE);
+	spritepos(sprite_x, sprite_y, #0);
 	Joystick();
 
     asm("   ldx #0 ; bug add");
@@ -95,7 +97,7 @@ end;
 
 procedure InitStars();
 begin
-   for i:=#0 to #50 do begin
+   for i:=#0 to #100 do begin
 	 rand(#1,#39,x);
 	 rand(#1,#160,y);
 	 rand(#0,#6,val);
@@ -110,9 +112,9 @@ end;
 
 procedure UpdateStars();
 begin
-	for i:=#0 to #20 do begin
+	for i:=#0 to #30 do begin
 
-		if stars_y[i]>#22*#8 then begin
+		if stars_y[i]>#200 then begin
 			stars_y[i]:=#1;
 		end;
 		stars_y[i]:=stars_y[i] + stars_dy[i];
@@ -125,11 +127,15 @@ begin
 
 
 		moveto(stars_x[i], y, #$04);
-		pokescreen(clearval,#0);
+		screenmemory[#0]:=clearval;
+		//pokescreen(clearval,#0);
 		incscreenx(#40);
-		pokescreen(x,#0);
+		screenmemory[#0]:=x;
+		//pokescreen(x,#0);
 		moveto(stars_x[i], y+#1, #$D8);
-		pokescreen(stars_col[i],#0);
+	//	pokescreen(stars_col[i],#0);
+		screenmemory[#0]:=stars_col[i];
+//		poke(SCREEN_BG_COL, #0, x);
 
 	end;
 	fill($0400 + #40*#23, clearval, #40);
@@ -145,7 +151,7 @@ begin
 	UpdateStars();
 	PrintText();
 	MoveSprite();
-	Call(SIDFILE_1_PLAY);
+	//Call(SIDFILE_1_PLAY);
 
 	//kernelInterrupt();
 
@@ -170,21 +176,11 @@ end;
 
 begin
 	
-	InitSid(SIDFILE_1_INIT);
+	//InitSid(SIDFILE_1_INIT);
 
 	poke(SCREEN_BG_COL, #0, BLACK);
 	poke(SCREEN_FG_COL, #1, BLACK);
 	poke($d018, #0, #$1A);
-/*
-$D018 = %xxxx000x -> charmem is at $0000
-$D018 = %xxxx001x -> charmem is at $0800
-$D018 = %xxxx010x -> charmem is at $1000
-$D018 = %xxxx011x -> charmem is at $1800
-$D018 = %xxxx100x -> charmem is at $2000
-$D018 = %xxxx101x -> charmem is at $2800
-$D018 = %xxxx110x -> charmem is at $3000
-$D018 = %xxxx111x -> charmem is at $3800
-*/
 
     //poke($C202, #0,#13);
 	clearval := #$20;
