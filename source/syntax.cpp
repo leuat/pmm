@@ -299,13 +299,18 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()
                 );
 
-    builtInFunctions["kernelinterrupt"] = BuiltInFunction(
-                "kernelinterrupt",
+    builtInFunctions["kernalinterrupt"] = BuiltInFunction(
+                "kernalinterrupt",
                 QList<BuiltInFunction::Type>()
                 );
 
     builtInFunctions["loop"] = BuiltInFunction(
                 "loop",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["clearsound"] = BuiltInFunction(
+                "clearsound",
                 QList<BuiltInFunction::Type>()
                 );
 

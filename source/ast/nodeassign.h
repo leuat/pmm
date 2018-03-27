@@ -33,7 +33,7 @@ public:
 
         QString varName = ((NodeVar*)m_left)->value;
         ErrorHandler::e.DebugHigh("Defining new variable : " + varName,level);
-        Symbol* s = symTab->Lookup(varName);
+        Symbol* s = symTab->Lookup(varName, m_op.m_lineNumber);
         s->m_value = new PVar(m_right->Execute(symTab, level));
 
         //Syntax::s.globals[varName] = new PVar(m_right->Execute(symTab, level));
@@ -165,9 +165,9 @@ public:
            ErrorHandler::e.Error("Left value not variable! ");
 
         as->Comment("Assigning single variable : " + v->value);
-        Symbol* s = as->m_symTab->Lookup(v->value);
-        if (s==nullptr)
-            ErrorHandler::e.Error("Could not find variable :" + v->value,m_op.m_lineNumber);
+        Symbol* s = as->m_symTab->Lookup(v->value, m_op.m_lineNumber);
+//        if (s==nullptr)
+  //          ErrorHandler::e.Error("Could not find variable :" + v->value,m_op.m_lineNumber);
 
         TokenType::Type t = s->getTokenType();
 
@@ -206,7 +206,7 @@ public:
     }
     void ExecuteSym(SymbolTable* symTab) override {
         QString varName = ((NodeVar*)m_left)->value;
-        Symbol* varSymbol = symTab->Lookup(varName);
+        Symbol* varSymbol = symTab->Lookup(varName, m_op.m_lineNumber);
         m_right->ExecuteSym(symTab);
 
     }

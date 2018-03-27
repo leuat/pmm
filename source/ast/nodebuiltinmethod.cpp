@@ -17,8 +17,8 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         as->EndWriteln();
     }
 
-    if (m_procName.toLower()=="kernelinterrupt")
-        as->Asm("jmp $ea81        ; return to kernel interrupt routine");
+    if (m_procName.toLower()=="kernalinterrupt")
+        as->Asm("jmp $ea81        ; return to kernal interrupt routine");
 
     if (m_procName.toLower()=="loop")
         as->Asm("jmp * ; loop like (¤/%");
@@ -26,6 +26,12 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="call") {
         Call(as);
     }
+
+
+    if (m_procName.toLower()=="clearsound") {
+        Clearsound(as);
+    }
+
     if (m_procName.toLower() == "setspriteloc")
         SetSpriteLoc(as);
 
@@ -923,6 +929,32 @@ void NodeBuiltinMethod::PlaySound(Assembler *as)
 
 }
 
+void NodeBuiltinMethod::Clearsound(Assembler *as)
+{
+    // 0, 7, 14
+    as->Asm("lda #0");
+    as->Asm("sta 54272" );
+    as->Asm("sta 54272+7" );
+    as->Asm("sta 54272+14" );
+
+    as->Asm("sta 54272+6" );
+    as->Asm("sta 54272+7+6" );
+    as->Asm("sta 54272+14+6" );
+
+/*    as->Asm("sei");
+    as->Asm("lda #$ea");
+    as->Asm("sta $0315 ");
+    as->Asm("lda #$31");
+    as->Asm("sta $0314 ");
+    as->Asm("lda #$81");
+    as->Asm("sta $dc0d");
+    as->Asm("lda #0");
+    as->Asm("sta $d01a");
+    as->Asm("inc $d019");
+    as->Asm("lda $dc0d");
+    as->Asm("cli");*/
+}
+
 void NodeBuiltinMethod::InitZeroPage(Assembler* as) {
     as->Asm("jmp initzeropage_continue");
     as->Label("zeropage1 = $02");
@@ -1192,19 +1224,28 @@ void NodeBuiltinMethod::ClearScreen(Assembler *as)
 
 
     QString lbl = as->NewLabel("clearloop");
+    QString lbl2 = as->NewLabel("clearloop2");
     QString shift = "$" + QString::number((int)num->m_val, 16);
     as->Comment("Clear screen with offset");
-    as->Asm("lda #$00");
-    as->Asm("tax");
+    as->Asm("ldx #$00");
     LoadVar(as, 0);
     as->Label(lbl);
     as->Asm("sta $0000+"+shift+",x");
     as->Asm("sta $0100+"+shift+",x");
     as->Asm("sta $0200+"+shift+",x");
-    as->Asm("sta $0300+"+shift+",x");
+//    as->Asm("sta $0300+"+shift+",x");
     as->Asm("dex");
     as->Asm("bne "+lbl);
+    as->Asm("ldx #234");
+    as->Label(lbl2);
+    as->Asm("sta $0300+"+shift+",x");
+    as->Asm("dex");
+    as->Asm("bne "+lbl2);
+
+
     as->PopLabel("clearloop");
+    as->PopLabel("clearloop2");
+
 }
 
 void NodeBuiltinMethod::WaitNoRasterLines(Assembler *as)
@@ -1270,9 +1311,11 @@ void NodeBuiltinMethod::SetSpriteLoc(Assembler *as)
 
 
     as->Comment("Set sprite location");
-    LoadVar(as,0);
-    as->Asm("tax");
+
     LoadVar(as,1);
+    LoadVar(as,0,"","ldx ");
+
+
 //    SaveVar(as,0,"x");
     as->Asm("sta $07f8 + "+bank+",x");
 

@@ -245,10 +245,10 @@ public:
         if ( dynamic_cast<const NodeVar*>(m_left) != nullptr) {
             NodeVar* v= (NodeVar*)m_left;
             varName = v->value;
-            Symbol* s = as->m_symTab->Lookup(varName);
-            if (s==nullptr)
+            Symbol* s = as->m_symTab->Lookup(varName, m_op.m_lineNumber);
+/*            if (s==nullptr)
                 ErrorHandler::e.Error("Could not find variable :" + varName,m_op.m_lineNumber);
-
+*/
             if (s->m_type.toLower()=="integer") isWord=true;
         }
 

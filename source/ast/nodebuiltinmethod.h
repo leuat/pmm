@@ -44,6 +44,7 @@ public:
     void BitOp(Assembler* as, int type);
     PVar Execute(SymbolTable* symTab, uint lvl) override;
     void PlaySound(Assembler* as);
+    void Clearsound(Assembler* as);
     void IncScreenX(Assembler* as);
     void IncZp(Assembler* as);
     void Call(Assembler* as);

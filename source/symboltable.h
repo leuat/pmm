@@ -126,18 +126,20 @@ public:
 
     void InitBuiltins();
 
-    Symbol* Lookup(QString name) {
-        if (m_constants.contains(name)) {
-            return m_constants[name];
+    Symbol* Lookup(QString name, int lineNumber) {
+//        name = name.toUpper();
+        if (m_constants.contains(name.toUpper())) {
+            return m_constants[name.toUpper()];
         }
-/*        if (!m_symbols.contains(name)) {
-            ErrorHandler::e.Error("Symbol/variable '" + name + "' does not exist in the current scope", 0);
+        if (!m_symbols.contains(name)) {
+            ErrorHandler::e.Error("Could not find variable '" + name + "'.", lineNumber);
             return nullptr;
-        }*/
+        }
         return m_symbols[name];
     }
-    Symbol* LookupVariables(QString name) {
+    Symbol* LookupVariables(QString name, int lineNumber) {
         if (!m_symbols.contains(name)) {
+            ErrorHandler::e.Error("Symbol/variable '" + name + "' does not exist in the current scope", lineNumber);
            return nullptr;
         }
         return m_symbols[name];

@@ -350,7 +350,8 @@ QVector<Node*> Parser::StatementList()
 
     }
     if (m_currentToken.m_type==TokenType::ID)
-        ErrorHandler::e.Error("Parser::Statementlist SYNTAX ERROR : Token should not be ID", m_currentToken.m_lineNumber);
+//        ErrorHandler::e.Error("Parser::Statementlist SYNTAX ERROR : Token should not be ID", m_currentToken.m_lineNumber);
+    ErrorHandler::e.Error("Did you forget a semicolon? (Token should not be ID in Parser)", m_currentToken.m_lineNumber);
 
 
     return results;

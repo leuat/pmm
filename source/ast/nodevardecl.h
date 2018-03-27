@@ -102,7 +102,7 @@ public:
         if (t->m_op.m_type==TokenType::ARRAY) {
             as->DeclareArray(v->value, t->m_arrayVarType.m_value, t->m_op.m_intVal, t->m_data, t->m_position);
             //qDebug() << "IS: " << TokenType::types[as->m_symTab->Lookup(v->value)->getTokenType()];
-            as->m_symTab->Lookup(v->value)->m_type="address";
+            as->m_symTab->Lookup(v->value, m_op.m_lineNumber)->m_type="address";
         }
         else
             if (t->m_op.m_type==TokenType::INCBIN)
@@ -126,13 +126,13 @@ public:
 
         QString typeName = ((NodeVar*)m_typeNode)->value;
         QString varName = ((NodeVar*)m_varNode)->value;
-        if (symTab->Lookup(varName)!=nullptr)
-                ErrorHandler::e.Error("Variable '" + varName +"' is already defined!",m_op.m_lineNumber);
+        //if (symTab->Lookup(varName)!=nullptr)
+         //       ErrorHandler::e.Error("Variable '" + varName +"' is already defined!",m_op.m_lineNumber);
 
 
-        Symbol* typeSymbol = symTab->Lookup(typeName);
-        if (typeSymbol==nullptr)
-            ErrorHandler::e.Error("Could not find type symbol :" + typeName,m_op.m_lineNumber);
+        Symbol* typeSymbol = symTab->Lookup(typeName, m_op.m_lineNumber);
+//        if (typeSymbol==nullptr)
+  //          ErrorHandler::e.Error("Could not find type symbol :" + typeName,m_op.m_lineNumber);
 
         ErrorHandler::e.DebugLow("Typename define : " + typeName + "  variable " + varName);
 

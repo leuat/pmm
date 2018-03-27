@@ -34,22 +34,22 @@ public:
         level = lvl+1;
         Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         ErrorHandler::e.DebugLow("Calling Var Node",level);
-        if (symTab->Lookup(value)==nullptr)
+        /*if (symTab->Lookup(value)==nullptr)
             ErrorHandler::e.Error("Could not find variable '" +value +"'.");
 
         if (symTab->Lookup(value)->m_value==nullptr)
             ErrorHandler::e.Error("Variable '" +value +"' not initialized before use.");
+*/
 
-
-        PVar v = *symTab->Lookup(value)->m_value;
+        PVar v = *symTab->Lookup(value, m_op.m_lineNumber)->m_value;
        return v;
 
     }
 
 
     TokenType::Type getType(Assembler* as) override {
-        if (as->m_symTab->Lookup(value)!=nullptr)
-            return as->m_symTab->Lookup(value)->getTokenType();
+        if (as->m_symTab->Lookup(value, m_op.m_lineNumber)!=nullptr)
+            return as->m_symTab->Lookup(value, m_op.m_lineNumber)->getTokenType();
         return m_op.m_type;
     }
 
@@ -121,10 +121,10 @@ public:
 
     void LoadVariable(Assembler* as) override {
 
-        if (as->m_symTab->Lookup(value)==nullptr)
+/*        if (as->m_symTab->Lookup(value)==nullptr)
             ErrorHandler::e.Error("Could not find variable '" +value +"' for storing.",m_op.m_lineNumber);
-
-        TokenType::Type t = as->m_symTab->Lookup(value)->getTokenType();
+*/
+        TokenType::Type t = as->m_symTab->Lookup(value, m_op.m_lineNumber)->getTokenType();
         if (t==TokenType::ADDRESS) {
             LoadByteArray(as);
             return;
@@ -155,8 +155,8 @@ public:
 
     void StoreVariable(Assembler* as) override {
         as->Comment("VarNode StoreVariable");
-        if (as->m_symTab->Lookup(value)==nullptr)
-            ErrorHandler::e.Error("Could not find variable '" +value +"' for storing.", m_op.m_lineNumber);
+        as->m_symTab->Lookup(value, m_op.m_lineNumber);
+  //          ErrorHandler::e.Error("Could not find variable '" +value +"' for storing.", m_op.m_lineNumber);
 
         // Is array
         if (m_expr != nullptr) {
@@ -206,12 +206,12 @@ public:
         }
         else {
             // Not array
-            if (as->m_symTab->Lookup(value)->getTokenType() == TokenType::BYTE) {
+            if (as->m_symTab->Lookup(value, m_op.m_lineNumber)->getTokenType() == TokenType::BYTE) {
 
                 as->Asm("sta " + value);
                 return;
             }
-            if (as->m_symTab->Lookup(value)->getTokenType() == TokenType::INTEGER) {
+            if (as->m_symTab->Lookup(value, m_op.m_lineNumber)->getTokenType() == TokenType::INTEGER) {
                 as->Asm("sta " + value);
                 as->Asm("sty " + value + "+1");
                 return;
@@ -224,10 +224,11 @@ public:
     QString Build(Assembler *as) override {
         QString  val = value;
         Pmm::Data::d.lineNumber = m_op.m_lineNumber;
-        Symbol* s = as->m_symTab->LookupVariables(value);
-        if (s==nullptr) {
-            ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?", m_op.m_lineNumber);
-        }
+        Symbol* s = as->m_symTab->Lookup(value, m_op.m_lineNumber);
+        qDebug() << s->m_value;
+//        if (s==nullptr) {
+  //          ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?", m_op.m_lineNumber);
+    //    }
         if (m_expr!=nullptr) {
             LoadVariable(as);
 
@@ -243,7 +244,7 @@ public:
     }
     void ExecuteSym(SymbolTable* symTab) override {
         QString varName = m_op.m_value;
-        Symbol* varSymbol = symTab->Lookup(varName);
+        Symbol* varSymbol = symTab->Lookup(varName, m_op.m_lineNumber);
 
     }
 

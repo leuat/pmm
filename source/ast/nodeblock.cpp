@@ -9,7 +9,7 @@ PVar NodeBlock::Execute(SymbolTable *symTab, uint lvl) {
         n->Execute(m_symTab, level);
     ErrorHandler::e.DebugLow("Calling Compound" ,level);
     m_compoundStatement->Execute(m_symTab, level);
-    Symbol* s = m_symTab->Lookup("return");
+    Symbol* s = m_symTab->Lookup("return", m_op.m_lineNumber);
     if (s->m_value)
         return *s->m_value;
     return PVar();

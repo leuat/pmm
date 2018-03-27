@@ -13,7 +13,7 @@ PVar NodeForLoop::Execute(SymbolTable *symTab, uint lvl) {
     //float val = symTab->Lookup(var->value)->m_value->m_fVal;
 
     for (float i = a.m_fVal;i<=b.m_fVal;i++) {
-        symTab->Lookup(var->value)->m_value->m_fVal = i;
+        symTab->Lookup(var->value, m_op.m_lineNumber)->m_value->m_fVal = i;
         m_block->Execute(symTab, level);
     }
 
