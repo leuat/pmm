@@ -1,0 +1,2 @@
+project_path = c:/users/leuat/onedrive/documents/github/pmm/pmm/
+data_header = ,id, x, y, life, color, spread, sx, sy, isdead, damage, ammo, sound, upgradeopen_files = ,sprites/fastfood.flf, charsets/tutorial3_level.flf, Tutorials/tutorial13_items_and_stuff.ras, levels/tutorial13.flf
