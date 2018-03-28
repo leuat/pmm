@@ -601,6 +601,15 @@ begin
 				#1+ SID_SAW ,  // Waveform
 				SID_SAW);  // waveform
 
+	if ps_t=#4 then
+		PlaySound(@sidchannel, 
+				#15,  // Volume
+				#45,  // Hi byte frequency 
+				#0*#16+#15,  // Attack voice 1
+				#15*#15 + #8,   // Sustain = 16*15 + release=6
+				#1+ SID_TRI ,  // Waveform
+				SID_TRI);  // waveform
+
 
 end;
 
@@ -783,6 +792,7 @@ begin
 
 
 			bullet_count:=bullet_count-#1;
+	
 			
 		end;
 		bullet_wait := #30;
@@ -855,6 +865,8 @@ begin
 			player_health := player_maxhealth;
 
 		bullet_count := bullet_count + zeropage5[@entity_ammo];
+		if bullet_count>bullet_max then
+			bullet_count:=bullet_max;
 		HitEntity(j, #1);	
 //		debug(#25, #0, zeropage5[#9]);
 			PlaySound(SID_CHANNEL2, 
