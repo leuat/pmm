@@ -84,6 +84,7 @@ public:
     Node* InlineAssembler();
     void Eat();
 
+
     int findSymbolLineNumber(QString symbol);
 
 

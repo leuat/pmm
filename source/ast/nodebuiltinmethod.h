@@ -68,6 +68,7 @@ public:
     void GetBit(Assembler* as);
     void CopyZPdata(Assembler* as);
     void InitZeroPage(Assembler* as);
+    void Abs(Assembler* as);
 
 
     QString BitShiftX(Assembler* as);

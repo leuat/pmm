@@ -378,6 +378,12 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER
                 );
 
+    builtInFunctions["abs"] = BuiltInFunction(
+                "abs",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                );
+
     builtInFunctions["copyimagecolordata"] = BuiltInFunction(
                 "copyimagecolordata",
                 QList<BuiltInFunction::Type>()

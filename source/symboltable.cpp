@@ -16,7 +16,7 @@ void SymbolTable::Initialize()
 {
     if (isInitialized)
         return;
-    m_constants["PI"] = new Symbol("PI","REAL", M_PI);
+    m_constants["PI"] = new Symbol("PI","4REAL", M_PI);
     m_constants["SCREEN_BG_COL"] = new Symbol("53280","ADDRESS", 53280);
     m_constants["SCREEN_FG_COL"] = new Symbol("53281","ADDRESS", 53281);
     m_constants["SCREEN_CHAR_LOC"] = new Symbol("$0400","ADDRESS", 0x0400);

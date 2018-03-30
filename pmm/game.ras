@@ -169,7 +169,7 @@ begin
 	colorAdd:=colorAdd &#15;
 	colorIndex :=#0;
 
-	kernelInterrupt();
+	kernalInterrupt();
 
 end;
 

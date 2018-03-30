@@ -7,6 +7,7 @@
 #include "errorhandler.h"
 #include "pvar.h"
 #include "token.h"
+#include "syntax.h"
 
 class Symbol {
 public:
@@ -128,9 +129,17 @@ public:
 
     Symbol* Lookup(QString name, int lineNumber) {
 //        name = name.toUpper();
+
         if (m_constants.contains(name.toUpper())) {
             return m_constants[name.toUpper()];
         }
+        // Create address on the fly
+         if (name.startsWith("$")) {
+            Symbol* s = new Symbol(name.toUpper(), "address");
+            m_symbols[name.toUpper()] = s;
+            return s;
+        }
+
         if (!m_symbols.contains(name)) {
             ErrorHandler::e.Error("Could not find variable '" + name + "'.", lineNumber);
             return nullptr;

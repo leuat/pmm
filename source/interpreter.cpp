@@ -66,8 +66,37 @@ bool Interpreter::Build(Interpreter::Type type, QString project_dir)
     }
     m_assembler->Connect();
     m_assembler->Optimise();
+    CleanupCycleLinenumbers();
     return true;
 
+}
+
+void Interpreter::CleanupCycleLinenumbers()
+{
+
+    QMap<int, int> cycles;
+
+    for (int i: m_assembler->m_cycles.keys()) {
+
+        int count = m_assembler->m_cycles[i];
+        int nl = i;
+        for (FilePart& fp : m_parser->m_lexer->m_includeFiles) {
+            // Modify bi filepart
+            if (nl>fp.m_startLine && nl<fp.m_endLine) {
+                cycles[fp.m_startLine]+=count;
+                count=0;
+            }
+
+            if (nl>=fp.m_endLine)
+                nl-=fp.m_count-1;
+        }
+        if (count!=0)
+            cycles[nl] = count;
+
+
+    }
+
+    m_assembler->m_cycles = cycles;
 }
 
 void Interpreter::SaveBuild(QString filename)

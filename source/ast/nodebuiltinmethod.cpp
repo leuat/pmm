@@ -26,6 +26,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="call") {
         Call(as);
     }
+    if (m_procName.toLower()=="abs") {
+        Abs(as);
+    }
 
 
     if (m_procName.toLower()=="clearsound") {
@@ -966,6 +969,26 @@ void NodeBuiltinMethod::InitZeroPage(Assembler* as) {
     as->Label("zeropage7 = $68");
 
     as->Label("initzeropage_continue");
+}
+
+void NodeBuiltinMethod::Abs(Assembler *as)
+{
+
+
+    as->Comment("abs(x)");
+    as->ClearTerm();
+    m_params[0]->Build(as);
+    as->Term();
+    QString l = as->NewLabel("abslabel");
+    as->Asm("cmp #127");
+    as->Asm("bcc " + l);
+    as->Asm("eor #$ff"); // negate
+    as->Asm("adc #$01");
+    as->Label(l);
+
+
+    as->PopLabel("abslabel");
+
 }
 
 QString NodeBuiltinMethod::BitShiftX(Assembler *as)

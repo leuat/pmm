@@ -12,11 +12,13 @@ VAR
 	sinx : array[40] of byte; 
 
 
+
 @define y_start "#5"
-@define include_color  true
+//@define include_color  true
 
 procedure Plasma();
 begin
+	asm(";kake");
 	c2x:=ax;
 	c2y:=ay;
 	

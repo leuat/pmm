@@ -24,6 +24,7 @@ begin
 		// like a canal		
 		val:=sine[(i*#4 + j+k)+#30]/#16 + #64 - #4;
 
+
 		if val<#64 then
 			val:=#$20;
 
@@ -69,7 +70,7 @@ begin
 
 
 
-	kernelinterrupt();
+	kernalinterrupt();
 end;
 
 procedure Setup();

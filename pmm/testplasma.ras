@@ -37,6 +37,7 @@ begin
 
 		
 
+
 	for x:=#0 to #40 do begin 
 		sinx[x] := sine[c2x] + sine[c2y];
 		c2x:=c2x+#3;

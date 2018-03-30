@@ -1,13 +1,16 @@
 
 
+/*
+   Renders a .flf level at map pos x,y
+*/
 procedure RenderLevel(m_li, m_lj, m_screen: byte);
 var
    m_rl_width, m_rl_height : byte;
    m_rl_sizex, m_rl_sizey : byte;
    m_rl_startx, m_rl_starty : byte;
    m_rl_dataSize, m_rl_pos : byte;
-   m_rl_i, m_rl_j, m_rl_val, m_rl_idx: byte;
-   m_rl_chunksize : byte;
+   m_rl_i, m_rl_j, m_rl_val, m_rl_val2, m_rl_idx: byte;
+   m_rl_chunksize, m_rl_chunks : byte;
 
 begin
 	// Fluff files have 13 byte headers
@@ -24,6 +27,8 @@ begin
 	m_rl_startx := @levelpointer[#4];
 	m_rl_starty := @levelpointer[#5];
 
+
+	m_rl_chunks := @levelpointer[#6];
 	m_rl_chunksize := @levelpointer[#7];
 
 	m_rl_dataSize := @levelpointer[#8];
@@ -38,7 +43,7 @@ begin
 	m_rl_pos := m_rl_sizex*m_lj + m_li;
 	
 	m_rl_val := m_rl_width*m_rl_height;
-	m_rl_val := m_rl_val;// + m_width; 
+//	m_rl_val := m_rl_val;// + m_width; 
 
 	// Skip levels
 
@@ -71,17 +76,19 @@ begin
 	// Then colors
 	moveto(m_rl_startx, m_rl_starty, #$D8);
 //	call(SIDFILE_1_PLAY);
-	zeropage4:=@levelpointer;
+	@colorpointer:=@levelpointer;
 	for m_rl_j:=#0 to m_rl_height do begin
 		for m_rl_i:=#0 to m_rl_width do begin
 			m_rl_val := peek(@levelpointer,m_rl_i)&#7 + #8;
 			m_rl_idx:=m_rl_i*#2;
-			
+	
 			screenmemory[m_rl_idx]:=m_rl_val;
 			screenmemory[m_rl_idx+#1]:=m_rl_val;
 			screenmemory[m_rl_idx+#40]:=m_rl_val;
 			screenmemory[m_rl_idx+#41]:=m_rl_val;
 			
+
+
 	 	end;
 		incscreenx(#80);
 		inczp(@levelpointer, m_rl_width);

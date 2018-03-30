@@ -154,7 +154,7 @@ public:
     }
 
     void StoreVariable(Assembler* as) override {
-        as->Comment("VarNode StoreVariable");
+//        as->Comment("VarNode StoreVariable");
         as->m_symTab->Lookup(value, m_op.m_lineNumber);
   //          ErrorHandler::e.Error("Could not find variable '" +value +"' for storing.", m_op.m_lineNumber);
 
@@ -171,7 +171,7 @@ public:
                 NodeVar* var = dynamic_cast<NodeVar*>(m_expr);
                 NodeNumber* num = dynamic_cast<NodeNumber*>(m_expr);
 
-
+//                qDebug() << "Var name: " << value;
                 QString secondReg="x";
                 QString pa = "";
                 QString pb= "";
@@ -211,6 +211,11 @@ public:
                 as->Asm("sta " + value);
                 return;
             }
+            if (as->m_symTab->Lookup(value, m_op.m_lineNumber)->getTokenType() == TokenType::ADDRESS) {
+
+                as->Asm("sta " + value);
+                return;
+            }
             if (as->m_symTab->Lookup(value, m_op.m_lineNumber)->getTokenType() == TokenType::INTEGER) {
                 as->Asm("sta " + value);
                 as->Asm("sty " + value + "+1");
@@ -225,7 +230,6 @@ public:
         QString  val = value;
         Pmm::Data::d.lineNumber = m_op.m_lineNumber;
         Symbol* s = as->m_symTab->Lookup(value, m_op.m_lineNumber);
-        qDebug() << s->m_value;
 //        if (s==nullptr) {
   //          ErrorHandler::e.Error("Could not find variable '" + value +"'.\nDid you mispell?", m_op.m_lineNumber);
     //    }

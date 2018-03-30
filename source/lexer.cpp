@@ -49,13 +49,26 @@ void Lexer::Advance()
     else {
 
         m_currentChar = m_text[m_pos];
-        if (Pmm::Data::d.lineNumber<m_lines.count())
+        //if (Pmm::Data::d.lineNumber<m_lines.count())
         if (m_currentChar=="\n") {
             //qDebug() << "Increase linenumber to " << Pmm::Data::d.lineNumber;
+
+          /*  if (!m_ignorePreprocessor)
+            for (FilePart& fp: m_includeFiles)
+                if (fp.m_startLine==Pmm::Data::d.lineNumber) {
+                    qDebug() << "Found " << fp.m_name << ", skipping " << fp.m_count;
+                    Pmm::Data::d.lineNumber+=fp.m_count;
+                }
+*/
             Pmm::Data::d.lineNumber ++;
-            if (Pmm::Data::d.lineNumber<m_lines.count())
-            Pmm::Data::d.currentLineText = m_lines[Pmm::Data::d.lineNumber];
+
+            //if (Pmm::Data::d.lineNumber<m_lines.count())
+            //Pmm::Data::d.currentLineText = m_lines[Pmm::Data::d.lineNumber];
             m_localPos = 0;
+
+
+
+
         }
 
 
@@ -109,6 +122,7 @@ QString Lexer::loadTextFile(QString filename)
 Token Lexer::Number()
 {
     QString res="";
+    QString org;
     while (!m_finished && Syntax::s.digitAll.contains(m_currentChar)) {
         res+=m_currentChar;
         Advance();
@@ -124,6 +138,7 @@ Token Lexer::Number()
 
         return Token(TokenType::REAL_CONST, res.toFloat());
     }
+    org = res;
     bool ok;
     float val = 0;
     // Memory address
@@ -134,6 +149,13 @@ Token Lexer::Number()
     }
 
     if (res.contains("$")) {
+/*        QString testNum = res;
+        testNum.remove("$");
+
+        if (Syntax::s.isNumeric(testNum) && !isConstant) {
+            //qDebug() << " address: " << res;
+            return Token(TokenType::ID, res);
+        }*/
         res.remove("$");
         val = res.toInt(&ok, 16);
     }
@@ -150,14 +172,18 @@ Token Lexer::Number()
 
     if (isConstant)
         return Token(TokenType::INTEGER_CONST, val);
-    else
-        return Token(TokenType::ADDRESS, val);
+    else {
+        Token t = Token(TokenType::ADDRESS, val);
+        t.m_value = org;
+        return t;
+    }
 
 }
 
 Token Lexer::_Id()
 {
     QString result="";
+    //qDebug() << "ID: " << m_currentChar;
     while (!m_finished && Syntax::s.isAlnum(m_currentChar)) {
         result +=m_currentChar;
         Advance();
@@ -270,8 +296,9 @@ Token Lexer::GetNextToken()
             return Number();
         }
 
-        if (Syntax::s.isAlpha(m_currentChar)) {
-          //  qDebug() << m_currentChar << " is Alpha";
+        if (Syntax::s.isAlpha(m_currentChar) || m_currentChar=="$") {
+
+            //qDebug() << m_currentChar << " is Alpha";
 
             return _Id();
         }

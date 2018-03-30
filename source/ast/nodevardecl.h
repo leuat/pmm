@@ -58,7 +58,7 @@ public:
             as->Asm("incbin \"" + filename + "\"");
         }
         else {
-            qDebug() << "bin: "<<v->value << " at " << t->m_position;
+//            qDebug() << "bin: "<<v->value << " at " << t->m_position;
             as->Appendix("org " +t->m_position,1);
             as->Appendix(v->value,0);
             as->Appendix("incbin \"" + filename + "\"",1);

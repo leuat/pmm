@@ -17,6 +17,7 @@ public:
     void Visit(Node* n);
     void Interpret();
     bool Build(Type, QString projDir);
+    void CleanupCycleLinenumbers();
     void SaveBuild(QString filename);
     void HandleError(FatalErrorException fe, QString se);
     void FindLineNumberAndFile(int inLe, QString& file, int& outle);

@@ -284,8 +284,7 @@ begin
 
 
 //	waitForRaster(#220);
-
-	kernelinterrupt();
+	kernalinterrupt();
 end;
 
 procedure Setup();

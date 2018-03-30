@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "source/data_pmm.h"
 Parser::Parser()
 {
 
@@ -151,6 +152,7 @@ void Parser::HandlePreprocessorInParsing()
 Node *Parser::Variable()
 {
     Node* n = nullptr;
+
     if (SymbolTable::m_constants.contains(m_currentToken.m_value)) {
         Symbol* s = SymbolTable::m_constants[m_currentToken.m_value];
 
@@ -160,8 +162,22 @@ Node *Parser::Variable()
         if (s->m_type=="INTEGER") m_currentToken.m_type=TokenType::INTEGER;
         if (s->m_type=="BYTE") m_currentToken.m_type=TokenType::BYTE;
         if (s->m_type=="STRING") m_currentToken.m_type=TokenType::STRING;
-        n = new NodeNumber(m_currentToken, s->m_value->m_fVal);
+
+        Token t = m_currentToken;
         Eat(m_currentToken.m_type);
+        Node *expr = nullptr;
+        if (m_currentToken.m_type==TokenType::LBRACKET) {
+            Eat(TokenType::LBRACKET);
+            expr = Expr();
+            Eat(TokenType::RBRACKET);
+         }
+
+        if (t.m_type==TokenType::ADDRESS && expr!=nullptr) {
+            t.m_value = "$"+QString::number( (int)s->m_value->m_fVal,16);
+            n = new NodeVar(t,expr);
+        }
+        else
+            n = new NodeNumber(t, s->m_value->m_fVal);
 
     }
     else {
@@ -231,6 +247,11 @@ Node *Parser::Statement()
             node = BuiltinFunction();
 //        if (node==nullptr)
 //            node = Constant();
+        if (node==nullptr)
+            node = AssignStatement();
+
+    }
+    else if (m_currentToken.m_type == TokenType::ADDRESS) {
         if (node==nullptr)
             node = AssignStatement();
 
@@ -471,8 +492,10 @@ void Parser::Preprocess()
                 QString text = m_lexer->loadTextFile(filename);
                 int ln=m_lexer->getLineNumber(m_currentToken.m_value);
                 m_lexer->m_text.insert(m_lexer->m_pos, text);
+                int count = text.split("\n").count();
+
                 m_lexer->m_includeFiles.append(
-                            FilePart(filename,ln, ln+ text.split("\n").count()));
+                            FilePart(filename,ln, ln+ count, count));
 
                 Eat(TokenType::STRING);
                 //Eat(TokenType::SEMI);
@@ -647,6 +670,7 @@ QVector<Node*> Parser::Declarations()
     while (m_currentToken.m_type==TokenType::PROCEDURE || m_currentToken.m_type==TokenType::INTERRUPT) {
 
         bool isInterrupt= (m_currentToken.m_type==TokenType::PROCEDURE)?false:true;
+        Token tok = m_currentToken;
         Eat(m_currentToken.m_type);
         QString procName = m_currentToken.m_value;
         Eat(TokenType::ID);
@@ -667,10 +691,24 @@ QVector<Node*> Parser::Declarations()
         //decl.append(procDecl);
         if (block!=nullptr)
             Eat(TokenType::SEMI);
+        else {
+            // Check if already defined
+
+        }
 
         m_procedures[procName] = procDecl;
-        if (block!=nullptr)
+        if (block!=nullptr) {
+            bool ok = true;
+             // Check if procedure already declared
+            for (Node* n: m_proceduresOnly) {
+                NodeProcedureDecl* proc =(NodeProcedureDecl*)n;
+                if (proc->m_procName==procName) ok = false;
+
+            }
+            if (!ok)
+                ErrorHandler::e.Error("Procedure '"+ procName +"' already defined", tok.m_lineNumber);
             m_proceduresOnly.append(procDecl);
+        }
 
     }
 

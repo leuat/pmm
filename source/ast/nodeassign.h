@@ -161,8 +161,20 @@ public:
 
     QString AssignVariable(Assembler* as) {
         NodeVar* v = (NodeVar*)dynamic_cast<const NodeVar*>(m_left);
-        if (v==nullptr)
-           ErrorHandler::e.Error("Left value not variable! ");
+        NodeNumber* num = (NodeNumber*)dynamic_cast<const NodeNumber*>(m_left);
+        if (v==nullptr && num == nullptr)
+           ErrorHandler::e.Error("Left value not variable or memory address! ");
+        if (num!=nullptr && num->getType(as)!=TokenType::ADDRESS)
+           ErrorHandler::e.Error("Left value must be either variable or memory address");
+
+
+        if (num!=nullptr) {
+            as->Comment("Assigning memory location (poke replacement)");
+            v = new NodeVar(num->m_op); // Create a variable copy
+            v->value = num->HexValue();
+            //return num->HexValue();
+        }
+
 
         as->Comment("Assigning single variable : " + v->value);
         Symbol* s = as->m_symTab->Lookup(v->value, m_op.m_lineNumber);

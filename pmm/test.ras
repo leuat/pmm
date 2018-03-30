@@ -1,16 +1,33 @@
 program Tutorial6;
 var
-	image_color: IncBin("images/cmb_color.bin", "$5000");
-	image_data: IncBin("images/cmb_data.bin", "$6000");
+//	image_color: IncBin("images/lemonspawn_color.bin", "$5000");
+	//image_data: IncBin("images/lemonspawn_data.bin", "$6000");
+	x,a: byte;
+
+
+//@include "RasLib/banking.ras"
 
 
 begin
 
-	setmulticolormode();
+/*	setmulticolormode();
 	setbitmapmode();
 	poke(VIC_DATA_LOC, #0,#$18);
+	x:=#5;
+	a:=x*#5;
 	setbank(VIC_BANK1);
 	copyimagecolordata(image_color,1);
+*/
+
+	SCREEN_BG_COL[#1] := RED;
+	a:=#10;
+
+	asm(";test");
+	for a:=#0 to #255 do 
+		$0400[a] := #66;
+
+	//SCREEN_BG_COL[#1] := GREEN;
+	//$d020[#1] := GREEN;
 
 	Loop();
 

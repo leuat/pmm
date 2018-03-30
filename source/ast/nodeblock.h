@@ -53,7 +53,6 @@ public:
    QString Build(Assembler* as) {
        //as->VarDeclHeader();
 
-       as->PushCounter();
 
        QString label = as->NewLabel("block");
        as->Asm("jmp " + label);
@@ -68,6 +67,7 @@ public:
             n->Build(as);
         }
         as->VarDeclEnds();
+        as->PushCounter();
 
         if (!blockLabel)
             as->Label(label);

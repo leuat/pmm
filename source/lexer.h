@@ -11,12 +11,13 @@
 class FilePart {
 public:
     QString m_name;
-    int m_startLine, m_endLine;
+    int m_startLine, m_endLine, m_count;
     FilePart() {}
-    FilePart(QString name, int s, int e) {
+    FilePart(QString name, int s, int e, int cnt) {
         m_startLine = s;
         m_endLine = e;
         m_name = name;
+        m_count = cnt;
     }
 };
 
