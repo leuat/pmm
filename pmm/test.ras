@@ -1,34 +1,44 @@
 program Tutorial6;
 var
-//	image_color: IncBin("images/lemonspawn_color.bin", "$5000");
-	//image_data: IncBin("images/lemonspawn_data.bin", "$6000");
-	x,a: byte;
+	x,a, i,k: byte;
 
+	colors1 : array[8] of byte = (0,1,2,3,4,5,6,7);
+	colors2 : array[8] of byte = (0,1,5,3,7,5,9,2);
 
-//@include "RasLib/banking.ras"
-
-
+procedure Pikk();
 begin
 
-/*	setmulticolormode();
-	setbitmapmode();
-	poke(VIC_DATA_LOC, #0,#$18);
-	x:=#5;
-	a:=x*#5;
-	setbank(VIC_BANK1);
-	copyimagecolordata(image_color,1);
-*/
 
-	SCREEN_BG_COL[#1] := RED;
-	a:=#10;
+end;
 
-	asm(";test");
-	for a:=#0 to #255 do 
-		$0400[a] := #66;
+begin
+	poke(SCREEN_BG_COL, #0, RED);
+	clearscreen(#$66,$0400);
+	for i:=#0 to #255 do begin
+//		poke($0400, i, #66);
+		$0400[i] := #66;
+	end;
 
-	//SCREEN_BG_COL[#1] := GREEN;
-	//$d020[#1] := GREEN;
+	a := #10;
 
-	Loop();
+	k:=#5;
+	while #1<>#2 do begin
+		
 
+		poke(SCREEN_BG_COL, #0, a);
+		PlaySound(SID_CHANNEL1, 
+				#15,  // Volume
+				k,  // Hi byte frequency 
+				#0*#16+#0,  // Attack voice 1
+				#5*#16 + #9,   // Sustain = 16*15 + release=6
+				#1 +SID_TRI,  // Waveform
+				SID_TRI);  // waveform
+		a:=a+#1;
+
+		asm(";htm");
+		waitforraster(#255);
+		waitforraster(#255);
+		k:=k+#1;
+
+	end;	
 end.

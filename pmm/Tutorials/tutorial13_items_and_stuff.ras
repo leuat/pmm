@@ -13,8 +13,7 @@ var
 //	intro_image_data: IncBin("images/lemonspawn_data.bin", "$A000"); // $2000 suze
 
 
-
-
+    
 
 //	music1 : incsid("fliptape3.sid");
 	m_posx, m_posy : byte; // current level position in grid
@@ -1282,6 +1281,7 @@ begin
 
 	//initsid(SIDFILE_1_INIT);
 //	Intro();
+
 
 	// TURN OFF Kernal Basic! WHOO!
 	togglebit($1, #0, #0);

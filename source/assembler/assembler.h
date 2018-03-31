@@ -68,6 +68,7 @@ public:
     SymbolTable* m_symTab;
     QString m_projectDir;
 
+
     QStringList m_tempVars;
     int m_varDeclEndsLineNumber = 0;
     int m_totalOptimizedLines;
