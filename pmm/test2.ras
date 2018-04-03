@@ -17,7 +17,7 @@ begin
     poke(SPRITE_BITMASK,#0, #%00000111);
 	poke(SPRITE_COLOR,#0, WHITE);
     poke(SPRITE_COLOR,#1, YELLOW);
-    memcpy(sprite0data, $0340, #63);
+//    memcpy(sprite0data, $0340, #63);
 
 end;
 
@@ -31,7 +31,7 @@ begin
 
 //	sprite_x:=sprite_x+#2;
 	sprite_x := sprite_x -joystickvalue[#1]*#4;
-	sprite_x := sprite_x +joystickvalue[#2]*#4;
+		sprite_x := sprite_x +joystickvalue[#2]*#4;
 	sprite_y := sprite_y +joystickvalue[#3]*#2;
 	moveto(#1,#1, #$04);
 	printnumber(sprite_x[1]);

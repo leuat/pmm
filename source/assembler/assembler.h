@@ -74,11 +74,16 @@ public:
     int m_totalOptimizedLines;
 
     QMap<int, int> m_cycles;
+    QMap<int, int> m_blockIndent;
 
     QVector<int> m_cycleCounter;
+    QVector<int> m_blockCounter;
 
     void PushCounter();
     void PopCounter(int ln);
+
+    void PushBlock(int ln);
+    void PopBlock(int ln);
 
     virtual int getLineCount() {return m_source.count();}
     int CountCycles(QString s);

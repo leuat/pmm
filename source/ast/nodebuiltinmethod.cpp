@@ -7,6 +7,7 @@
 QMap<QString, bool> NodeBuiltinMethod::m_isInitialized;
 
 QString NodeBuiltinMethod::Build(Assembler *as) {
+    Node::Build(as);
 
     as->PushCounter();
 

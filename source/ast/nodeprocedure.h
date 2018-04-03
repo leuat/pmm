@@ -38,6 +38,8 @@ public:
 
 
     QString Build(Assembler* as) override {
+        Node::Build(as);
+
         if (m_parameters.count()!=m_procedure->m_paramDecl.count())
             ErrorHandler::e.Error("Procedure '" + m_procedure->m_procName+"' requires "
             + QString::number(m_procedure->m_paramDecl.count()) +" parameters, not "

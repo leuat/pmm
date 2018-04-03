@@ -13,11 +13,13 @@ public:
     Assembler* m_assembler = nullptr;
     Parser* m_parser;
     Interpreter(Parser* p);
+    Interpreter() {}
     void Parse();
     void Visit(Node* n);
     void Interpret();
     bool Build(Type, QString projDir);
     void CleanupCycleLinenumbers();
+    void CleanupBlockLinenumbers();
     void SaveBuild(QString filename);
     void HandleError(FatalErrorException fe, QString se);
     void FindLineNumberAndFile(int inLe, QString& file, int& outle);

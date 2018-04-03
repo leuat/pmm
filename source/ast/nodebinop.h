@@ -349,6 +349,7 @@ public:
     }
 
     QString Build(Assembler *as) override {
+        Node::Build(as);
 
         // First check if both are consants:
 

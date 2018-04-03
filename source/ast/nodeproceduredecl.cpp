@@ -3,7 +3,9 @@
 #include "source/syntax.h"
 
 
-NodeProcedureDecl::NodeProcedureDecl(QString m, QVector<Node *> paramDecl, Node *block, bool isInterrupt) {
+NodeProcedureDecl::NodeProcedureDecl(Token t, QString m, QVector<Node *> paramDecl, Node *block, bool isInterrupt) {
+    m_op = t;
+
     m_procName = m;
     m_block = block;
     m_paramDecl = paramDecl;
@@ -34,6 +36,8 @@ void NodeProcedureDecl::SetParametersValue(QVector<PVar> &lst) {
 
 QString NodeProcedureDecl::Build(Assembler *as)
 {
+    Node::Build(as);
+
     if (m_block==nullptr)  // Is builtin procedure
         m_block = new NodeBuiltinMethod(m_procName, QVector<Node*>());
 

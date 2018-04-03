@@ -3,6 +3,8 @@
 
 
 QString NodeConditional::Build(Assembler *as) {
+    Node::Build(as);
+
     as->PushCounter();
     QString labelStartOverAgain = as->NewLabel("while");
     QString lblstartTrueBlock = as->NewLabel("ConditionalTrueBlock");

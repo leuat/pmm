@@ -212,6 +212,8 @@ void NodeBinaryClause::LogicalClause(Assembler *as)
 
 QString NodeBinaryClause::Build(Assembler *as)
 {
+    Node::Build(as);
+
     // First, check the byte
     if (m_op.m_type==TokenType::AND || m_op.m_type == TokenType::OR)
         LogicalClause(as);

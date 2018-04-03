@@ -39,6 +39,8 @@ public:
     }
 
     QString Build(Assembler* as) {
+        Node::Build(as);
+
         as->BeginBlock();
         for (Node* n: children)
             n->Build(as);

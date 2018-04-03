@@ -71,6 +71,8 @@ void NodeForLoop::SmallLoop(Assembler *as)
 
 
 QString NodeForLoop::Build(Assembler *as) {
+    Node::Build(as);
+
     //QString m_currentVar = ((NodeAssign*)m_a)->m_
     QString var = m_a->Build(as);
     //QString to = m_b->Build(as);

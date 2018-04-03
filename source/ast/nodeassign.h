@@ -210,6 +210,7 @@ public:
     }
 
     QString Build(Assembler* as) {
+        Node::Build(as);
         as->PushCounter();
         QString s = AssignVariable(as);
         as->PopCounter(m_op.m_lineNumber);

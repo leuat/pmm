@@ -16,7 +16,7 @@ public:
     Node* m_left = nullptr, *m_right = nullptr;
     bool m_isWord = false;
     int m_cycleCounter;
-
+    static int m_currentLineNumber;
     virtual PVar Execute(SymbolTable* symTab, uint lvl) = 0;
     virtual void ExecuteSym(SymbolTable* symTab) = 0;
     virtual bool DataEquals(Node* other) { return false;}
@@ -37,6 +37,7 @@ public:
         return false;
     }
     virtual QString Build(Assembler* as) {
+        m_currentLineNumber = m_op.m_lineNumber;
         return "";
     }
     virtual void LoadVariable(Assembler* a) {}

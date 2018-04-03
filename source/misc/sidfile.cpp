@@ -35,7 +35,18 @@ void SidFile::Load(QString filename, QString path)
 void SidFile::Convert(int headerShift)
 {
     m_outFile = m_fileName.remove(".sid");
-    m_outFile = "_" + m_outFile + ".dat";
+    QStringList l = m_fileName.split("/");
+    QString last = l.last();
+    qDebug() << "last: " << last;
+    l.removeLast();
+
+
+    m_outFile = "_" + last + ".dat";
+    QString f="";
+    for (QString& s : l)
+        f+=s+"/";
+    m_outFile=f+m_outFile;
+
 
     if (QFile::exists(m_path + m_outFile))
         QFile::remove(m_path + m_outFile);

@@ -94,6 +94,7 @@ public:
     }
 
     QString Build(Assembler* as) {
+        Node::Build(as);
 
         ExecuteSym(as->m_symTab);
 

@@ -21,7 +21,6 @@ public:
     }
 
     QString Build(Assembler *as) override {
-        qDebug() << "Build";
         return "";
 
         m_expr->Build(as);

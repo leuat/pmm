@@ -44,7 +44,7 @@ begin
 	colorIndex:=#0;
 	Bars();
 	
-	kernelInterrupt();
+	kernalInterrupt();
 
 end;
 

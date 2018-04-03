@@ -9,8 +9,8 @@
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
 #include "source/ast/nodevar.h"
+//#include "source/ast/nodeproceduredecl.h"
 #include "source/ast/nodevardecl.h"
-
 
 class NodeBlock : public Node {
 public:
@@ -52,17 +52,37 @@ public:
 
    QString Build(Assembler* as) {
        //as->VarDeclHeader();
+       Node::Build(as);
+       as->PushBlock(m_currentLineNumber);
+
 
 
        QString label = as->NewLabel("block");
        as->Asm("jmp " + label);
        bool blockLabel = false;
+       bool blockProcedure = false;
+       if (m_decl.count()!=0) {
+//           as->PushBlock(m_decl[0]->m_op.m_lineNumber-1);
+       }
         for (Node* n: m_decl) {
-            if (!blockLabel) // Print label at end of vardecl
-                if (dynamic_cast<NodeVarDecl*>(n)==nullptr) {
+            // Print label at end of vardecl
+            if (dynamic_cast<NodeVarDecl*>(n)==nullptr) {
+                if (!blockLabel)
                     as->Label(label);
-                    blockLabel = true;
+                blockLabel = true;
+
+                if (!blockProcedure) // Print label at end of vardecl
+                {
+                    if (n->m_op.m_lineNumber!=0) {
+  //                      as->PopBlock(n->m_op.m_lineNumber);
+                        blockProcedure = true;
+                     //   qDebug() << "pop" << n->m_op.m_lineNumber << " " << TokenType::getType(n->getType(as));
+                    }
+
                 }
+
+            }
+                //if (dynamic_cast<NodeProcedureDecl*>(n)==nullptr)
             //qDebug() << "VarDeclBuild:" ;
             n->Build(as);
         }
@@ -76,7 +96,10 @@ public:
 
 
         as->PopCounter(m_op.m_lineNumber-1);
+        as->PopBlock(m_currentLineNumber);
 
+
+//        qDebug() << "ln:" << m_currentLineNumber;
         //qDebug() << "Adding at linenumber: " << m_op.m_lineNumber << "  cycles " << m_cycleCounter;
         return "";
 

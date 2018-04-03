@@ -227,6 +227,9 @@ public:
     }
 
     QString Build(Assembler *as) override {
+        Node::Build(as);
+
+
         QString  val = value;
         Pmm::Data::d.lineNumber = m_op.m_lineNumber;
         Symbol* s = as->m_symTab->Lookup(value, m_op.m_lineNumber);

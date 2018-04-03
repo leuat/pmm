@@ -1,29 +1,73 @@
 program test3;
-var  
-   index, b,i : byte; 
-	c:array[#8] of byte;
+var
+index, b,i : byte;
+c:array[#8] of byte;
+
+procedure test();
 begin
 
-	while b<#10 do 
+	index:=#0;
+end;
+
+begin
+	
+	while b<#10 do
 	begin
-		if c>#5 then 
+		if c>#5 then
 		begin
 			c[#3]:=c[#3] +#1;
-
-		end
-		else 
+			i:=#0;
+			
+			
+			end
+		else
 		begin
 			moveto(#2,#2, #0);
 		end;
 	end;
-
+	
 	//asm(";wtf");
-	while b<#10 do 
+	while b<#10 do
 	begin
-			moveto(#2,#2, #0);
-
+		moveto(#2,#2, #0);
+		
 	end;
-
+	
 	screenmemory[#0] := #0;
-
+	
 end.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

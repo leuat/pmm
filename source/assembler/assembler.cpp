@@ -53,7 +53,29 @@ void Assembler::PopCounter(int ln)
     m_cycleCounter.removeLast();
     if (i>m_cycles[ln]) // Only count largest number
        m_cycles[ln] = i;
- //   return i;
+    //   return i;
+}
+
+void Assembler::PushBlock(int ln)
+{
+    if (m_blockIndent.contains(ln))
+        //PushBlock(ln+1);
+        m_blockIndent[ln] = m_blockIndent[ln]+1;
+    else
+        m_blockIndent[ln] = 1;
+    //   qDebug()<< "push: " <<m_blockCounter.count()  << " at " << ln;
+
+}
+
+void Assembler::PopBlock(int ln)
+{
+    if (m_blockIndent.contains(ln))
+//        PopBlock(ln-1);
+        m_blockIndent[ln] = m_blockIndent[ln]-1;
+
+    else
+        m_blockIndent[ln] = -1;
+
 }
 
 int Assembler::CountCycles(QString s)

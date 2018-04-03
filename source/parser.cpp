@@ -70,7 +70,7 @@ void Parser::InitBuiltinFunction(QStringList methodName, QString builtinFunction
     QString txt = m_lexer->m_text.toLower();
     for (QString s: methodName)
      if (txt.contains(s)) {
-        m_procedures[builtinFunctionName] = new NodeProcedureDecl(builtinFunctionName);
+        m_procedures[builtinFunctionName] = new NodeProcedureDecl(Token(TokenType::PROCEDURE, builtinFunctionName), builtinFunctionName);
         return;
      }
 
@@ -687,7 +687,7 @@ QVector<Node*> Parser::Declarations()
         Node* block = Block(true);
 //        if (block==nullptr)
   //          qDebug() << "Procedure decl: " << procName;
-        Node* procDecl = new NodeProcedureDecl(procName, paramDecl, block, isInterrupt);
+        Node* procDecl = new NodeProcedureDecl(tok, procName, paramDecl, block, isInterrupt);
         //decl.append(procDecl);
         if (block!=nullptr)
             Eat(TokenType::SEMI);

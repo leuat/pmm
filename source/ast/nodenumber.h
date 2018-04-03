@@ -62,6 +62,8 @@ public:
     }
 
     QString Build(Assembler *as) override {
+        Node::Build(as);
+
         QString val = "";
 
 /*        if (as->m_symTab->m_constants.contains(m_op.m_value)) {

@@ -588,9 +588,6 @@ begin
 	for i:=#0 to no_entities do begin
 		if entity_type[i]<>#0 then 
 		begin
-
-
-
 			tmp2 := abs(entity_curpos_x[i] - fc_x) + abs(entity_curpos_y[i] -fc_y);
 			if tmp2<val then begin
 				val:=tmp2;
@@ -1243,7 +1240,6 @@ end;
 interrupt MainScreen();
 
 begin
-		
 	Joystick();
 //	if val=#1 then
 		call(SIDFILE_1_PLAY);
@@ -1260,7 +1256,7 @@ begin
 		PrintText();
 
 		InitNewGame();
-		
+
 
 	// My VIC of chosing	
 		setbank(VIC_BANK1);
@@ -1282,7 +1278,7 @@ begin
 	//initsid(SIDFILE_1_INIT);
 //	Intro();
 
-
+	
 	// TURN OFF Kernal Basic! WHOO!
 	togglebit($1, #0, #0);
 	InitMainScreen();

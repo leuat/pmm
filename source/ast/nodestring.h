@@ -22,6 +22,8 @@ public:
     }
 
     QString Build(Assembler *as) override {
+       Node::Build(as);
+
        as->String(m_val);
        return m_val;
     }
