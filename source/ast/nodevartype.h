@@ -15,8 +15,9 @@ public:
     Token m_arrayVarType;
     QStringList m_data;
     QString m_filename, m_position;
+    QString initVal ="";
 
-    NodeVarType(Token t, QString position,   Token arrayVarType=Token(),QStringList data =QStringList() ) {
+    NodeVarType(Token t, QString position,   Token arrayVarType,QStringList data) {
         m_op = t;
         value = t.m_value;
         m_arrayVarType = arrayVarType;
@@ -24,11 +25,19 @@ public:
         m_position = position;
 
     }
-    NodeVarType(Token t,    QString filename, QString position ) {
+    NodeVarType(Token t,  QString filename, QString position ) {
         m_op = t;
         value = t.m_value;
         m_filename = filename;
         m_position = position;
+
+
+    }
+    NodeVarType(Token t,  QString initvalue ) {
+        m_op = t;
+        value = t.m_value;
+        initVal = initvalue;
+
 
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override;

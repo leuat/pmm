@@ -64,7 +64,7 @@ public:
     void InitMosOpCycles();
 
     void VarDeclHeader();
-    void DeclareVariable(QString name, QString type) override;
+    void DeclareVariable(QString name, QString type, QString initval) override;
 
     void BeginBlock() override;
     void EndBlock() override;

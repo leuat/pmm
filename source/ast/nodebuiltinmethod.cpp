@@ -55,6 +55,8 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="swap")
         Swap(as);
 
+    if (m_procName.toLower()=="clearbitmap")
+        ClearBitmap(as);
     if (m_procName.toLower()=="clearscreen")
         ClearScreen(as);
 
@@ -72,6 +74,7 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         as->Comment("Multicolor mode");
         as->Asm("lda #$18");
         as->Asm("sta $d016");
+
 
     }
     if (m_procName.toLower()=="hidebordery") {
@@ -253,6 +256,7 @@ void NodeBuiltinMethod::Poke(Assembler* as)
 {
     // Optimization : if parameter 1 is zero, drop the ldx / tax
     as->Comment("Poke");
+    RequireAddress(m_params[0],"Poke", m_op.m_lineNumber);
     NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
     if (num!=nullptr!=0 && num->m_val==0) {
         as->Comment("Optimization: shift is zero");
@@ -292,6 +296,7 @@ void NodeBuiltinMethod::Poke(Assembler* as)
 void NodeBuiltinMethod::Peek(Assembler* as)
 {
     as->Comment("Peek");
+    RequireAddress(m_params[0],"Peek", m_op.m_lineNumber);
 
     // If pointer
 
@@ -643,8 +648,8 @@ void NodeBuiltinMethod::InitRandom(Assembler *as)
     as->Asm("LDA #$80");
     as->Asm("STA $D412");
     as->Asm("jmp continueRandom");
-    as->DeclareVariable("upperRandom", "byte");
-    as->DeclareVariable("lowerRandom", "byte");
+    as->DeclareVariable("upperRandom", "byte","0");
+    as->DeclareVariable("lowerRandom", "byte","0");
     as->Label("callRandom");
     as->Asm("lda upperRandom");
     as->Asm("sbc lowerRandom");
@@ -1173,7 +1178,7 @@ void NodeBuiltinMethod::InitMul16x8(Assembler *as)
 
     as->Asm("lda #$00");
     as->Asm("tay");
-    //as->Asm("sty num1Hi  ; remove this line for 16*8=16bit multiply
+    as->Asm("sty mul16x8_num1Hi  ; remove this line for 16*8=16bit multiply");
     as->Asm("beq mul16x8_enterLoop");
 
     as->Label("mul16x8_doAdd");
@@ -1351,6 +1356,32 @@ void NodeBuiltinMethod::SetSpriteLoc(Assembler *as)
 */
 }
 
+void NodeBuiltinMethod::ClearBitmap(Assembler *as)
+{
+    NodeNumber* addr = dynamic_cast<NodeNumber*>(m_params[0]);
+    NodeNumber* cnt = dynamic_cast<NodeNumber*>(m_params[1]);
+
+    if (addr==nullptr || cnt == nullptr)
+        ErrorHandler::e.Error("ClearBitmap: both parameters must be integer constants");
+
+    QString lbl = as->NewLabel("clear");
+
+
+    QString screen = addr->HexValue();
+
+
+    as->Asm("; Clear bitmap method");
+
+    as->Asm("ldy #0");
+    as->Asm("tya");
+    as->Label(lbl);
+    for (int i=0;i<cnt->m_val;i++)
+        as->Asm("sta "+screen+"+$" + QString::number(i*256,16) + " ,y");
+    as->Asm("dey");
+    as->Asm("bne "+lbl);
+
+}
+
 void NodeBuiltinMethod::Swap(Assembler *as)
 {
     NodeVar* vars[2];
@@ -1501,6 +1532,8 @@ void NodeBuiltinMethod::CopyImageColorData(Assembler *as)
 void NodeBuiltinMethod::CopyHalfScreen(Assembler *as)
 {
     as->Comment("Copy half screen unrolled 500 bytes = 12.5*40");
+    RequireAddress(m_params[0],"CopyHalfscreen", m_op.m_lineNumber);
+    RequireAddress(m_params[1],"CopyHalfscreen", m_op.m_lineNumber);
 
     QString lbl = as->NewLabel("halfcopyloop");
     QString lbl2 = as->NewLabel("halfcopyloop2");
@@ -1562,6 +1595,8 @@ void NodeBuiltinMethod::CopyHalfScreen(Assembler *as)
 void NodeBuiltinMethod::CopyFullScreen(Assembler *as)
 {
     as->Comment("Copy screen unrolled 1000 bytes");
+    RequireAddress(m_params[0],"CopyFullscreen", m_op.m_lineNumber);
+    RequireAddress(m_params[1],"CopyFullscreen", m_op.m_lineNumber);
 
     QString lbl = as->NewLabel("fullcopyloop");
     QString lbl2 = as->NewLabel("fullcopyloop2");

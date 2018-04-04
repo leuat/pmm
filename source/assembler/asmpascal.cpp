@@ -20,7 +20,7 @@ void AsmPascal::VarDeclHeader()
     Write("var",m_currentLvl);
 }
 
-void AsmPascal::DeclareVariable(QString name, QString type)
+void AsmPascal::DeclareVariable(QString name, QString type, QString initval)
 {
     Write(name + " : " + type +";",1 + m_currentLvl);
 }

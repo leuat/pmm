@@ -111,7 +111,7 @@ public:
             else if (t->m_op.m_type==TokenType::INCSID)
                 IncSid(as);
             else
-                as->DeclareVariable(v->value, t->value);
+                as->DeclareVariable(v->value, t->value, t->initVal);
         return "";
     }
 

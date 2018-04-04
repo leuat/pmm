@@ -15,12 +15,19 @@ public:
     NodeNumber(Token op, int val) {
         m_op = op;
         m_val = val;
+
+
         if (m_op.m_type!=TokenType::ADDRESS)
             m_op.m_type = TokenType::INTEGER_CONST;
 
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override;
     void ExecuteSym(SymbolTable* symTab) override {
+    }
+
+
+    bool isAddress() override {
+        return m_op.m_type == TokenType::ADDRESS;
     }
 
     bool isPureNumeric() override {
@@ -85,6 +92,7 @@ public:
             as->Comment("Integer constant assigning");
             int hiBit = ((int)m_val)>>8;
             int loBit = ((int)m_val)&0xff;
+            as->ClearTerm();
             as->Asm("ldy #" + QString::number(hiBit) );
 //            as->Asm("tax");
             as->Asm("lda #" + QString::number(loBit) );

@@ -191,7 +191,6 @@ Node *Parser::Variable()
 
         Eat(m_currentToken.m_type);
         if (m_currentToken.m_type!=TokenType::LBRACKET) {
-
             n = new NodeVar(t);
         }
         else
@@ -432,6 +431,7 @@ Node* Parser::Factor()
     if (t.m_type == TokenType::INTEGER_CONST || t.m_type ==TokenType::REAL_CONST
             || t.m_type ==TokenType::ADDRESS) {
         Eat(t.m_type);
+        //qDebug() << "parser: " <<t.m_value << t.m_intVal;
         return new NodeNumber(t, t.m_intVal);
     }
 
@@ -538,7 +538,7 @@ Node* Parser::Parse()
     m_pass = 0;
     Preprocess();
     m_pass = 1;
-
+    m_symTab = new SymbolTable();
     m_lexer->Initialize();
     m_lexer->m_ignorePreprocessor = true;
     m_currentToken = m_lexer->GetNextToken();
@@ -719,6 +719,9 @@ QVector<Node *> Parser::VariableDeclarations()
 {
     QVector<Node*> vars;
     vars.append(new NodeVar(m_currentToken));
+    if (m_symTab->m_symbols.contains(m_currentToken.m_value))
+        ErrorHandler::e.Error("Variable '" + m_currentToken.m_value + "' is already defined.", m_currentToken.m_lineNumber);
+    m_symTab->Define(new Symbol(m_currentToken.m_value,""));
     Eat(TokenType::ID);
 
     while (m_currentToken.m_type == TokenType::COMMA) {
@@ -808,9 +811,15 @@ Node *Parser::TypeSpec()
     }
 
     Eat(m_currentToken.m_type);
+    QString initVal = "";
+    if (m_currentToken.m_type == TokenType::EQUALS) {
+        Eat(m_currentToken.m_type);
+        initVal = m_currentToken.m_value;
+        Eat(m_currentToken.m_type);
+    }
 
 
-    return new NodeVarType(t,"");
+    return new NodeVarType(t,initVal);
 
 }
 

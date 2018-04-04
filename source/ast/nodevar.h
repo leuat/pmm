@@ -119,6 +119,10 @@ public:
 
     }
 
+    bool isAddress() override {
+        return true;
+    }
+
     void LoadVariable(Assembler* as) override {
 
 /*        if (as->m_symTab->Lookup(value)==nullptr)

@@ -36,6 +36,7 @@ public:
     Lexer* m_lexer;
     Token m_currentToken;
     int m_pass = 0;
+    SymbolTable* m_symTab;
     Parser();
     Parser(Lexer* l) {
         m_lexer = l;

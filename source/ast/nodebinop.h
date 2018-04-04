@@ -60,6 +60,7 @@ public:
     bool isPureNumeric() override {
         if (m_left==nullptr || m_right==nullptr)
             return false;
+
         return (m_left->isPureNumeric() && m_right->isPureNumeric());
     }
 
@@ -106,6 +107,11 @@ public:
     void LoadVariable(Assembler* as) override {
         Build(as);
 
+    }
+
+
+    bool isAddress() override {
+        return m_left->isAddress() && m_right->isAddress();
     }
 
 
@@ -182,9 +188,8 @@ public:
     void RightIsPureNumericMulDiv16bit(Assembler* as) {
         int val = ((NodeNumber*)m_right)->m_val;
 
-
         int cnt = getShiftCount(val);
-        if (cnt == -1 ) {
+        if (cnt == -1 && m_op.m_type == TokenType::DIV ) {
             //if (m_op.m_type == TokenType::MUL)
             //    EightBitMul(as);
             //else
@@ -304,6 +309,7 @@ public:
         else {
             // Word handling
 
+
             as->m_labelStack["wordAdd"].push();
             QString lblword = as->getLabel("wordAdd");
 
@@ -313,20 +319,27 @@ public:
             NodeVar* v = (NodeVar*)m_left;
 
             as->Asm("jmp " + lblJmp);
-            as->Write(lbl +"\t.byte\t0");
+            as->Write(lbl +"\t.word\t0");
             as->Label(lblJmp);
             as->ClearTerm();
-
+            as->Asm("ldy #0");
             m_right->Build(as);
 
             as->Term();
             as->Asm("sta " +lbl);
+            as->Asm("sty " +lbl+"+1");
             as->Term();
 
             as->Asm("clc");
-            as->Variable(v->value, false);
-            as->Term();
-            as->ClearTerm();
+            //as->Variable(v->value, false);
+            as->Asm("lda " + v->value + "+1");
+            as->BinOP(m_op.m_type);
+            as->Term(lbl+"+1", true);
+            as->Asm("tay");
+            as->Asm("lda "+ v->value);
+            as->Asm("clc");
+
+//            as->ClearTerm();
             as->BinOP(m_op.m_type);
             as->Term(lbl,true);
     //        as->Asm("sta " + varName);
@@ -339,6 +352,9 @@ public:
                 as->Asm("dey");
             }
             as->Label(lblword);
+
+            // Finally, add high bit of temp var
+
 
             as->PopLabel("wordAdd");
 

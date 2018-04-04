@@ -142,39 +142,30 @@ Token Lexer::Number()
     bool ok;
     float val = 0;
     // Memory address
-    bool isConstant = false;
-    if (res.contains("#")) {
-        res.remove("#");
-        isConstant = true;
+    bool isConstant = true;
+    int base = 10;
+
+    if (res.contains("%")) {
+        res.remove("%");
+        base=2;
     }
 
     if (res.contains("$")) {
-/*        QString testNum = res;
-        testNum.remove("$");
-
-        if (Syntax::s.isNumeric(testNum) && !isConstant) {
-            //qDebug() << " address: " << res;
-            return Token(TokenType::ID, res);
-        }*/
         res.remove("$");
-        val = res.toInt(&ok, 16);
+        base=16;
     }
-    else
-    if (res.contains("%")) {
-        res.remove("%");
-        val = res.toInt(&ok, 2);
+    if (res.contains("^")) {
+        res.remove("^");
+        isConstant = false;
     }
+    val = res.toInt(&ok, base);
 
-
-
-    else
-        val = res.toFloat();
 
     if (isConstant)
         return Token(TokenType::INTEGER_CONST, val);
     else {
         Token t = Token(TokenType::ADDRESS, val);
-        t.m_value = org;
+        t.m_value = res;
         return t;
     }
 

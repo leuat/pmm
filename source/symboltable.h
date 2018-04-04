@@ -127,14 +127,14 @@ public:
 
     void InitBuiltins();
 
-    Symbol* Lookup(QString name, int lineNumber) {
+    Symbol* Lookup(QString name, int lineNumber, bool isAddress=false) {
 //        name = name.toUpper();
 
         if (m_constants.contains(name.toUpper())) {
             return m_constants[name.toUpper()];
         }
         // Create address on the fly
-         if (name.startsWith("$")) {
+         if (isAddress) {
             Symbol* s = new Symbol(name.toUpper(), "address");
             m_symbols[name.toUpper()] = s;
             return s;

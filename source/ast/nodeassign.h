@@ -97,6 +97,45 @@ public:
         }
     }
 
+    bool isSimpleAeqAOpB(NodeVar* var, Assembler* as) {
+        NodeBinOP* rterm = dynamic_cast<NodeBinOP*>(m_right);
+        if (rterm==nullptr)
+            return false;
+
+        // right first is var
+        NodeVar* rvar = dynamic_cast<NodeVar*>(rterm->m_left);
+
+        NodeVar* rrvar = dynamic_cast<NodeVar*>(rterm->m_right);
+        NodeNumber* rrnum = dynamic_cast<NodeNumber*>(rterm->m_right);
+
+        if (rrvar==nullptr && rrnum==nullptr)
+            return false;
+
+//        if (var->m_expr!=nullptr) {
+    //        return false;
+  //      }
+
+        if (!(rterm->m_op.m_type==TokenType::PLUS || rterm->m_op.m_type==TokenType::MINUS))
+            return false;
+
+        if (var->getType(as) == TokenType::INTEGER)
+            return false;
+        as->Comment("Optimizer: a = a +/- b");
+        var->LoadVariable(as);
+        as->BinOP(rterm->m_op.m_type);
+        rterm->m_right->Build(as);
+        as->Term();
+        var->StoreVariable(as);
+
+     /*   qDebug() << "is simple a=a+b : " << var->value << " = " << rvar->value << " op " ;
+        if (rrnum!=nullptr)
+            qDebug() << " " << rrnum->m_val;
+        if (rrvar!=nullptr)
+            qDebug() << " " << rrvar->value;*/
+
+        return true;
+    }
+
 
     bool IsSimpleIncDec(NodeVar* var, Assembler* as) {
         // Right is binop
@@ -113,6 +152,11 @@ public:
             return false;
 
         NodeNumber* num = dynamic_cast<NodeNumber*>(rterm->m_right);
+
+        // If a = a + b
+        if (!(num!=nullptr && num->m_val==1))
+            return isSimpleAeqAOpB(var, as);
+
         if (num==nullptr)
             return false;
 
@@ -177,7 +221,7 @@ public:
 
 
         as->Comment("Assigning single variable : " + v->value);
-        Symbol* s = as->m_symTab->Lookup(v->value, m_op.m_lineNumber);
+        Symbol* s = as->m_symTab->Lookup(v->value, m_op.m_lineNumber, v->isAddress());
 //        if (s==nullptr)
   //          ErrorHandler::e.Error("Could not find variable :" + v->value,m_op.m_lineNumber);
 

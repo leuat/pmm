@@ -75,7 +75,7 @@ void AsmMOS6502::VarDeclHeader()
     Asm("jmp "+ getLabel("block"));
 }
 
-void AsmMOS6502::DeclareVariable(QString name, QString type)
+void AsmMOS6502::DeclareVariable(QString name, QString type, QString initval)
 {
     QString t = byte;
     if (type.toLower()=="integer")
@@ -83,7 +83,7 @@ void AsmMOS6502::DeclareVariable(QString name, QString type)
     if (type.toLower()=="byte")
         t = byte;
 
-    Write(name +"\t" + t);
+    Write(name +"\t" + t + "\t"+initval);
 
 }
 

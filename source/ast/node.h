@@ -45,6 +45,15 @@ public:
     virtual TokenType::Type getType(Assembler* as) {
         return m_op.m_type;
     }
+
+    virtual bool isAddress() { return false;}
+
+
+    void RequireAddress(Node* n,QString name, int ln) {
+        if (!n->isAddress())
+            ErrorHandler::e.Error(name + " requires parameter to be memory address", ln);
+    }
+
     bool verifyBlockBranchSize(Assembler *as, Node* testBlock)
     {
         AsmMOS6502 tmpAsm;

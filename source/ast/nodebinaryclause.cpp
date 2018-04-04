@@ -220,8 +220,9 @@ QString NodeBinaryClause::Build(Assembler *as)
     else
     if (m_op.m_type==TokenType::LESS || m_op.m_type == TokenType::GREATER ||
             m_op.m_type==TokenType::EQUALS || m_op.m_type == TokenType::NOTEQUALS) {
-        if (m_left->getType(as)==TokenType::INTEGER)
+        if (m_left->getType(as)==TokenType::INTEGER) {
             BinaryClauseInteger(as);
+        }
         else
             //qDebug() << "COMPARING INTEGER WITH " << TokenType::types[m_left->getType(as)];
             BinaryClause(as);

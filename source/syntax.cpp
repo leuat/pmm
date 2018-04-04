@@ -283,6 +283,13 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER
                 );
 
+    builtInFunctions["clearbitmap"] = BuiltInFunction(
+                "clearbitmap",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                <<BuiltInFunction::Type::INTEGER
+                );
+
     builtInFunctions["call"] = BuiltInFunction(
                 "call",
                 QList<BuiltInFunction::Type>()

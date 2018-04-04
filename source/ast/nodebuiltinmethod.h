@@ -57,6 +57,7 @@ public:
     void WaitForRaster(Assembler* as);
     void WaitNoRasterLines(Assembler* as);
     void SetSpriteLoc(Assembler* as);
+    void ClearBitmap(Assembler* as);
     void Swap(Assembler* as);
     void MemCpyLarge(Assembler* as);
     void SetBank(Assembler* as);

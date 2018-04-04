@@ -11,7 +11,7 @@ public:
     void Program(QString name) override;
     void EndProgram() override;
     void VarDeclHeader( ) override;
-    void DeclareVariable(QString name, QString type) override;
+    void DeclareVariable(QString name, QString type, QString InitVal) override;
     void BeginBlock() override;
     void EndBlock() override;
     void AssignVariable(QString var) override;
