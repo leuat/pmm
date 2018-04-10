@@ -29,7 +29,8 @@ public:
     void BuildSimple(Assembler* as, QString failedLabel);
 
 
-    bool canBeSimplified(Assembler* as) {
+    bool cannotBeSimplified(Assembler* as) {
+       // can NOT be simplified
         return ((m_op.m_type==TokenType::AND || m_op.m_type == TokenType::OR)
                 || m_left->getType(as)==TokenType::INTEGER || m_right->getType(as)==TokenType::INTEGER
 

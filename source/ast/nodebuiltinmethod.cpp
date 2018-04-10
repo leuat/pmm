@@ -31,9 +31,17 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         Abs(as);
     }
 
+    if (m_procName.toLower()=="setmemoryconfig") {
+        SetMemoryConfig(as);
+    }
+
 
     if (m_procName.toLower()=="clearsound") {
         Clearsound(as);
+    }
+
+    if (m_procName.toLower()=="copycharsetfromrom") {
+        CopyCharsetFromRom(as);
     }
 
     if (m_procName.toLower() == "setspriteloc")
@@ -84,6 +92,13 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         as->Asm("sta $d011");
 
     }
+    if (m_procName.toLower()=="hideborderx") {
+        as->Comment("Hide x border");
+        as->Asm("lda $D016");
+        as->Asm("and #$f7  ; change bit 4");
+        as->Asm("sta $D016");
+
+    }
     if (m_procName.toLower() =="settextmode") {
         as->Comment("Regular text mode ");
         as->Asm("lda $D011");
@@ -124,8 +139,18 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="waitnoraster")
         WaitNoRasterLines(as);
 
+    if (m_procName.toLower()=="inc")
+        IncDec(as, "inc");
+
+    if (m_procName.toLower()=="dec")
+        IncDec(as, "dec");
+
+
     if (m_procName.toLower()=="memcpy")
         MemCpy(as);
+
+    if (m_procName.toLower()=="unrolledmemcpy")
+        MemCpyUnroll(as);
 
     if (m_procName.toLower()=="memcpylarge")
         MemCpyLarge(as);
@@ -162,6 +187,12 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower() == "init16x8mul")
             InitMul16x8(as);
 
+    if (m_procName.toLower() == "init8x8div")
+            InitDiv8x8(as);
+
+/*    if (m_procName.toLower() == "init16x8mul")
+            InitMul16x8(as);
+  */
     if (m_procName.toLower()=="fill")
         Fill(as);
 
@@ -214,7 +245,7 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="pokescreencolor") {
         PokeScreenColor(as, 0);
     }
-    if (m_procName.toLower()=="disableinterrupts")
+    if (m_procName.toLower()=="disableciainterrupts")
         DisableInterrupts(as);
 
     if (m_procName.toLower()=="rasterirq")
@@ -370,13 +401,8 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     else
         as->Asm("lda " +addr +" +  #" + num2->HexValue() + ",y");
     as->ClearTerm();
-    /*as->Term("lda ");
-    m_params[0]->Build(as);
-    as->Term(",x",true);
-    */
-  //  LoadVar(as,0, "x");
 
-    //SaveVar(as, 2, "y");
+
     as->Term("sta " + bp1);
     m_params[2]->Build(as);
     as->Term(bp2 + ",y", true);
@@ -390,6 +416,61 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     as->PopLabel("memcpy");
 
 }
+
+void NodeBuiltinMethod::MemCpyUnroll(Assembler* as)
+{
+    //as->ClearTerm();
+    NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
+    NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
+    if (var==nullptr && num==nullptr) {
+        ErrorHandler::e.Error("First parameter must be variable or number", m_op.m_lineNumber);
+    }
+    QString addr = "";
+    if (num!=nullptr)
+        addr = num->HexValue();
+    if (var!=nullptr)
+        addr = var->value;
+
+    NodeNumber* num2 = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
+    if (num2==nullptr) {
+        ErrorHandler::e.Error("Second parameter must be pure numeric", m_op.m_lineNumber);
+    }
+    NodeNumber* counter = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[3]);
+    if (counter==nullptr) {
+        ErrorHandler::e.Error("Third parameter must be pure numeric", m_op.m_lineNumber);
+    }
+
+
+
+    QString ap1 = "";
+    QString ap2 = "";
+    QString bp1 = "";
+    QString bp2 = "";
+
+    if (m_params[2]->getType(as)==TokenType::POINTER) {
+        bp1="(";
+        bp2=")";
+    }
+
+
+    as->Comment("memcpy unrolled");
+    for (int i=0;i<counter->m_val;i++) {
+        as->Asm("ldy #" +QString::number(i));
+
+        if (m_params[0]->getType(as)==TokenType::POINTER)
+            as->Asm("lda ("+ addr +"),y");
+        else
+            as->Asm("lda " +addr +" +  #" + num2->HexValue() + ",y");
+        as->ClearTerm();
+
+
+        as->Term("sta " + bp1);
+        m_params[2]->Build(as);
+        as->Term(bp2 + ",y", true);
+    }
+
+}
+
 
 void NodeBuiltinMethod::Rand(Assembler* as)
 {
@@ -824,6 +905,26 @@ void NodeBuiltinMethod::SetSpritePos(Assembler *as)
 void NodeBuiltinMethod::Fill(Assembler *as)
 {
     QString lbl = as->NewLabel("fill");
+    RequireAddress(m_params[0],"Fill",m_op.m_lineNumber);
+    if (m_params[0]->getType(as)==TokenType::POINTER) {
+
+        LoadVar(as,1);
+        as->Asm("ldy #0");
+        as->Label(lbl);
+        as->Term("sta (");
+        m_params[0]->Build(as);
+        as->Term("),y", true);
+        as->Asm("iny");
+        as->Term("cpy ");
+        m_params[2]->Build(as);
+        as->Term();
+        as->Asm("bne "+lbl);
+        as->PopLabel("fill");
+
+        return;
+    }
+
+
     LoadVar(as,1);
     as->Asm("ldx #0");
     as->Label(lbl);
@@ -997,6 +1098,91 @@ void NodeBuiltinMethod::Abs(Assembler *as)
 
 }
 
+void NodeBuiltinMethod::CopyCharsetFromRom(Assembler *as)
+{
+    RequireAddress(m_params[0],"CopyCharsetFromRom",m_op.m_lineNumber);
+    as->Comment("Copy charset from ROM");
+    as->Asm("sei ;copy charset");
+    QString lbl = as->NewLabel("charsetcopy");
+    as->Asm("lda #$33 ;from rom - rom visible at d800");
+    as->Asm("sta $01");
+
+    as->Asm("ldy #$00");
+    as->Label(lbl);
+    as->Asm("lda $D800,y");
+    if (m_params[0]->getType(as)==TokenType::POINTER) {
+        as->Term("sta (");
+        m_params[0]->Build(as);
+        as->Term("),y", true);
+
+    }
+    else {
+        as->Term("sta ");
+        m_params[0]->Build(as);
+        as->Term(",y", true);
+    }
+    //as->Asm("sta (zeropage1),y");
+    as->Asm("dey");
+    as->Asm("bne "+lbl);
+
+    as->Asm("lda #$37");
+    as->Asm("sta $01");
+}
+
+void NodeBuiltinMethod::IncDec(Assembler *as, QString cmd)
+{
+//    RequireAddress(m_params[0], "Inc/Dec", m_op.m_lineNumber);
+    NodeNumber* n = dynamic_cast<NodeNumber*>(m_params[0]);
+    NodeVar* v = dynamic_cast<NodeVar*>(m_params[0]);
+    if (v!=nullptr && v->m_expr!=nullptr) {
+        as->ClearTerm();
+        v->m_expr->Build(as);
+        as->Asm("tax");
+        as->Asm(cmd +" " + v->value + ",x");
+        return;
+
+    }
+    if (n==nullptr && v==nullptr)
+        ErrorHandler::e.Error("Inc / Dec requires an address / variable");
+
+    if (n!=nullptr && n->getType(as)!=TokenType::ADDRESS)
+        ErrorHandler::e.Error("Inc / Dec requires an address / variable");
+
+    as->ClearTerm();
+    as->Term(cmd + " ");
+    m_params[0]->Build(as);
+    as->Term();
+
+
+}
+
+void NodeBuiltinMethod::SetMemoryConfig(Assembler *as)
+{
+    as->Comment("Set Memory Config");
+    RequireNumber(m_params[0], "SetMemoryConfig", m_op.m_lineNumber);
+    RequireNumber(m_params[1], "SetMemoryConfig", m_op.m_lineNumber);
+    RequireNumber(m_params[2], "SetMemoryConfig", m_op.m_lineNumber);
+
+    NodeNumber* num1 = dynamic_cast<NodeNumber*>(m_params[0]);
+    NodeNumber* num2 = dynamic_cast<NodeNumber*>(m_params[1]);
+    NodeNumber* num3 = dynamic_cast<NodeNumber*>(m_params[2]);
+
+    int n1 = num1->m_val;
+    int n2 = num2->m_val;
+    int n3 = num3->m_val;
+
+    if (n1==1 && n2==0 && n3 == 0)
+        n2=1; // Bit 2 must be toggled
+
+    uchar val = n1<<2 | n2<<1 << n3 << 0;
+
+    as->Asm("lda $01");
+    as->Asm("and #%11111000");
+    as->Asm("ora #%" + QString::number(val,2));
+    as->Asm("sta $01");
+
+}
+
 QString NodeBuiltinMethod::BitShiftX(Assembler *as)
 {
     QString lblshiftbit = as->NewLabel("shiftbit");
@@ -1163,6 +1349,84 @@ void NodeBuiltinMethod::InitSid(Assembler *as)
 
 }
 
+
+/*void NodeBuiltinMethod::InitDiv8x8(Assembler* as) {
+    as->Asm("jmp div8x8_def_end");
+    as->Label("div8x8_procedure_defs");
+
+    as->Label("div8x8_c .byte 0 ");
+    as->Label("div8x8_d .byte 0 ");
+    as->Label("div8x8_e .byte 0 ");
+
+    as->Comment("Normal 8x8 bin div");
+    as->Label("div8x8_procedure");
+    as->Asm("ASL div8x8_d");
+    as->Asm("LDA #$00");
+    as->Asm("ROL");
+
+    as->Asm("LDX #$08");
+    as->Label("div8x8loop1");
+    as->Asm("CMP div8x8_c");
+    as->Asm("BCC *+4");
+    as->Asm("SBC div8x8_c");
+    as->Asm("ROL div8x8_d");
+    as->Asm("ROL");
+    as->Asm("DEX");
+    as->Asm("BNE div8x8loop1");
+
+    as->Asm("LDX #$08");
+    as->Label("div8x8loop2");
+    as->Asm("CMP div8x8_c");
+    as->Asm("BCC *+4");
+    as->Asm("SBC div8x8_c");
+    as->Asm("ROL div8x8_e");
+    as->Asm("ASL");
+    as->Asm("DEX");
+    as->Asm("BNE div8x8loop2");
+
+    as->Asm("lda div8x8_d");
+    as->Asm("rts");
+
+
+    as->Label("div8x8_def_end");
+
+}
+
+*/
+
+void NodeBuiltinMethod::InitDiv8x8(Assembler* as) {
+    as->Asm("jmp div8x8_def_end");
+    as->Label("div8x8_procedure_defs");
+
+    as->Label("div8x8_c .byte 0 ");
+    as->Label("div8x8_d .byte 0 ");
+    as->Label("div8x8_e .byte 0 ");
+
+    as->Comment("Normal 8x8 bin div");
+    as->Label("div8x8_procedure");
+
+    as->Asm("lda #$00");
+    as->Asm("ldx #$07");
+    as->Asm("clc");
+   as->Label("div8x8_loop1 rol div8x8_d");
+     as->Asm("rol");
+     as->Asm("cmp div8x8_c");
+     as->Asm("bcc div8x8_loop2");
+      as->Asm("sbc div8x8_c");
+   as->Label("div8x8_loop2 dex");
+    as->Asm("bpl div8x8_loop1");
+    as->Asm("rol div8x8_d");
+
+    as->Asm("lda div8x8_d");
+    as->Asm("rts");
+
+
+    as->Label("div8x8_def_end");
+
+}
+
+
+
 void NodeBuiltinMethod::InitMul16x8(Assembler *as)
 {
 
@@ -1265,9 +1529,9 @@ void NodeBuiltinMethod::ClearScreen(Assembler *as)
 //    as->Asm("sta $0300+"+shift+",x");
     as->Asm("dex");
     as->Asm("bne "+lbl);
-    as->Asm("ldx #234");
+    as->Asm("ldx #232");
     as->Label(lbl2);
-    as->Asm("sta $0300+"+shift+",x");
+    as->Asm("sta $02FF+"+shift+",x");
     as->Asm("dex");
     as->Asm("bne "+lbl2);
 
@@ -1484,7 +1748,7 @@ void NodeBuiltinMethod::CopyImageColorData(Assembler *as)
         ErrorHandler::e.Error("CopyImageColorData : parameter 1 must be a constant number!");
 
 
-    QString addBank="";
+    QString addBank="0";
     if (bank->m_val==1)
         addBank="$4000";
     if (bank->m_val==2)

@@ -23,7 +23,7 @@ public:
     bool m_isWhileLoop;
 
 
-
+    int m_forcePage = 0;
 /*    NodeConditional(QVector<Token> op, QVector<Node*> a, QVector<Node*> b, Node* block, bool isWhile, QVector<Token> conditionals, Node* elseBlock=nullptr) {
         m_a = a;
         m_b = b;
@@ -33,12 +33,13 @@ public:
         m_elseBlock = elseBlock;
         m_conditionals = conditionals;
     }*/
-    NodeConditional(Token op, Node* clause, Node* block, bool isWhile, Node* elseBlock=nullptr) {
+    NodeConditional(Token op, int forcePage, Node* clause, Node* block, bool isWhile, Node* elseBlock=nullptr) {
         m_block = block;
         m_isWhileLoop = isWhile;
         m_elseBlock = elseBlock;
         m_binaryClause = clause;
         m_op = op;
+        m_forcePage = forcePage;
     }
 
 /*    void ConditionalTryFail(Assembler* , QString labelFail, int i);

@@ -134,7 +134,7 @@ public:
             return m_constants[name.toUpper()];
         }
         // Create address on the fly
-         if (isAddress) {
+         if (isAddress || name.startsWith("$")) {
             Symbol* s = new Symbol(name.toUpper(), "address");
             m_symbols[name.toUpper()] = s;
             return s;

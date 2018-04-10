@@ -30,6 +30,7 @@ public:
     void Poke(Assembler* as);
     void Peek(Assembler* as);
     void MemCpy(Assembler* as);
+    void MemCpyUnroll(Assembler* as);
     void Rand(Assembler* as);
     void MoveTo(Assembler* as);
     void PokeScreen(Assembler* as, int hiAddress);
@@ -50,6 +51,7 @@ public:
     void Call(Assembler* as);
     void InitSid(Assembler* as);
     void InitMul16x8(Assembler* as);
+    void InitDiv8x8(Assembler* as);
     void DisableInterrupts(Assembler* as);
     void EnableInterrupts(Assembler* as);
     void RasterIRQ(Assembler* as);
@@ -70,6 +72,9 @@ public:
     void CopyZPdata(Assembler* as);
     void InitZeroPage(Assembler* as);
     void Abs(Assembler* as);
+    void CopyCharsetFromRom(Assembler* as);
+    void IncDec(Assembler* as, QString cmd);
+    void SetMemoryConfig(Assembler* as);
 
 
     QString BitShiftX(Assembler* as);

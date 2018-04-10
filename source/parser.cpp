@@ -55,14 +55,15 @@ int Parser::findSymbolLineNumber(QString symbol)
 
 void Parser::InitBuiltinFunctions()
 {
-    InitBuiltinFunction(QStringList()<< "rand", "initrandom");
-    InitBuiltinFunction(QStringList()<< "sine", "initsinetable");
     InitBuiltinFunction(QStringList()<< "*", "initeightbitmul");
     InitBuiltinFunction(QStringList()<< "*", "init16x8mul");
+    InitBuiltinFunction(QStringList()<< "*", "init8x8div");
+    InitBuiltinFunction(QStringList()<< "rand", "initrandom");
+    InitBuiltinFunction(QStringList()<< "sine", "initsinetable");
     InitBuiltinFunction(QStringList()<< "moveto", "initmoveto");
     InitBuiltinFunction(QStringList()<< "printstring" << "printnumber", "initprintstring");
     InitBuiltinFunction(QStringList()<< "joystick" , "initjoystick");
-    InitBuiltinFunction(QStringList()<< "peekzp" << "inczp" , "initzeropage");
+    InitBuiltinFunction(QStringList()<< "zeropage" << "inczp" , "initzeropage");
  }
 
 void Parser::InitBuiltinFunction(QStringList methodName, QString builtinFunctionName)
@@ -116,6 +117,23 @@ void Parser::PreprocessIfDefs(bool ifdef)
     }
 
 
+}
+
+int Parser::findPage()
+{
+    int forcePage = 0;
+
+    if (m_currentToken.m_type==TokenType::OFFPAGE) {
+        forcePage = 1;
+        Eat();
+    }
+    else
+    if (m_currentToken.m_type==TokenType::ONPAGE) {
+        forcePage = 2;
+        Eat();
+    }
+
+    return forcePage ;
 }
 
 
@@ -338,6 +356,7 @@ Node *Parser::Conditional(bool isWhileLoop)
 
     Node* clause = BinaryClause();
 
+    int forcePage = findPage();
 
     if (m_currentToken.m_type==TokenType::THEN || m_currentToken.m_type==TokenType::DO)
         Eat(m_currentToken.m_type);
@@ -353,7 +372,7 @@ Node *Parser::Conditional(bool isWhileLoop)
         nodeElse = Block(false);
     }
 
-    return new NodeConditional(t, clause, block, isWhileLoop, nodeElse);
+    return new NodeConditional(t, forcePage, clause, block, isWhileLoop, nodeElse);
 }
 
 
@@ -636,6 +655,34 @@ Node *Parser::ForLoop()
     Node* a = AssignStatement();
     Eat(TokenType::TO);
     Node* b = Expr();
+    bool unroll = false;
+    Node* step = nullptr;
+
+    int forcePage = 0;
+    int loopType = 0; // use var
+    while (m_currentToken.m_type!=TokenType::DO) {
+        if (m_currentToken.m_type==TokenType::ONPAGE || m_currentToken.m_type==TokenType::OFFPAGE)
+            forcePage = findPage();
+        if (m_currentToken.m_type==TokenType::STEP) {
+            Eat();
+            step = Expr();
+            qDebug() << TokenType::getType(step->m_op.m_type);
+        }
+        if (m_currentToken.m_type==TokenType::LOOPX) {
+            Eat();
+            loopType = 1;
+        }
+        if (m_currentToken.m_type==TokenType::LOOPY) {
+            Eat();
+            loopType = 2;
+        }
+        if (m_currentToken.m_type==TokenType::UNROLL) {
+            Eat();
+            unroll = true;
+        }
+    }
+
+
     Eat(m_currentToken.m_type);
 //    qDebug() << "Current: " << m_currentToken.getType();
 //    Eat(TokenType::DO);
@@ -643,7 +690,7 @@ Node *Parser::ForLoop()
 
 //    qDebug() << m_currentToken.getType();
   //  exit(1);
-    return new NodeForLoop(a,b,block);
+    return new NodeForLoop(a,b,block, step, unroll, forcePage,loopType);
 
 }
 
@@ -814,7 +861,10 @@ Node *Parser::TypeSpec()
     QString initVal = "";
     if (m_currentToken.m_type == TokenType::EQUALS) {
         Eat(m_currentToken.m_type);
+//        qDebug() << m_currentToken.getType() << m_currentToken.m_value << m_currentToken.m_intVal;
         initVal = m_currentToken.m_value;
+        if (initVal=="")
+            initVal = QString::number(m_currentToken.m_intVal);
         Eat(m_currentToken.m_type);
     }
 

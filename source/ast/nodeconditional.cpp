@@ -19,8 +19,18 @@ QString NodeConditional::Build(Assembler *as) {
     // Test all binary clauses:
     bool isSimplified = false;
     NodeBinaryClause* bn = dynamic_cast<NodeBinaryClause*>(m_binaryClause);
-    if (bn!=nullptr && verifyBlockBranchSize(as, m_block)) {
-        isSimplified = !bn->canBeSimplified(as);
+    if (verifyBlockBranchSize(as, m_block)) {
+        isSimplified = !bn->cannotBeSimplified(as);
+    }
+
+    // Then, check m_forcepage
+    if (m_forcePage==1) // force OFFPAGE
+        isSimplified = false;
+
+    if (m_forcePage==2) {
+        if (!bn->cannotBeSimplified(as)) // force ONPAGE
+            isSimplified = true;
+        else ErrorHandler::e.Error("keyword onpage can only be used with 1 compare clause (no and, or etc)", m_op.m_lineNumber);
     }
     if (!isSimplified) {
         m_binaryClause->Build(as);

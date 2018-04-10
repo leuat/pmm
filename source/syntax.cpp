@@ -46,6 +46,13 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::IFDEF,"IFDEF"));
     reservedWords.append(Token(TokenType::IFNDEF,"IFNDEF"));
     reservedWords.append(Token(TokenType::ENDIF,"ENDIF"));
+    reservedWords.append(Token(TokenType::OFFPAGE,"OFFPAGE"));
+    reservedWords.append(Token(TokenType::ONPAGE,"ONPAGE"));
+    reservedWords.append(Token(TokenType::STEP,"STEP"));
+    reservedWords.append(Token(TokenType::UNROLL,"UNROLL"));
+//    reservedWords.append(Token(TokenType::LOOPX,"LOOPX"));
+//    reservedWords.append(Token(TokenType::LOOPY,"LOOPY"));
+
 
 }
 
@@ -89,6 +96,13 @@ void Syntax::SetupBuiltinFunctions()
                 BuiltInFunction::Type::INTEGER <<
                 BuiltInFunction::Type::INTEGER);
 
+    builtInFunctions["unrolledmemcpy"] = BuiltInFunction(
+                "unrolledmemcpy",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER <<
+                BuiltInFunction::Type::INTEGER);
+
     builtInFunctions["memcpylarge"] = BuiltInFunction(
                 "memcpylarge",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
@@ -123,6 +137,10 @@ void Syntax::SetupBuiltinFunctions()
                 "init16x8mul",
                 QList<BuiltInFunction::Type>());
 
+    builtInFunctions["init8x8div"] = BuiltInFunction(
+                "init8x8div",
+                QList<BuiltInFunction::Type>());
+
 
 
 
@@ -130,6 +148,26 @@ void Syntax::SetupBuiltinFunctions()
                 "moveto",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER <<
                 BuiltInFunction::Type::INTEGER << BuiltInFunction::Type::INTEGER);
+
+    builtInFunctions["copycharsetfromrom"] = BuiltInFunction(
+                "copycharsetfromrom",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+             );
+
+
+    builtInFunctions["inc"] = BuiltInFunction(
+                "inc",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+             );
+
+
+    builtInFunctions["dec"] = BuiltInFunction(
+                "dec",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+             );
+
+
+
 
 /*    builtInFunctions["pokescreen"] = BuiltInFunction(
                 "pokescreen",
@@ -163,6 +201,14 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
                 );
 
+    builtInFunctions["setmemoryconfig"] = BuiltInFunction(
+                "setmemoryconfig",
+                QList<BuiltInFunction::Type>()<<
+                BuiltInFunction::Type::INTEGER<<
+                BuiltInFunction::Type::INTEGER<<
+                BuiltInFunction::Type::INTEGER
+                );
+
     builtInFunctions["inczp"] = BuiltInFunction(
                 "inczp",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
@@ -172,6 +218,11 @@ void Syntax::SetupBuiltinFunctions()
 
     builtInFunctions["hidebordery"] = BuiltInFunction(
                 "hidebordery",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["hideborderx"] = BuiltInFunction(
+                "hideborderx",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
                 );
 
@@ -197,12 +248,12 @@ void Syntax::SetupBuiltinFunctions()
                 << BuiltInFunction::Type::INTEGER
                 );
 
-    builtInFunctions["sin"] = BuiltInFunction(
+/*    builtInFunctions["sin"] = BuiltInFunction(
                 "sin",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
                 BuiltInFunction::Type::INTEGER
                 );
-
+*/
 /*    builtInFunctions["and"] = BuiltInFunction(
                 "and",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER<<
@@ -296,8 +347,8 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER
                 );
 
-    builtInFunctions["disableinterrupts"] = BuiltInFunction(
-                "disableinterrupts",
+    builtInFunctions["disableciainterrupts"] = BuiltInFunction(
+                "disableciainterrupts",
                 QList<BuiltInFunction::Type>()
                 );
 

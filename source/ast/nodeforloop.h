@@ -15,14 +15,27 @@ public:
 
     Node* m_a, *m_b;
     Node* m_block;
+    int m_forcePage;
+    bool m_unroll = false;
+    Node* m_step = nullptr;
+    int m_loopCounter=0;
 
-
-    NodeForLoop(Node* a, Node* b, Node* block) {
+    NodeForLoop(Node* a, Node* b, Node* block, Node* step, bool unroll, int forcePage, int loopCounter) {
         m_a = a;
         m_b = b;
         m_block = block;
+        m_forcePage = forcePage;
+        m_step = step;
+        m_loopCounter = loopCounter;
 //        m_op = op;
     }
+
+
+    void Compare(Assembler* as);
+
+    void IncreaseCounter(Assembler* as);
+
+
     PVar Execute(SymbolTable* symTab, uint lvl) override;
     void Delete() override {
         if (m_a) {

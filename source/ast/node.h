@@ -54,6 +54,14 @@ public:
             ErrorHandler::e.Error(name + " requires parameter to be memory address", ln);
     }
 
+    void RequireNumber(Node* n,QString name, int ln) {
+        if (!n->isPureNumeric())
+            ErrorHandler::e.Error(name + " requires parameter to be pure numeric", ln);
+    }
+
+   virtual bool isMinusOne() { return false; }
+    virtual bool isOne() { return false; }
+
     bool verifyBlockBranchSize(Assembler *as, Node* testBlock)
     {
         AsmMOS6502 tmpAsm;

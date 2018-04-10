@@ -129,7 +129,7 @@ public:
             ErrorHandler::e.Error("Could not find variable '" +value +"' for storing.",m_op.m_lineNumber);
 */
         TokenType::Type t = as->m_symTab->Lookup(value, m_op.m_lineNumber)->getTokenType();
-        if (t==TokenType::ADDRESS) {
+        if (t==TokenType::ADDRESS || t==TokenType::STRING) {
             LoadByteArray(as);
             return;
         }

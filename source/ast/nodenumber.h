@@ -68,6 +68,14 @@ public:
         return val;
     }
 
+    bool isMinusOne() override {
+        if (m_val==255)
+            return true;
+
+        return false;
+    }
+
+    bool isOne() override { return m_val==1; }
     QString Build(Assembler *as) override {
         Node::Build(as);
 
@@ -77,6 +85,8 @@ public:
             m_val = as->m_symTab->m_constants[m_op.m_value]->m_value->m_fVal;
         }
 */
+
+
         if (m_op.m_type==TokenType::BYTE)
             val = "#"+QString::number((int)m_val);
         if (m_op.m_type==TokenType::INTEGER)

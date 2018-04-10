@@ -55,6 +55,8 @@ public:
     void PreprocessReplace();
     void PreprocessIfDefs(bool ifdef);
 
+    int findPage();
+
     Node* Parse();
     Node* Variable();
     Node* Empty();

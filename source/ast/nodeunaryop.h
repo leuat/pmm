@@ -7,6 +7,9 @@
 #include "source/symboltable.h"
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
+#include "source/ast/nodenumber.h"
+#include "source/ast/nodevar.h"
+#include "source/ast/nodebinop.h"
 
 class NodeUnaryOp : public Node {
 public:
@@ -14,6 +17,7 @@ public:
         m_op = t;
         m_right = right;
         m_left = nullptr;
+        qDebug() << "NU:";
     }
     PVar Execute(SymbolTable* symTab, uint lvl) override {
         Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
@@ -27,6 +31,46 @@ public:
         return PVar();
 
     }
+
+
+    bool isMinusOne() override {
+        NodeNumber* num = dynamic_cast<NodeNumber*>(m_right);
+        if (num==nullptr)
+            return false;
+
+        if (num->m_val==1 || m_op.m_type==TokenType::MINUS)
+            return true;
+
+        return false;
+
+    }
+
+    QString Build(Assembler* as) {
+
+        NodeNumber* num = dynamic_cast<NodeNumber*>(m_right);
+
+        if (num!=nullptr) {
+            int s = num->m_val;
+
+            if (m_op.m_type==TokenType::MINUS) {
+                if (num->m_op.m_type<256)
+                    num->m_val=256-num->m_val;
+                else
+                    if (num->m_op.m_type<65536)
+                        num->m_val=65536-num->m_val;
+
+            }
+            QString ss= num->Build(as);
+            num->m_val = s;
+            return ss;
+
+        }
+
+
+        return "";
+    }
+
+
     void ExecuteSym(SymbolTable* symTab) override {
         m_right->ExecuteSym(symTab);
     }

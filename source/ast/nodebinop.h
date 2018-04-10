@@ -103,6 +103,29 @@ public:
 
     }
 
+    void EightBitDiv(Assembler* as) {
+
+        QString mulVar = as->NewLabel("mulRightVar");
+        QString mulVarJmp = as->NewLabel("mulRightVarJmp");
+
+        as->Comment("8 bit div");
+        as->ClearTerm();
+        m_left->Build(as);
+        as->Term();
+        as->Asm("sta div8x8_d");
+        as->Term(); // lda z
+        as->Comment("Load right hand side");
+        m_right->Build(as);
+        as->Term();
+        as->Asm("sta div8x8_c");
+
+        as->Term();
+
+        as->Asm("jsr div8x8_procedure");
+
+    }
+
+
 
     void LoadVariable(Assembler* as) override {
         Build(as);
@@ -145,7 +168,8 @@ public:
             if (m_op.m_type == TokenType::MUL)
                 EightBitMul(as);
             else
-                ErrorHandler::e.Error("Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
+                //ErrorHandler::e.Error("Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
+                EightBitDiv(as);
             return;
         }
         as->Comment("8 bit mul of power 2");
@@ -239,9 +263,44 @@ public:
             EightBitMul(as);
             return;
         }
+        if (m_op.m_type==TokenType::DIV) {
+            RightIsPureNumericMulDiv8bit(as);
+            return;
+        }
         ErrorHandler::e.Error("Binary operation / not implemented for this type yet...");
     }
 
+
+    bool HandleSingleAddSub(Assembler* as) {
+
+        NodeNumber* num = dynamic_cast<NodeNumber*>(m_right);
+        NodeVar* vnum = dynamic_cast<NodeVar*>(m_right);
+        NodeVar* var = dynamic_cast<NodeVar*>(m_left);
+
+
+
+        if (num!=nullptr || vnum!=nullptr) {
+            as->Comment("Add/sub where right value is constant number");
+            if (num!=nullptr && num->m_op.m_type==TokenType::ADDRESS && var!=nullptr) {
+                //qDebug() << "ADDRESS: " << num->StringValue();
+                //exit(1);
+                //as->
+                as->ClearTerm();
+                as->Term("lda " + var->value + " + " + num->StringValue());
+                return true;
+            }
+            m_left->Build(as);
+            as->Term();
+            as->BinOP(m_op.m_type);
+            m_right->Build(as);
+            as->Term();
+            as->Term(" ; end add / sub var with constant", true);
+            return true;
+        }
+
+
+        return false;
+    }
 
     void HandleRestBinOp(Assembler* as) {
         bool isWord = false;
@@ -262,25 +321,8 @@ public:
 
         if (!isWord) {
             // Optimizing check: if right var is number, then cut losses
-            NodeNumber* num = dynamic_cast<NodeNumber*>(m_right);
-            NodeVar* var = dynamic_cast<NodeVar*>(m_left);
-            if (num!=nullptr) {
-                as->Comment("Add/sub where right value is constant number");
-                if (num->m_op.m_type==TokenType::ADDRESS && var!=nullptr) {
-                    //qDebug() << "ADDRESS: " << num->StringValue();
-                    //exit(1);
-                    //as->
-                    as->ClearTerm();
-                    as->Term("lda " + var->value + " + " + num->StringValue());
-                    return;
-                }
-                m_left->Build(as);
-                as->Term();
-                as->BinOP(m_op.m_type);
-                m_right->Build(as);
-                as->Term();
-                as->Term(" ; end add / sub var with constant", true);
-
+            if (HandleSingleAddSub(as)) {
+                return;
             }
             else {
                 as->Comment("Add/sub right value is variable/expression");

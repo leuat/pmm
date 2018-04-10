@@ -82,7 +82,10 @@ void AsmMOS6502::DeclareVariable(QString name, QString type, QString initval)
         t = word;
     if (type.toLower()=="byte")
         t = byte;
-
+    if (type.toLower()=="string") {
+        Write(name +"\t" + t + "\t"+"\""+initval+ "\",0");
+        return;
+    }
     Write(name +"\t" + t + "\t"+initval);
 
 }
@@ -272,12 +275,6 @@ void AsmMOS6502::StartPrint()
 
 void AsmMOS6502::StartForLoop(QString var, QString startVal)
 {
-    m_stack["for"].push(var);
-    m_labelStack["for"].push();
-    //m_currentLoopVar = var;
-    //Asm("lda " + startVal);
-    //Asm("sta " + var);
-    Label(getLabel("for"));
 }
 
 void AsmMOS6502::EndForLoop(QString endVal)
@@ -587,10 +584,10 @@ void AsmMOS6502::InitMosOpCycles()
     m_opCycles["sei"] = MOSOperandCycle("sei",2,0,0,0,0,0);
     m_opCycles["clc"] = MOSOperandCycle("clc",2,0,0,0,0,0);
 
-    m_opCycles["lsr"] = MOSOperandCycle("lsr",0,2,6,7,5,6);
-    m_opCycles["asl"] = MOSOperandCycle("asl",0,2,6,7,5,6);
-    m_opCycles["ror"] = MOSOperandCycle("ror",0,2,6,7,5,6);
-    m_opCycles["rol"] = MOSOperandCycle("rol",0,2,6,7,5,6);
+    m_opCycles["lsr"] = MOSOperandCycle("lsr",2,2,6,7,5,6);
+    m_opCycles["asl"] = MOSOperandCycle("asl",2,2,6,7,5,6);
+    m_opCycles["ror"] = MOSOperandCycle("ror",2,2,6,7,5,6);
+    m_opCycles["rol"] = MOSOperandCycle("rol",2,2,6,7,5,6);
 
     m_opCycles["org"] = MOSOperandCycle("org",0,0,0,0,0,0);
     m_opCycles["nop"] = MOSOperandCycle("nop",2,0,0,0,0,0);
