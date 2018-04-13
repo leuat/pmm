@@ -209,6 +209,34 @@ void Syntax::SetupBuiltinFunctions()
                 BuiltInFunction::Type::INTEGER
                 );
 
+    builtInFunctions["enablerasterirq"] = BuiltInFunction(
+                "enablerasterirq",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["startirq"] = BuiltInFunction(
+                "startirq",
+                QList<BuiltInFunction::Type>() << BuiltInFunction::Type::INTEGER
+                );
+
+
+    builtInFunctions["closeirq"] = BuiltInFunction(
+                "closeirq",
+                QList<BuiltInFunction::Type>()
+                );
+
+
+    builtInFunctions["enableirq"] = BuiltInFunction(
+                "enableirq",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["preventirq"] = BuiltInFunction(
+                "preventirq",
+                QList<BuiltInFunction::Type>()
+                );
+
+
     builtInFunctions["inczp"] = BuiltInFunction(
                 "inczp",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
@@ -376,6 +404,7 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["rasterirq"] = BuiltInFunction(
                 "rasterirq",
                 QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER
                 <<BuiltInFunction::Type::INTEGER
                 );

@@ -15,6 +15,9 @@ public:
     uint level = 0;
     Node* m_left = nullptr, *m_right = nullptr;
     bool m_isWord = false;
+
+    TokenType::Type m_forceType = TokenType::NADA;
+
     int m_cycleCounter;
     static int m_currentLineNumber;
     virtual PVar Execute(SymbolTable* symTab, uint lvl) = 0;
@@ -58,6 +61,8 @@ public:
         if (!n->isPureNumeric())
             ErrorHandler::e.Error(name + " requires parameter to be pure numeric", ln);
     }
+
+    virtual bool isWord(Assembler* as) { return false;}
 
    virtual bool isMinusOne() { return false; }
     virtual bool isOne() { return false; }

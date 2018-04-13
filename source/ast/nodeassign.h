@@ -239,8 +239,10 @@ public:
         }
         if (m_right==nullptr)
             ErrorHandler::e.Error("Node assign: right hand must be expression", m_op.m_lineNumber);
-        if (m_left->getType(as)==TokenType::INTEGER)
+        if (m_left->getType(as)==TokenType::INTEGER) {
             as->Asm("ldy #0");
+            m_right->m_forceType = TokenType::INTEGER; // FORCE integer on right-hand side
+        }
 
         // For constant i:=i+1;
         if (IsSimpleIncDec(v,  as))

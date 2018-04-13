@@ -75,7 +75,9 @@ public:
     void CopyCharsetFromRom(Assembler* as);
     void IncDec(Assembler* as, QString cmd);
     void SetMemoryConfig(Assembler* as);
-
+    void EnableRasterIRQ(Assembler* as);
+    void StartIRQ(Assembler* as);
+    void CloseIRQ(Assembler* as);
 
     QString BitShiftX(Assembler* as);
 

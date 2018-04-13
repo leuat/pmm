@@ -48,6 +48,8 @@ public:
 
 
     TokenType::Type getType(Assembler* as) override {
+        if (m_forceType!=TokenType::NADA)
+            return m_forceType;
         if (as->m_symTab->Lookup(value, m_op.m_lineNumber)!=nullptr)
             return as->m_symTab->Lookup(value, m_op.m_lineNumber)->getTokenType();
         return m_op.m_type;
@@ -59,6 +61,16 @@ public:
         if (var==nullptr)
             return nullptr;
         return var->value==value;
+    }
+    bool isWord(Assembler* as) override {
+
+
+        return getType(as)==TokenType::INTEGER;
+        return m_op.m_type==TokenType::INTEGER;
+        Symbol* s = as->m_symTab->Lookup(value, m_op.m_lineNumber);
+        qDebug() << "Is word test: " << s;
+
+        return s->m_type.toLower()=="integer";
     }
 
     void LoadPointer(Assembler* as) {

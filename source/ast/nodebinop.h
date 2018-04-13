@@ -73,6 +73,7 @@ public:
         if (i==32) return 5;
         if (i==64) return 6;
         if (i==128) return 7;
+        if (i==256) return 8;
         return -1;
     }
 
@@ -194,11 +195,22 @@ public:
     }
 
     void Mul16x8(Assembler* as) {
+        as->Comment("Mul 16x8 setup");
         as->Asm("");
-        m_left->LoadVariable(as);
-        as->Term();
-        as->Asm("sty mul16x8_num1");
-        as->Asm("sta mul16x8_num1Hi");
+        if (m_left->getType(as)==TokenType::INTEGER) {
+            m_left->LoadVariable(as);
+            as->Term();
+            as->Asm("sty mul16x8_num1");
+            as->Asm("sta mul16x8_num1Hi");
+        }
+        else {
+            // 8x8 bit
+            m_left->LoadVariable(as);
+            as->Term();
+            as->Asm("sta mul16x8_num1");
+            as->Asm("lda #0");
+            as->Asm("sta mul16x8_num1Hi");
+        }
 
         as->Asm("");
         m_right->LoadVariable(as);
@@ -220,7 +232,7 @@ public:
                 ErrorHandler::e.Error("16 bit Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
             //return;
         }
-        as->Comment("16 bit mul of power 2");
+        as->Comment("16 bit mul");
 
         QString command = "";
         QString varName;
@@ -252,15 +264,21 @@ public:
     }
 
     void HandleMulDiv(Assembler* as) {
+
         if (m_right->isPureNumeric())  {
-            if (m_left->getType(as)==TokenType::INTEGER)
+            as->Comment("Right is PURE NUMERIC");
+            //qDebug() << "IS PURE NUMERIC";
+            if (isWord(as))
                 RightIsPureNumericMulDiv16bit(as);
             else
                 RightIsPureNumericMulDiv8bit(as);
             return;
         }
         if (m_op.m_type==TokenType::MUL) {
-            EightBitMul(as);
+            if (isWord(as))
+                Mul16x8(as);
+            else
+                EightBitMul(as);
             return;
         }
         if (m_op.m_type==TokenType::DIV) {
@@ -302,24 +320,23 @@ public:
         return false;
     }
 
+    bool isWord(Assembler* as) override {
+        return ((m_left->isWord(as) || m_right->isWord(as)) || (m_forceType==TokenType::INTEGER));
+    }
+
     void HandleRestBinOp(Assembler* as) {
-        bool isWord = false;
+        bool isWord16 = false;
         QString varName="";
 
         if ( dynamic_cast<const NodeVar*>(m_left) != nullptr) {
             NodeVar* v= (NodeVar*)m_left;
             varName = v->value;
             Symbol* s = as->m_symTab->Lookup(varName, m_op.m_lineNumber);
-/*            if (s==nullptr)
-                ErrorHandler::e.Error("Could not find variable :" + varName,m_op.m_lineNumber);
-*/
-            if (s->m_type.toLower()=="integer") isWord=true;
         }
-
+        isWord16 = isWord(as);
         // check if both are constant values:
 
-
-        if (!isWord) {
+        if (!isWord16) {
             // Optimizing check: if right var is number, then cut losses
             if (HandleSingleAddSub(as)) {
                 return;

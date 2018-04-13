@@ -34,6 +34,10 @@ public:
         return true;
     }
 
+    bool isWord(Assembler* as) override {
+        return (m_val>=256 && m_op.m_type == TokenType::INTEGER_CONST);
+    }
+
     void LoadVariable(Assembler* as) override {
         as->ClearTerm();
         as->Term("lda ");

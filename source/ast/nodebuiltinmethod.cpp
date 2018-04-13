@@ -35,6 +35,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         SetMemoryConfig(as);
     }
 
+    if (m_procName.toLower()=="enablerasterirq") {
+        EnableRasterIRQ(as);
+    }
 
     if (m_procName.toLower()=="clearsound") {
         Clearsound(as);
@@ -52,6 +55,13 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     }
     if (m_procName.toLower()=="initzeropage") {
         InitZeroPage(as);
+    }
+
+    if (m_procName.toLower()=="startirq") {
+        StartIRQ(as);
+    }
+    if (m_procName.toLower()=="closeirq") {
+        CloseIRQ(as);
     }
 
     if (m_procName.toLower()=="poke")
@@ -186,6 +196,14 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower() == "init16x8mul")
             InitMul16x8(as);
+
+    if (m_procName.toLower() == "preventirq") {
+        as->Asm("sei");
+    }
+
+    if (m_procName.toLower() == "enableirq") {
+        as->Asm("cli");
+    }
 
     if (m_procName.toLower() == "init8x8div")
             InitDiv8x8(as);
@@ -1167,20 +1185,59 @@ void NodeBuiltinMethod::SetMemoryConfig(Assembler *as)
     NodeNumber* num2 = dynamic_cast<NodeNumber*>(m_params[1]);
     NodeNumber* num3 = dynamic_cast<NodeNumber*>(m_params[2]);
 
-    int n1 = num1->m_val;
-    int n2 = num2->m_val;
-    int n3 = num3->m_val;
+    int n1 = num1->m_val; // Kernal
+    int n2 = num2->m_val; // Basic
+    int n3 = num3->m_val; // IO
 
     if (n1==1 && n2==0 && n3 == 0)
         n2=1; // Bit 2 must be toggled
 
-    uchar val = n1<<2 | n2<<1 << n3 << 0;
+    uchar val = n1<<2 | n2<<1 | n3 << 0;
 
     as->Asm("lda $01");
     as->Asm("and #%11111000");
     as->Asm("ora #%" + QString::number(val,2));
     as->Asm("sta $01");
 
+}
+
+void NodeBuiltinMethod::EnableRasterIRQ(Assembler* as)
+{
+    as->Comment("Enable raster IRQ");
+    as->Asm("lda $d01a");
+    as->Asm("ora #$01");
+    as->Asm("sta $d01a");
+    as->Asm("lda #$1B");
+    as->Asm("sta $d011");
+}
+
+void NodeBuiltinMethod::StartIRQ(Assembler *as)
+{
+    as->Comment("StartIRQ");
+    RequireNumber(m_params[0], "StartIRQ", m_op.m_lineNumber);
+    NodeNumber* n = dynamic_cast<NodeNumber*>(m_params[0]);
+    if (n->m_val==1) {
+        as->Asm("asl $d019");
+    }
+    else {
+        as->Asm("pha");
+        as->Asm("txa");
+        as->Asm("pha");
+        as->Asm("tya");
+        as->Asm("pha");
+        as->Asm("asl $d019");
+    }
+}
+
+void NodeBuiltinMethod::CloseIRQ(Assembler *as)
+{
+    as->Comment("CloseIRQ");
+    as->Asm("pla");
+    as->Asm("tay");
+    as->Asm("pla");
+    as->Asm("tax");
+    as->Asm("pla");
+    as->Asm("rti");
 }
 
 QString NodeBuiltinMethod::BitShiftX(Assembler *as)
@@ -1487,7 +1544,7 @@ void NodeBuiltinMethod::DisableInterrupts(Assembler *as)
     as->Asm("");
 }
 
-void NodeBuiltinMethod::RasterIRQ(Assembler *as)
+/*void NodeBuiltinMethod::RasterIRQ(Assembler *as)
 {
     NodeProcedure* addr = (NodeProcedure*)dynamic_cast<NodeProcedure*>(m_params[0]);
     if (addr==nullptr)
@@ -1506,6 +1563,54 @@ void NodeBuiltinMethod::RasterIRQ(Assembler *as)
     LoadVar(as,1);
     as->Asm("sta $d012");
 
+
+}
+*/
+void NodeBuiltinMethod::RasterIRQ(Assembler *as)
+{
+    NodeProcedure* addr = (NodeProcedure*)dynamic_cast<NodeProcedure*>(m_params[0]);
+    if (addr==nullptr)
+        ErrorHandler::e.Error("First parameter must be interrupt procedure!", m_op.m_lineNumber);
+
+    QString name = addr->m_procedure->m_procName;
+
+    RequireNumber(m_params[2], "RasterIRQ", m_op.m_lineNumber);
+    NodeNumber* num = dynamic_cast<NodeNumber*>(m_params[2]);
+
+    as->Comment("RasterIRQ : Hook a procedure");
+
+    as->ClearTerm();
+    m_params[1]->Build(as);
+    as->Term();
+
+    if (num->m_val==0) {
+//        as->Asm("lda #$(adresstosignalIRQ)
+        as->Asm("sta $d012");
+        as->Asm("lda #<"+name);
+        as->Asm("sta $fffe");
+        as->Asm("lda #>"+name);
+        as->Asm("sta $ffff");
+    }
+    else
+    {
+        as->Asm("sta $d012");
+        as->Asm("lda #<"+name);
+        as->Asm("sta $0314");
+        as->Asm("lda #>"+name);
+        as->Asm("sta $0315");
+
+    }
+/*    as->Comment("Set raster interrupt pointing to : " +name);
+    as->Asm("lda #$01    ; Set Interrupt Request Mask...");
+    as->Asm("sta $d01a   ; ...we want IRQ by Rasterbeam");
+    as->Asm("lda #<" + name);
+    as->Asm("ldx #>"+ name);
+    as->Asm("sta $314    ; store in $314/$315");
+    as->Asm("stx $315");
+
+    LoadVar(as,1);
+    as->Asm("sta $d012");
+*/
 
 }
 
