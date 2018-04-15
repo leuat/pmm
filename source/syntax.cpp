@@ -141,6 +141,9 @@ void Syntax::SetupBuiltinFunctions()
                 "init8x8div",
                 QList<BuiltInFunction::Type>());
 
+    builtInFunctions["init16x8div"] = BuiltInFunction(
+                "init16x8div",
+                QList<BuiltInFunction::Type>());
 
 
 
@@ -380,11 +383,11 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()
                 );
 
-    builtInFunctions["enableinterrupts"] = BuiltInFunction(
+/*    builtInFunctions["enableinterrupts"] = BuiltInFunction(
                 "enableinterrupts",
                 QList<BuiltInFunction::Type>()
                 );
-
+*/
     builtInFunctions["kernalinterrupt"] = BuiltInFunction(
                 "kernalinterrupt",
                 QList<BuiltInFunction::Type>()

@@ -52,8 +52,9 @@ public:
     void InitSid(Assembler* as);
     void InitMul16x8(Assembler* as);
     void InitDiv8x8(Assembler* as);
+    void InitDiv16x8(Assembler* as);
     void DisableInterrupts(Assembler* as);
-    void EnableInterrupts(Assembler* as);
+//    void EnableInterrupts(Assembler* as);
     void RasterIRQ(Assembler* as);
     void ClearScreen(Assembler* as);
     void WaitForRaster(Assembler* as);

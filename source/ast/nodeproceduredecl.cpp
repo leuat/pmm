@@ -67,12 +67,13 @@ QString NodeProcedureDecl::Build(Assembler *as)
 
         as->Label(m_procName);
     }
-    if (m_isInterrupt)
-        as->Asm("dec $d019        ; acknowledge IRQ");
+//    if (m_isInterrupt)
+  //      as->Asm("dec $d019        ; acknowledge IRQ");
 
     m_block->Build(as);
     if (!isInitFunction) {
-        as->Asm("rts");
+        if (!m_isInterrupt)
+            as->Asm("rts");
       as->Label("afterProc_" + m_procName);
     }
     return 0;

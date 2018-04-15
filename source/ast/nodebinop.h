@@ -220,6 +220,24 @@ public:
 
     }
 
+    void Div16x8(Assembler* as) {
+        as->Comment("16x8 div");
+        as->Asm("ldy #0");
+        m_left->Build(as);
+        as->Term();
+        as->Asm("sta dividend");
+        as->Asm("sty dividend+1");
+        as->Asm("ldy #0");
+        m_right->Build(as);
+        as->Term();
+        as->Asm("sta divisor");
+        as->Asm("sty divisor+1");
+        as->Asm("jsr divide16x8");
+        as->Asm("lda dividend");
+        as->Asm("ldy dividend+1");
+
+    }
+
 
     void RightIsPureNumericMulDiv16bit(Assembler* as) {
         int val = ((NodeNumber*)m_right)->m_val;
@@ -229,10 +247,12 @@ public:
             //if (m_op.m_type == TokenType::MUL)
             //    EightBitMul(as);
             //else
-                ErrorHandler::e.Error("16 bit Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
+                //ErrorHandler::e.Error("16 bit Binary operation / not implemented for this value yet ( " + QString::number(val) + ")");
+            Div16x8(as);
+            return;
             //return;
         }
-        as->Comment("16 bit mul");
+        as->Comment("16 bit mul or div");
 
         QString command = "";
         QString varName;
@@ -282,7 +302,11 @@ public:
             return;
         }
         if (m_op.m_type==TokenType::DIV) {
-            RightIsPureNumericMulDiv8bit(as);
+            if (isWord(as))
+                Div16x8(as);
+//                ErrorHandler::e.Error("16 bit div not implemented",m_op.m_lineNumber);
+            else
+                RightIsPureNumericMulDiv8bit(as);
             return;
         }
         ErrorHandler::e.Error("Binary operation / not implemented for this type yet...");
@@ -324,6 +348,121 @@ public:
         return ((m_left->isWord(as) || m_right->isWord(as)) || (m_forceType==TokenType::INTEGER));
     }
 
+
+    void HandleVarBinopB16bit(Assembler* as) {
+        as->m_labelStack["wordAdd"].push();
+        QString lblword = as->getLabel("wordAdd");
+
+        QString lbl = as->NewLabel("rightvarInteger");
+        QString lblJmp = as->NewLabel("jmprightvarInteger");
+
+        NodeVar* v = dynamic_cast<NodeVar*>(m_left);
+
+        as->Asm("jmp " + lblJmp);
+        as->Write(lbl +"\t.word\t0");
+        as->Label(lblJmp);
+        as->ClearTerm();
+        as->Asm("ldy #0");
+        m_right->Build(as);
+
+        as->Term();
+        as->Asm("sta " +lbl);
+        as->Asm("sty " +lbl+"+1");
+        as->Term();
+
+        as->Asm("clc");
+        //as->Variable(v->value, false);
+        as->Asm("lda " + v->value + "+1");
+        as->BinOP(m_op.m_type);
+        as->Term(lbl+"+1", true);
+        as->Asm("tay");
+        as->Asm("lda "+ v->value);
+        as->Asm("clc");
+
+//            as->ClearTerm();
+        as->BinOP(m_op.m_type);
+        as->Term(lbl,true);
+//        as->Asm("sta " + varName);
+
+        if (m_op.m_type==TokenType::PLUS) {
+            as->Asm("bcc "+lblword);
+            as->Asm("iny");
+        }
+        else {
+            as->Asm("bcs "+lblword);
+            as->Asm("dey");
+        }
+        as->Label(lblword);
+
+        // Finally, add high bit of temp var
+
+
+        as->PopLabel("wordAdd");
+
+        as->PopLabel("rightvarInteger");
+        as->PopLabel("jmprightvarInteger");
+
+    }
+
+    void HandleGenericBinop16bit(Assembler* as) {
+
+        as->m_labelStack["wordAdd"].push();
+        QString lblword = as->getLabel("wordAdd");
+
+        QString lbl = as->NewLabel("rightvarInteger");
+        QString lblJmp = as->NewLabel("jmprightvarInteger");
+
+
+        as->Comment("Generic 16 bit op");
+
+        as->Asm("jmp " + lblJmp);
+        as->Write(lbl +"\t.word\t0");
+        as->Label(lblJmp);
+        as->ClearTerm();
+        as->Asm("ldy #0");
+        m_right->Build(as);
+
+        as->Term();
+        as->Asm("sta " +lbl);
+        as->Asm("sty " +lbl+"+1");
+        as->Term();
+
+        //as->Variable(v->value, false);
+        //as->Asm("lda " + v->value + "+1");
+
+        m_left->Build(as);
+        as->Comment("Low bit binop:");
+        as->BinOP(m_op.m_type);
+        as->Term(lbl, true); // high bit added to a
+
+        if (m_op.m_type==TokenType::PLUS) {
+            as->Asm("bcc "+lblword);
+            as->Asm("inc " +lbl+"+1");
+        }
+        else {
+            as->Asm("bcs "+lblword);
+            as->Asm("dec  " +lbl+"+1");
+        }
+
+        as->Label(lblword);
+        as->Asm("sta "+lbl);
+        as->Comment("High-bit binop");
+        as->Asm("tya");
+
+        as->BinOP(m_op.m_type);
+        as->Term(lbl+"+1",true);
+        as->Asm("tay");
+        as->Asm("lda "+lbl);
+
+
+        as->PopLabel("wordAdd");
+
+        as->PopLabel("rightvarInteger");
+        as->PopLabel("jmprightvarInteger");
+
+    }
+
+
     void HandleRestBinOp(Assembler* as) {
         bool isWord16 = false;
         QString varName="";
@@ -335,7 +474,6 @@ public:
         }
         isWord16 = isWord(as);
         // check if both are constant values:
-
         if (!isWord16) {
             // Optimizing check: if right var is number, then cut losses
             if (HandleSingleAddSub(as)) {
@@ -367,58 +505,12 @@ public:
         }
         else {
             // Word handling
-
-
-            as->m_labelStack["wordAdd"].push();
-            QString lblword = as->getLabel("wordAdd");
-
-            QString lbl = as->NewLabel("rightvarInteger");
-            QString lblJmp = as->NewLabel("jmprightvarInteger");
-
-            NodeVar* v = (NodeVar*)m_left;
-
-            as->Asm("jmp " + lblJmp);
-            as->Write(lbl +"\t.word\t0");
-            as->Label(lblJmp);
-            as->ClearTerm();
-            as->Asm("ldy #0");
-            m_right->Build(as);
-
-            as->Term();
-            as->Asm("sta " +lbl);
-            as->Asm("sty " +lbl+"+1");
-            as->Term();
-
-            as->Asm("clc");
-            //as->Variable(v->value, false);
-            as->Asm("lda " + v->value + "+1");
-            as->BinOP(m_op.m_type);
-            as->Term(lbl+"+1", true);
-            as->Asm("tay");
-            as->Asm("lda "+ v->value);
-            as->Asm("clc");
-
-//            as->ClearTerm();
-            as->BinOP(m_op.m_type);
-            as->Term(lbl,true);
-    //        as->Asm("sta " + varName);
-            if (m_op.m_type==TokenType::PLUS) {
-                as->Asm("bcc "+lblword);
-                as->Asm("iny");
+            NodeVar* v = dynamic_cast<NodeVar*>(m_left);
+            if (v!=nullptr) {
+                HandleVarBinopB16bit(as);
+                return;
             }
-            else {
-                as->Asm("bcs "+lblword);
-                as->Asm("dey");
-            }
-            as->Label(lblword);
-
-            // Finally, add high bit of temp var
-
-
-            as->PopLabel("wordAdd");
-
-            as->PopLabel("rightvarInteger");
-            as->PopLabel("jmprightvarInteger");
+            HandleGenericBinop16bit(as);
         }
 
     }
@@ -428,7 +520,9 @@ public:
 
         // First check if both are consants:
 
+
         if (isPureNumeric()) {
+
             BothPureNumbersBinOp(as);
             return "";
         }

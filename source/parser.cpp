@@ -58,6 +58,7 @@ void Parser::InitBuiltinFunctions()
     InitBuiltinFunction(QStringList()<< "*", "initeightbitmul");
     InitBuiltinFunction(QStringList()<< "*", "init16x8mul");
     InitBuiltinFunction(QStringList()<< "*", "init8x8div");
+    InitBuiltinFunction(QStringList()<< "*", "init16x8div");
     InitBuiltinFunction(QStringList()<< "rand", "initrandom");
     InitBuiltinFunction(QStringList()<< "sine", "initsinetable");
     InitBuiltinFunction(QStringList()<< "moveto", "initmoveto");
@@ -627,7 +628,7 @@ Node *Parser::Block(bool useOwnSymTab)
 /*    if (m_currentToken.m_type!=TokenType::VAR  && m_currentToken.m_type!=TokenType::BEGIN)
         return nullptr;
 */
-    if (m_currentToken.m_type==TokenType::PROCEDURE)
+    if (m_currentToken.m_type==TokenType::PROCEDURE || m_currentToken.m_type==TokenType::INTERRUPT)
         return nullptr;
     return new NodeBlock(m_currentToken, Declarations(), CompoundStatement(), useOwnSymTab);
 }
@@ -754,6 +755,7 @@ QVector<Node*> Parser::Declarations()
             }
             if (!ok)
                 ErrorHandler::e.Error("Procedure '"+ procName +"' already defined", tok.m_lineNumber);
+
             m_proceduresOnly.append(procDecl);
         }
 

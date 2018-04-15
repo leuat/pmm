@@ -197,6 +197,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower() == "init16x8mul")
             InitMul16x8(as);
 
+    if (m_procName.toLower() == "init16x8div")
+            InitDiv16x8(as);
+
     if (m_procName.toLower() == "preventirq") {
         as->Asm("sei");
     }
@@ -220,8 +223,8 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="transformcolors")
         TransformColors(as);
 
-    if (m_procName.toLower()=="enableinterrupts")
-        EnableInterrupts(as);
+//    if (m_procName.toLower()=="enableinterrupts")
+  //      EnableInterrupts(as);
 
     if (m_procName.toLower()=="initmoveto") {
         InitMoveto(as);
@@ -961,7 +964,7 @@ void NodeBuiltinMethod::Fill(Assembler *as)
 
 void NodeBuiltinMethod::ScrollX(Assembler *as)
 {
-    LoadVar(as, 0);
+//    LoadVar(as, 0);
    // as->Asm("dec $d019");
     as->Asm("lda $d016  ");
     as->Asm("and #$F8");
@@ -975,7 +978,7 @@ void NodeBuiltinMethod::ScrollX(Assembler *as)
 
 void NodeBuiltinMethod::ScrollY(Assembler *as)
 {
-    LoadVar(as, 0);
+//    LoadVar(as, 0);
    // as->Asm("dec $d019");
     as->Asm("lda $d011  ");
     as->Asm("and #$F8"); // 8 = 1000
@@ -1190,7 +1193,7 @@ void NodeBuiltinMethod::SetMemoryConfig(Assembler *as)
     int n3 = num3->m_val; // IO
 
     if (n1==1 && n2==0 && n3 == 0)
-        n2=1; // Bit 2 must be toggled
+        n3=1; // Bit 2 must be toggled
 
     uchar val = n1<<2 | n2<<1 | n3 << 0;
 
@@ -1482,6 +1485,41 @@ void NodeBuiltinMethod::InitDiv8x8(Assembler* as) {
 
 }
 
+void NodeBuiltinMethod::InitDiv16x8(Assembler *as)
+{
+    as->Asm("jmp div16x8_def_end");
+    as->Label("divisor = $58     ;$59 used for hi-byte");
+    as->Label("dividend = $fb	  ;$fc used for hi-byte");
+    as->Label("remainder = $fd	  ;$fe used for hi-byte");
+    as->Label("result = dividend ;save memory by reusing divident to store the result");
+
+    as->Label("divide16x8	lda #0	        ;preset remainder to 0");
+    as->Asm("sta remainder");
+    as->Asm("sta remainder+1");
+    as->Asm("ldx #16	        ;repeat for each bit: ...");
+
+    as->Label("divloop16	asl dividend	;dividend lb & hb*2, msb -> Carry");
+    as->Asm("rol dividend+1");
+    as->Asm("rol remainder	;remainder lb & hb * 2 + msb from carry");
+    as->Asm("rol remainder+1");
+    as->Asm("lda remainder");
+    as->Asm("sec");
+    as->Asm("sbc divisor	;substract divisor to see if it fits in");
+    as->Asm("tay	        ;lb result -> Y, for we may need it later");
+    as->Asm("lda remainder+1");
+    as->Asm("sbc divisor+1");
+    as->Asm("bcc skip16	;if carry=0 then divisor didn't fit in yet");
+
+    as->Asm("sta remainder+1	;else save substraction result as new remainder,");
+    as->Asm("sty remainder");
+    as->Asm("inc result	;and INCrement result cause divisor fit in 1 times");
+    as->Label("skip16	dex");
+    as->Asm("bne divloop16");
+    as->Asm("rts");
+
+    as->Label("div16x8_def_end");
+}
+
 
 
 void NodeBuiltinMethod::InitMul16x8(Assembler *as)
@@ -1527,7 +1565,7 @@ void NodeBuiltinMethod::InitMul16x8(Assembler *as)
 void NodeBuiltinMethod::DisableInterrupts(Assembler *as)
 {
     as->Comment("Disable interrupts");
-    as->Asm("sei ");
+//    as->Asm("sei ");
 /*    as->Asm("ldy #$7f    ; $7f = %01111111");
     as->Asm("sta $dc0d");
     as->Asm("sta $dd0d");
@@ -2134,7 +2172,7 @@ void NodeBuiltinMethod::CopyZPdata(Assembler *as)
 
 }
 
-
+/*
 void NodeBuiltinMethod::EnableInterrupts(Assembler* as) {
   //  as->Asm("lda $dc0d");
   //  as->Asm("lda $dd0d");
@@ -2146,7 +2184,7 @@ void NodeBuiltinMethod::EnableInterrupts(Assembler* as) {
 
     as->Asm("cli");
 }
-
+*/
 void NodeBuiltinMethod::SaveVar(Assembler *as, int paramNo, QString reg, QString extra)
 {
     as->ClearTerm();
