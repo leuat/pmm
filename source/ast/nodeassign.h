@@ -70,8 +70,8 @@ public:
         NodeNumber* bNum = dynamic_cast<NodeNumber*>(m_right);
         NodeVar* aVar = dynamic_cast<NodeVar*>(m_left);
 
-        if (bVar==nullptr && bNum== nullptr)
-            ErrorHandler::e.Error("Error assigning pointer: right-hand must be variable or number");
+        if (bVar==nullptr && !m_right->isPureNumeric())
+            ErrorHandler::e.Error("Error assigning pointer: right-hand must be variable or number", m_op.m_lineNumber);
 
         if (bVar!=nullptr) {
 
@@ -89,9 +89,9 @@ public:
                 as->Asm("stx "+ aVar->value+"+1");
             }
         }
-        if (bNum!=nullptr) {
-            as->Asm("lda #" + QString::number(((int)bNum->m_val) & 255));
-            as->Asm("ldx #" + QString::number(((int)(bNum->m_val)>>8) & 255) );
+        if (m_right->isPureNumeric()) {
+            as->Asm("lda #" + QString::number(((int)m_right->numValue()) & 255));
+            as->Asm("ldx #" + QString::number(((int)m_right->numValue()>>8) & 255) );
             as->Asm("sta " + aVar->value);
             as->Asm("stx "+ aVar->value+"+1");
         }

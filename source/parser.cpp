@@ -356,7 +356,20 @@ Node *Parser::Conditional(bool isWhileLoop)
     bool done=false;
     int linenum = m_currentToken.m_lineNumber;
 
+    bool hasParen = false;
+    if (m_currentToken.m_type==TokenType::LPAREN) {
+        Eat();
+        hasParen = true;
+    }
+
     Node* clause = BinaryClause();
+    if (hasParen) {
+        if (m_currentToken.m_type!=TokenType::RPAREN) {
+            ErrorHandler::e.Error("Expected right paranthesis after binary clause", linenum);
+
+        }
+        Eat();
+    }
 
     int forcePage = findPage();
 

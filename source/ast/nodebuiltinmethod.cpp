@@ -386,17 +386,17 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     //as->ClearTerm();
     NodeVar* var = (NodeVar*)dynamic_cast<NodeVar*>(m_params[0]);
     NodeNumber* num = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[0]);
-    if (var==nullptr && num==nullptr) {
+    if (var==nullptr && !m_params[0]->isPureNumeric()) {
         ErrorHandler::e.Error("First parameter must be variable or number", m_op.m_lineNumber);
     }
     QString addr = "";
-    if (num!=nullptr)
-        addr = num->HexValue();
+    if (m_params[0]->isPureNumeric())
+        addr = m_params[0]->HexValue();
     if (var!=nullptr)
         addr = var->value;
 
     NodeNumber* num2 = (NodeNumber*)dynamic_cast<NodeNumber*>(m_params[1]);
-    if (num2==nullptr) {
+    if (!m_params[1]->isPureNumeric()) {
         ErrorHandler::e.Error("Second parameter must be pure numeric", m_op.m_lineNumber);
     }
 
@@ -420,7 +420,7 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     if (m_params[0]->getType(as)==TokenType::POINTER)
         as->Asm("lda ("+ addr +"),y");
     else
-        as->Asm("lda " +addr +" +  #" + num2->HexValue() + ",y");
+        as->Asm("lda " +addr +" +  " + num2->HexValue() + ",y");
     as->ClearTerm();
 
 
@@ -2129,24 +2129,44 @@ void NodeBuiltinMethod::ToggleBit(Assembler *as)
 void NodeBuiltinMethod::GetBit(Assembler *as)
 {
     NodeNumber* sprite = dynamic_cast<NodeNumber*>(m_params[1]);
-    if (sprite==nullptr)
-        ErrorHandler::e.Error("GetBit (for now) needs param 2 to be a number");
 
+
+    if (sprite!=nullptr) {
+        QString lbl = as->NewLabel("getbit_false");
+        uchar v = 1 << (uchar)sprite->m_val;
+        as->Comment("Get bit");
+        LoadVar(as, 0);
+        as->Asm("and #%"+QString::number((uchar)v,2));
+        as->Asm("beq " + lbl);
+        as->Asm("lda #1");
+        as->Label(lbl);
+        as->Asm("eor #1");
+        as->PopLabel("getbit_false");
+        return;
+    }
 
     QString lbl = as->NewLabel("getbit_false");
-
-    uchar v = 1 << (uchar)sprite->m_val;
-    as->Comment("Get bit");
+    QString lblD = as->NewLabel("getbit_done");
+    m_params[1]->Build(as);
+    as->Term();
+    as->Asm("tax");
+    QString var = BitShiftX(as);
     LoadVar(as, 0);
-    as->Asm("and #%"+QString::number((uchar)v,2));
-    as->Asm("beq " + lbl);
+    as->Asm("and " + var);
+    as->Asm("cmp " + var);
+    as->Asm("bne " + lbl);
     as->Asm("lda #1");
+    as->Asm("jmp " + lblD);
     as->Label(lbl);
-    as->Asm("eor #1");
-
+    as->Asm("lda #0");
+    as->Label(lblD);
 
     as->PopLabel("getbit_false");
 
+
+//    ErrorHandler::e.Error("NOT IMPLEMENTED (getbit with number)");
+
+    // do full shit
 }
 
 

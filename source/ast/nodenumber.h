@@ -45,6 +45,8 @@ public:
         as->Term();
     }
 
+    int numValue() { return m_val;}
+
     QString HexValue() {
         return "$" + QString::number((int)m_val,16);
     }

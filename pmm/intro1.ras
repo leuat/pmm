@@ -1,16 +1,27 @@
 program Tutorial14_fire;
 
 var
-	c,val,time,i, scroll : byte;
+	c,val,time,i, scroll,scrollsplit,val2,drawVal,k,curFld : byte = 0;
 	x,y : byte;
 	// Use custom charset
 	charset: IncBin("charsets/intro.bin","$2000");
+	hfbin: IncBin("levels/hf2.bin", "$2800");
+	charset2: IncBin("charsets/roadrunner.bin","$6000");
 	color : array [8] of byte = (9, 2,2,8,8, 10,10, 7,7,1, 1,1,1); 
-	hfbin: IncBin("levels/hf2.bin", $2800);
 	shiftx: byte;
 	coldiv, curx: byte = 24;
+	
+	stab : array[4] of byte=(39,40,41,80);
+
+	fireText: string="BAH WHO ARE YOU TO  LET ME  DO  ";
+	endd: byte = 0;
+
+
+	text: string="BAH  WELCOME TO ANOTHER HOKUTO FORCE INTRO YAY YAAAY        ";
 
 	rands : array[256] of byte;
+
+	firecounter: byte = 0;
 
 /*
  	This tutorial shows a typical preferred coding method using the TRSE language: 
@@ -20,63 +31,65 @@ var
 
 */
 
-@define startx 3
-@define endx 30
-
-procedure Fire();
-begin
-
-
-
-	rand(0,16, val);
-	zeropage2:=hfbin;
-	for i:=0 to 9 do inczp(zeropage2,40);
-//	inczp(zeropage2,curx);
-//	val:=80;
-
-	shiftx:=shiftx+31;
-	moveto(curx, 9, $04);
-	zeropage1:=$D968;
-	inczp(zeropage1,curx);
-	//zeropage1:=$D800;
-
-	
-
-	val:=sine[time*16]/coldiv + 1;
-
-
-	if coldiv<24 then
-		inc(coldiv);
-
-	for y:=9 to 24 do begin 
-			// Optimized
-			for x:=@startx to @endx onpage do 
-			asm("
-				ldy x
-				lda (zeropage2),y
-				cmp #$20
-				beq burnLoop				
-/*				lda x
-				adc shiftx	
-				adc y
-				tax
-				lda rands,x
-				sbc #64
+/*@define startx "5"
+@define starty "11"
+@define start2 "18"
+@define endx "25"
 */
 
+@define startx "8"
+@define endx "31"
+/*@define starty "13"
+@define start2 "17"
+@define star3 "21"
+@define endy "25"
+*/
+@define starty "10"
+@define start2 "14"
+@define star3 "18"
+@define endy "22"
+
+
+@define startImage "$8000"
+
+@define genCharmap "$8000"
+
+
+@define textpointer zeropage4
+@define firetextpointer zeropage5
+
+
+procedure FLD();
+begin
+	
+	asm("
+     ldx curFld
+loop2
+        lda $d012 ; Wait for beginning of next line
+        cmp $d012
+        beq *-3
+
+        clc ; Do one line of FLD
+        lda $d011
+        adc #1
+        and #7
+        ora #$18
+        sta $d011
+
+        dex ; Decrease counter
+        bne loop2 ; Branch if counter not 0
+	");
+end;
+
+
+procedure InnerFire();
+begin
+	for x:=@startx to @endx onpage do 
+		begin
+			asm("
 				ldy x
-				ldx val
-				lda color,x
-				sta (zeropage1),y
 
-
-				lda val
-				jmp cont
-
-			
-
-burnLoop:
-				lda x
+				tya
 				adc #38
 				tay
 				lda (screenmemory),y
@@ -95,41 +108,113 @@ burnLoop:
 				lsr
 
 				tax
-				pha
 				ldy x
 				lda color,x
 				sta (zeropage1),y
-				pla
+				txa
 				
 
 				bne cont
 				lda #1
 cont:
 				adc #63
-				;ldy x
 				sta (screenmemory),y		
 			");			
-
+		end;
 		incscreenx(40);
 		inczp(zeropage1,40);
-		inczp(zeropage2,40);
+			
+
+end;
+
+procedure WriteText();
+begin
+
+	for i:=0 to 3 do begin
+		moveto(8 + i *8,13,$04);
+		zeropage1:=@genCharmap;
+		val:=zeropage5[i];
+		if val<>$20 then begin
+			val:=val-65;
+			if (val<>0) then
+			for k:=0 to val do inczp(zeropage1, 64);
+			for y:=0 to 8 do begin
+				for x:=0 to 8 do begin
+					k:=zeropage1[x];
+					if k<>$20 then
+					screenmemory[x]:=k;
+				end;	
+				inczp(screenmemory, 40);
+				inczp(zeropage1, 8);
+			end;
+
+		end;
+
+
 	end;
-	for i:=@startx to @endx do begin
-		screenmemory[i+40]:=rands[i + shiftx];		
-		screenmemory[i+00]:=rands[i - shiftx];		
-		//if zeropage2[i]<>$20 then screenmemory[i]:=80;
-	end;
-	
-/*	moveto(curx, 9, $04);
-	for i:=9 to 25 do begin
-		screenmemory[@startx-1]:=64;		
-		screenmemory[@endx+1]:=64;		
-		incscreenx(40);
-		//if zeropage2[i]<>$20 then screenmemory[i]:=80;
-	end;
+
+end;
+
+
+
+procedure FireLower();
+begin
+
+	zeropage2:=@startImage +40*@star3;
+
+	shiftx:=shiftx+31;
+	moveto(0, @star3, $04);
+	zeropage1:=$D800 + 40*@star3;
+	for y:=@star3 to @endy do
+		InnerFire();
+
+/*	zeropage1:=rands;
+	inczp(zeropage1,shiftx);
+	memcpy(zeropage1,0, ^$0400+40*25 + @startx,@endx-@startx);
 */
 end;
 
+procedure FireMiddle();
+begin
+
+	zeropage2:=@startImage +40*@start2;
+
+	shiftx:=shiftx+31;
+	moveto(0, @start2, $04);
+	zeropage1:=$D800 + 40*@start2;
+	for y:=@start2 to @star3 do
+		InnerFire();
+
+	zeropage1:=rands;
+	inczp(zeropage1,shiftx);
+	memcpy(zeropage1,0, ^$0400+40*@endy + @startx,@endx-@startx);
+
+end;
+
+
+procedure FireUpper();
+begin
+
+	zeropage2:=@startImage +40*@starty;
+
+	shiftx:=shiftx+31;
+	if (shiftx>129) then shiftx:=shiftx-128;
+	screenmemory:=$0400 + @starty*40;
+	zeropage1:=$D800 + 40*@starty;
+	
+
+	drawVal:=sine[time*4]/coldiv + 2;
+	
+
+	for y:=@starty to @start2 do 
+		InnerFire();		
+
+
+/*	zeropage1:=rands;
+	inczp(zeropage1,shiftx);
+	memcpy(zeropage1,0, ^$0400+40*24 + @startx,@endx-@startx);
+	*/
+end;
 
 
 procedure InitRandom();
@@ -142,16 +227,129 @@ begin
 end;
 
 
+procedure DrawRandom();
+begin
+	screenmemory:=^$0400 + 80*24;
+	for i:=@startx to @endx do begin
+		screenmemory[i+40]:=rands[i + shiftx];		
+		screenmemory[i+00]:=rands[i - shiftx];		
+	end;
+
+
+end;
+
+
+
 interrupt Raster1();
 
-interrupt Raster2();
-begin
-	time:=time+1;
-	StartIRQ(1);
-	SCREEN_BG_COL:=BLACK;
-	scrollx(scroll);
 
-	RasterIRQ(Raster1(),$F0,1);
+
+
+interrupt ScrollerEnds();
+var 
+	fireTest:byte = 0;
+begin
+//	scrollx(0);
+//	scrolly(0);
+	StartIRQ(1);
+	asm(" 
+		ldx #3
+		dex
+		bne *-1
+	");
+	SCREEN_BG_COL:=BLACK;
+	SCREEN_FG_COL:=BLACK;
+	setbank(VIC_BANK0);
+	// Copy scroller
+	val:=0-time*4;
+	curFld:=sine[val]/8+1;
+	FLD();
+	scrolly(0);
+	scrollx(0);
+	//scrolly(0);
+	if scroll=7 then begin
+		memcpy($4400 + 40*3,1,^$4400 + 40*3,39);
+		memcpy($4400 + 40*2,1,^$4400 + 40*2,39);
+	end;
+	
+
+//	fireTest := 5; // do nuthin
+	if fireTest=0 then
+		FireUpper();
+	if fireTest=1 then
+		FireMiddle();
+	if fireTest=2 then
+		FireLower();
+	if fireTest=3 then begin
+		inc(firecounter);
+		if (firecounter=10) then begin
+			WriteText();
+			inczp(@firetextpointer,4);
+			firecounter := 0;
+			if (@firetextpointer[0]=0) then 
+				@firetextpointer:=fireText;
+		end;
+	end;
+	
+
+	inc(fireTest);
+	if fireTest=4 then begin
+		fireTest := 0;
+	end;
+
+	RasterIRQ(Raster1(),60,1);
+	CloseIRQ();
+
+
+end;
+
+interrupt ScrollerStart();
+begin
+	StartIRQ(1);
+//	scrolly(7);	
+	curFld:=sine[time*4]/8+1;
+	//curFld := 0;
+	FLD();
+	asm(" 
+		ldx #3
+		dex
+		bne *-1
+	");
+
+
+
+	SCREEN_BG_COL:=BLUE;
+	//SCREEN_FG_COL:=BLUE;
+	hideborderx(0);
+	setbank(VIC_BANK1);
+	VIC_DATA_LOC := $18;
+	scrollx(scroll);
+	inc(time);
+	dec(scroll);
+	moveto(0, 2, $44);
+	if scroll>127 then begin
+		val:=@textpointer[0];
+		val2:=val;
+		if val<>$20 then begin
+			val:=val-64;
+			if val>16 then val:=val+16; 
+			val:=val*2+64;
+		
+			val:=val + scrollsplit;
+			val2:=val+32;
+		end;
+		screenmemory[39]:=val;
+		screenmemory[39+40]:=val2;
+
+		scroll:=7;
+		inc(scrollsplit);
+	end;
+	if scrollsplit=2 then begin
+		scrollsplit:=0;
+		inczp(@textpointer,1);
+	end;
+	
+	RasterIRQ(ScrollerEnds(),88+curFld,1);
 	CloseIRQ();
 
 end;
@@ -160,9 +358,10 @@ end;
 interrupt Raster1();
 begin
 	StartIRQ(1);
-	SCREEN_BG_COL:=BLACK;
-	RasterIRQ(Raster2(),$80,1);
+	//SCREEN_BG_COL:=BLACK;
+	RasterIRQ(ScrollerStart(),64,1);
 	hidebordery(0);
+	scrolly(7);
 
 	/*curx:=sine[time*2]/2;
 	scroll:=curx & 7;
@@ -170,10 +369,33 @@ begin
 
 	curx:=curx/8 + 35;
 */
-	curx:=4;
-	Fire();
 
 	CloseIRQ();
+end;
+
+
+procedure CreateCharmap();
+begin
+	zeropage1:=charset;
+	inczp(zeropage1,8);
+	zeropage2:=@genCharmap;
+	// 2000 bytes in total
+	for i:=0 to 32 do begin
+		for y:=0 to 8 do begin
+			val:=zeropage1[y];
+			for x:=0 to 8 do begin
+				val2 := getbit(val,7-x);
+				if val2=0 then c:=$20 // blank
+				else c:=80;
+				zeropage2[x]:=c;
+			end;
+			inczp(zeropage2,8);
+		end;
+		inczp(zeropage1,8);
+	end;
+
+
+
 end;
 
 
@@ -187,12 +409,14 @@ begin
 	VIC_DATA_LOC := $18;
 	// Clear screen and color memory
 	ClearScreen(64, SCREEN_CHAR_LOC);
-	ClearScreen(64, ^$4400);
+	ClearScreen($20, ^$4400);
+	ClearScreen(64, ^$04A0);
+
 	ClearScreen(WHITE, SCREEN_COL_LOC);
 
-
-	
-
+	CreateCharmap();
+	@textpointer:=text;
+	@firetextpointer:=fireText;
 
 	DisableCIAInterrupts();
 	SetMemoryConfig(1,1,0);

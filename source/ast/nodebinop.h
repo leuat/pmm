@@ -515,6 +515,33 @@ public:
 
     }
 
+
+    int numValue() override {
+        if (!isPureNumeric())
+            return 0;
+        int a = m_left->numValue();
+        int b = m_right->numValue();
+        int res = 0;
+        if (m_op.m_type==TokenType::PLUS)
+            res=a+b;
+        if (m_op.m_type==TokenType::MINUS)
+            res=a-b;
+        if (m_op.m_type==TokenType::MUL)
+            res=a*b;
+        if (m_op.m_type==TokenType::DIV)
+            res=a/b;
+
+        return res;
+    }
+
+    QString HexValue() override {
+        if (!isPureNumeric())
+            return 0;
+        int res = numValue();
+        qDebug() << QString::number(res, 16);
+        return "$" + QString::number(res, 16);
+    }
+
     QString Build(Assembler *as) override {
         Node::Build(as);
 
@@ -524,6 +551,8 @@ public:
         if (isPureNumeric()) {
 
             BothPureNumbersBinOp(as);
+            //as->Term("#" + HexValue());
+
             return "";
         }
 
