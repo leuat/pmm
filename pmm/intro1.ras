@@ -4,11 +4,11 @@ var
 	c,val,time,i, scroll : byte;
 	x,y : byte;
 	// Use custom charset
-	charset: IncBin("charsets/test.bin","$1fff");
+	charset: IncBin("charsets/intro.bin","$2000");
 	color : array [8] of byte = (9, 2,2,8,8, 10,10, 7,7,1, 1,1,1); 
-	hfbin: IncBin("levels/hf.bin", $2800);
+	hfbin: IncBin("levels/hf2.bin", $2800);
 	shiftx: byte;
-	coldiv, curx: byte = 20;
+	coldiv, curx: byte = 24;
 
 	rands : array[256] of byte;
 
