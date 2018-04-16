@@ -221,6 +221,7 @@ Node *Parser::Variable()
 
 
         }
+
     }
     if (n==nullptr) {
         ErrorHandler::e.Error("Could not assign variable!");
@@ -243,7 +244,7 @@ Node *Parser::AssignStatement()
 
     if (m_currentToken.m_type!=TokenType::ASSIGN) {
 //        qDebug() << m_currentToken;
-        ErrorHandler::e.Error("Could not assign '" + t.m_value+  "', did you forget a colon?" , token.m_lineNumber);
+        ErrorHandler::e.Error("Could not find '" + t.m_value+  "', did you forget a colon?" , token.m_lineNumber);
     }
     Eat(TokenType::ASSIGN);
     Node* right = Expr();
@@ -601,6 +602,7 @@ Node *Parser::FindProcedure()
         QVector<Node*> paramList;
         while (m_currentToken.m_type!=TokenType::RPAREN && !m_lexer->m_finished) {
             paramList.append(Expr());
+
             if (m_currentToken.m_type==TokenType::COMMA)
                 Eat(TokenType::COMMA);
             //if (m_currentToken.m_type==TokenType::SEMI)
@@ -652,6 +654,7 @@ QVector<Node *> Parser::Parameters()
 
 Node *Parser::ForLoop()
 {
+    int ln = m_currentToken.m_lineNumber;
     Eat(TokenType::FOR);
     Node* a = AssignStatement();
     Eat(TokenType::TO);
@@ -661,6 +664,7 @@ Node *Parser::ForLoop()
 
     int forcePage = 0;
     int loopType = 0; // use var
+    int curCnt=0;
     while (m_currentToken.m_type!=TokenType::DO) {
         if (m_currentToken.m_type==TokenType::ONPAGE || m_currentToken.m_type==TokenType::OFFPAGE)
             forcePage = findPage();
@@ -680,6 +684,9 @@ Node *Parser::ForLoop()
         if (m_currentToken.m_type==TokenType::UNROLL) {
             Eat();
             unroll = true;
+        }
+        if (curCnt++>15) {
+            ErrorHandler::e.Error("For loop needs a 'DO' keyword", ln);
         }
     }
 
@@ -883,13 +890,23 @@ Node *Parser::BuiltinFunction()
         Eat(TokenType::ID);
         Eat(TokenType::LPAREN);
         QVector<Node*> paramList;
+        QString prev;
+
         while (m_currentToken.m_type!=TokenType::RPAREN) {
             if (m_currentToken.m_type==TokenType::STRING) {
                 paramList.append( String() );
                 Eat(TokenType::STRING);
             }
-            else
-                paramList.append(Expr());
+            else {
+                QString pname = m_currentToken.m_value;
+                try {
+                    paramList.append(Expr());
+                } catch (FatalErrorException fe) {
+                    fe.message = "Could not find ID/procedure/variable! '" + prev + "'\n" + fe.message;
+                    throw fe;
+                }
+                prev = pname;
+            }
 
             if (m_currentToken.m_type==TokenType::COMMA)
                 Eat(TokenType::COMMA);

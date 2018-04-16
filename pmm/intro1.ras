@@ -1,0 +1,204 @@
+program Tutorial14_fire;
+
+var
+	c,val,time,i, scroll : byte;
+	x,y : byte;
+	// Use custom charset
+	charset: IncBin("charsets/test.bin","$1fff");
+	color : array [8] of byte = (9, 2,2,8,8, 10,10, 7,7,1, 1,1,1); 
+	hfbin: IncBin("levels/hf.bin", $2800);
+	shiftx: byte;
+	coldiv, curx: byte = 20;
+
+	rands : array[256] of byte;
+
+/*
+ 	This tutorial shows a typical preferred coding method using the TRSE language: 
+	- First prototype in TRSE
+	- Identify slow bottlenecks
+	- Rewrite inner loops to assembler
+
+*/
+
+@define startx 3
+@define endx 30
+
+procedure Fire();
+begin
+
+
+
+	rand(0,16, val);
+	zeropage2:=hfbin;
+	for i:=0 to 9 do inczp(zeropage2,40);
+//	inczp(zeropage2,curx);
+//	val:=80;
+
+	shiftx:=shiftx+31;
+	moveto(curx, 9, $04);
+	zeropage1:=$D968;
+	inczp(zeropage1,curx);
+	//zeropage1:=$D800;
+
+	
+
+	val:=sine[time*16]/coldiv + 1;
+
+
+	if coldiv<24 then
+		inc(coldiv);
+
+	for y:=9 to 24 do begin 
+			// Optimized
+			for x:=@startx to @endx onpage do 
+			asm("
+				ldy x
+				lda (zeropage2),y
+				cmp #$20
+				beq burnLoop				
+/*				lda x
+				adc shiftx	
+				adc y
+				tax
+				lda rands,x
+				sbc #64
+*/
+
+				ldy x
+				ldx val
+				lda color,x
+				sta (zeropage1),y
+
+
+				lda val
+				jmp cont
+
+			
+
+burnLoop:
+				lda x
+				adc #38
+				tay
+				lda (screenmemory),y
+				iny
+				adc (screenmemory),y
+				iny
+				adc (screenmemory),y
+				pha
+				tya
+				adc #39
+				tay
+				pla
+				adc (screenmemory),y
+				
+				lsr
+				lsr
+
+				tax
+				pha
+				ldy x
+				lda color,x
+				sta (zeropage1),y
+				pla
+				
+
+				bne cont
+				lda #1
+cont:
+				adc #63
+				;ldy x
+				sta (screenmemory),y		
+			");			
+
+		incscreenx(40);
+		inczp(zeropage1,40);
+		inczp(zeropage2,40);
+	end;
+	for i:=@startx to @endx do begin
+		screenmemory[i+40]:=rands[i + shiftx];		
+		screenmemory[i+00]:=rands[i - shiftx];		
+		//if zeropage2[i]<>$20 then screenmemory[i]:=80;
+	end;
+	
+/*	moveto(curx, 9, $04);
+	for i:=9 to 25 do begin
+		screenmemory[@startx-1]:=64;		
+		screenmemory[@endx+1]:=64;		
+		incscreenx(40);
+		//if zeropage2[i]<>$20 then screenmemory[i]:=80;
+	end;
+*/
+end;
+
+
+
+procedure InitRandom();
+begin
+	for i:=0 to 0 do begin
+		rand(0,255,val);
+		rands[i]:=val/20+64;
+	end;
+
+end;
+
+
+interrupt Raster1();
+
+interrupt Raster2();
+begin
+	time:=time+1;
+	StartIRQ(1);
+	SCREEN_BG_COL:=BLACK;
+	scrollx(scroll);
+
+	RasterIRQ(Raster1(),$F0,1);
+	CloseIRQ();
+
+end;
+
+
+interrupt Raster1();
+begin
+	StartIRQ(1);
+	SCREEN_BG_COL:=BLACK;
+	RasterIRQ(Raster2(),$80,1);
+	hidebordery(0);
+
+	/*curx:=sine[time*2]/2;
+	scroll:=curx & 7;
+
+
+	curx:=curx/8 + 35;
+*/
+	curx:=4;
+	Fire();
+
+	CloseIRQ();
+end;
+
+
+begin
+	InitRandom();
+	HideborderY(0);
+	// Set color background
+	SCREEN_BG_COL:=BLACK;
+	SCREEN_FG_COL:=BLACK;
+	// Set charmap location at $2000
+	VIC_DATA_LOC := $18;
+	// Clear screen and color memory
+	ClearScreen(64, SCREEN_CHAR_LOC);
+	ClearScreen(64, ^$4400);
+	ClearScreen(WHITE, SCREEN_COL_LOC);
+
+
+	
+
+
+	DisableCIAInterrupts();
+	SetMemoryConfig(1,1,0);
+	RasterIRQ(Raster1(),$00,1);
+
+	EnableRasterIRQ();
+	enableirq();
+	Loop();
+end.

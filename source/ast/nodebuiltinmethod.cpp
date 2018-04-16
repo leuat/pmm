@@ -968,8 +968,8 @@ void NodeBuiltinMethod::ScrollX(Assembler *as)
    // as->Asm("dec $d019");
     as->Asm("lda $d016  ");
     as->Asm("and #$F8");
-    as->Asm("clc");
-    as->Term("adc ");
+    //as->Asm("clc");
+    as->Term("ora ");
     m_params[0]->Build(as);
     as->Term();
     as->Asm("sta $d016");
@@ -982,8 +982,8 @@ void NodeBuiltinMethod::ScrollY(Assembler *as)
    // as->Asm("dec $d019");
     as->Asm("lda $d011  ");
     as->Asm("and #$F8"); // 8 = 1000
-    as->Asm("clc");
-    as->Term("adc ");
+    //as->Asm("clc");
+    as->Term("ora ");
     m_params[0]->Build(as);
     as->Term();
     as->Asm("sta $d011");
