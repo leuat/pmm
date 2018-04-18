@@ -2,55 +2,57 @@ program Tutorial14_fire;
 
 var
 	c,val,time,i, scroll,scrollsplit,val2,drawVal,k,curFld : byte = 0;
-	x,y : byte;
+	x,y : byte = 0;
 	// Use custom charset
-	charset: IncBin("charsets/intro.bin","$2000");
-	hfbin: IncBin("levels/hf2.bin", "$2800");
+	charset: IncBin("charsets/intro.bin","$2800");
+	sprites: IncBin("sprites/introsprite.bin","$3000");
+//	hfbin: IncBin("levels/hf2.bin", "$2800");
 	charset2: IncBin("charsets/roadrunner.bin","$6000");
+	music: IncSid("music/uctumi1_68.sid","2");// Begynner p? 3800
 	color : array [8] of byte = (9, 2,2,8,8, 10,10, 7,7,1, 1,1,1); 
 	shiftx: byte;
 	coldiv, curx: byte = 24;
+	sindiv : byte = 8;
+	background: byte = 0;
 	
-	stab : array[4] of byte=(39,40,41,80);
+	fade : array [8] of byte = (11,6,12,12,4,14,15,1,1,1,1,15,14,4,12,12,6,11); 
 
-	fireText: string="BAH WHO ARE YOU TO  LET ME  DO  ";
-	endd: byte = 0;
+	textColor : array[8] of byte = (0, 0,6, 11, 12, 2, 3, 14,1,  1,14,3,2,12,11,6,00,0);
 
+	//fireText: string="                                                                	";
+	fireText: string="WE  ARE HKT FRC YOU ARE NOT HKT FRC ";
+	fireText2: string="DO  NOT BE  US  GO  WAY NOW PLZ ";
+	fireText3: string="TIS TXT NOT QL  SO  GO  LVE GO  WAY NOR WAY ";
+	endd: byte = 255;
+	
+	curcol: byte = 0;
+	curTextCol: byte = 0;
 
-	text: string="BAH  WELCOME TO ANOTHER HOKUTO FORCE INTRO YAY YAAAY        ";
+	text: string="   HOKUTO FORCE EVIL FORCE RABID FONT ROADRUNNER STOLEN THIS INTRO IS NOT MADE BY HOKUTO FORCE BUT BY ELSE PLEASE NO ASK NOT LEUAT PUSHEAD PUS HEAD";
 
 	rands : array[256] of byte;
 
-	firecounter: byte = 0;
+	firecounter: byte = 10;
 
-/*
- 	This tutorial shows a typical preferred coding method using the TRSE language: 
-	- First prototype in TRSE
-	- Identify slow bottlenecks
-	- Rewrite inner loops to assembler
 
-*/
+	spritex: array[8] of byte;
+	spritey: array[8] of byte;
 
-/*@define startx "5"
-@define starty "11"
-@define start2 "18"
-@define endx "25"
-*/
+
+@define useKernal "0"
+
 
 @define startx "8"
-@define endx "31"
-/*@define starty "13"
-@define start2 "17"
-@define star3 "21"
-@define endy "25"
-*/
-@define starty "10"
-@define start2 "14"
-@define star3 "18"
-@define endy "22"
+@define endx "32"
 
 
-@define startImage "$8000"
+
+@define starty "8"
+@define start2 "12"
+@define star3 "16"
+@define endy "21"
+
+
 
 @define genCharmap "$8000"
 
@@ -59,27 +61,9 @@ var
 @define firetextpointer zeropage5
 
 
-procedure FLD();
-begin
-	
-	asm("
-     ldx curFld
-loop2
-        lda $d012 ; Wait for beginning of next line
-        cmp $d012
-        beq *-3
+@define userJammer true
 
-        clc ; Do one line of FLD
-        lda $d011
-        adc #1
-        and #7
-        ora #$18
-        sta $d011
 
-        dex ; Decrease counter
-        bne loop2 ; Branch if counter not 0
-	");
-end;
 
 
 procedure InnerFire();
@@ -127,11 +111,12 @@ cont:
 
 end;
 
-procedure WriteText();
+procedure WriteText(wtx, wty, wtadd:byte);
 begin
-
+	c:=0;
+	if zeropage5[2]=$20 then c:=4;
 	for i:=0 to 3 do begin
-		moveto(8 + i *8,13,$04);
+		moveto(wtx + i *8 + c,wty,wtadd);
 		zeropage1:=@genCharmap;
 		val:=zeropage5[i];
 		if val<>$20 then begin
@@ -159,25 +144,18 @@ end;
 
 procedure FireLower();
 begin
-
-	zeropage2:=@startImage +40*@star3;
-
 	shiftx:=shiftx+31;
 	moveto(0, @star3, $04);
 	zeropage1:=$D800 + 40*@star3;
 	for y:=@star3 to @endy do
 		InnerFire();
 
-/*	zeropage1:=rands;
-	inczp(zeropage1,shiftx);
-	memcpy(zeropage1,0, ^$0400+40*25 + @startx,@endx-@startx);
-*/
+
 end;
 
 procedure FireMiddle();
 begin
 
-	zeropage2:=@startImage +40*@start2;
 
 	shiftx:=shiftx+31;
 	moveto(0, @start2, $04);
@@ -189,13 +167,13 @@ begin
 	inczp(zeropage1,shiftx);
 	memcpy(zeropage1,0, ^$0400+40*@endy + @startx,@endx-@startx);
 
+
 end;
 
 
 procedure FireUpper();
 begin
 
-	zeropage2:=@startImage +40*@starty;
 
 	shiftx:=shiftx+31;
 	if (shiftx>129) then shiftx:=shiftx-128;
@@ -208,12 +186,6 @@ begin
 
 	for y:=@starty to @start2 do 
 		InnerFire();		
-
-
-/*	zeropage1:=rands;
-	inczp(zeropage1,shiftx);
-	memcpy(zeropage1,0, ^$0400+40*24 + @startx,@endx-@startx);
-	*/
 end;
 
 
@@ -227,21 +199,12 @@ begin
 end;
 
 
-procedure DrawRandom();
-begin
-	screenmemory:=^$0400 + 80*24;
-	for i:=@startx to @endx do begin
-		screenmemory[i+40]:=rands[i + shiftx];		
-		screenmemory[i+00]:=rands[i - shiftx];		
-	end;
-
-
-end;
 
 
 
 interrupt Raster1();
 
+procedure UpdateSprites();
 
 
 
@@ -251,19 +214,21 @@ var
 begin
 //	scrollx(0);
 //	scrolly(0);
-	StartIRQ(1);
+	StartIRQ(@useKernal);
 	asm(" 
-		ldx #3
+		ldx #14
 		dex
 		bne *-1
 	");
-	SCREEN_BG_COL:=BLACK;
 	SCREEN_FG_COL:=BLACK;
+	SCREEN_BG_COL:=BLACK;
 	setbank(VIC_BANK0);
+	VIC_DATA_LOC := $1A;
 	// Copy scroller
 	val:=0-time*4;
-	curFld:=sine[val]/8+1;
-	FLD();
+	curFld:=sine[val]/8;
+	inc(curFld);
+	FLD(curFld);
 	scrolly(0);
 	scrollx(0);
 	//scrolly(0);
@@ -273,7 +238,7 @@ begin
 	end;
 	
 
-//	fireTest := 5; // do nuthin
+//	fireTest := 3; // do nuthin
 	if fireTest=0 then
 		FireUpper();
 	if fireTest=1 then
@@ -282,14 +247,16 @@ begin
 		FireLower();
 	if fireTest=3 then begin
 		inc(firecounter);
-		if (firecounter=10) then begin
-			WriteText();
+		if (firecounter=13) then begin
+			WriteText(8,13,$04);
 			inczp(@firetextpointer,4);
 			firecounter := 0;
-			if (@firetextpointer[0]=0) then 
-				@firetextpointer:=fireText;
+			if (@firetextpointer[0]=0) then inczp(@firetextpointer,1); 
+			if (@firetextpointer[0]=255) then @firetextpointer:=fireText;
 		end;
 	end;
+	call(SIDFILE_1_PLAY);
+	//UpdateSprites();
 	
 
 	inc(fireTest);
@@ -297,33 +264,33 @@ begin
 		fireTest := 0;
 	end;
 
-	RasterIRQ(Raster1(),60,1);
+	RasterIRQ(Raster1(),60,@useKernal);
 	CloseIRQ();
 
 
 end;
 
+
 interrupt ScrollerStart();
 begin
-	StartIRQ(1);
+	StartIRQ(@useKernal);
 //	scrolly(7);	
-	curFld:=sine[time*4]/8+1;
+	curFld:=sine[time*4]/sindiv+1;
+
 	//curFld := 0;
-	FLD();
-	asm(" 
+	FLD(curFld);
+	/*asm(" 
 		ldx #3
 		dex
 		bne *-1
-	");
-
-
-
-	SCREEN_BG_COL:=BLUE;
+	");*/
+	SCREEN_BG_COL:=curcol;
 	//SCREEN_FG_COL:=BLUE;
 	hideborderx(0);
 	setbank(VIC_BANK1);
 	VIC_DATA_LOC := $18;
 	scrollx(scroll);
+
 	inc(time);
 	dec(scroll);
 	moveto(0, 2, $44);
@@ -348,28 +315,61 @@ begin
 		scrollsplit:=0;
 		inczp(@textpointer,1);
 	end;
+	val:=150 + sine[time]/8;
+	poke(^$D001,0,val);
+	poke(^$D001,2,val);
+	poke(^$D001,4,val);
+	val:=val+21;
+	poke(^$D001,6,val);
+	poke(^$D001,8,val);
+	poke(^$D001,10,val);
 	
-	RasterIRQ(ScrollerEnds(),88+curFld,1);
+	RasterIRQ(ScrollerEnds(),88+curFld,@useKernal);
+@ifdef useJammer
+	Jammer(88+curFld, RED);
+@endif
 	CloseIRQ();
 
+end;
+procedure UpdateSprites();
+var
+	sx: integer;
+begin
+	for i:=0 to 6 do begin
+	//i:=scroll;
+	sx:=spritex[i]*2;
+	spritepos(sx, spritey[i], i);
+
+	spritey[i]:=160 + sine[time +i*16]/8;
+
+	end;
 end;
 
 
 interrupt Raster1();
 begin
-	StartIRQ(1);
-	//SCREEN_BG_COL:=BLACK;
-	RasterIRQ(ScrollerStart(),64,1);
-	hidebordery(0);
+
+
+	StartIRQ(@useKernal);
+
+	RasterIRQ(ScrollerStart(),64,@useKernal);
+//	hidebordery(0);
 	scrolly(7);
 
-	/*curx:=sine[time*2]/2;
-	scroll:=curx & 7;
+
+	curTextCol:=sine[time*4]/32;
+	//curTextCol:=sine[time]/32;
+
+	SPRITE_MULTICOLOR_REG1:=textColor[ curTextCol+1 ];
+ 	SPRITE_MULTICOLOR_REG2:=textColor[ curTextCol];
 
 
-	curx:=curx/8 + 35;
-*/
+//	SCREEN_BG_COL:=RED;
 
+	curcol:=RED;//color2[val&15];
+@ifdef useJammer
+	Jammer(64, GREY);
+@endif
 	CloseIRQ();
 end;
 
@@ -379,49 +379,95 @@ begin
 	zeropage1:=charset;
 	inczp(zeropage1,8);
 	zeropage2:=@genCharmap;
-	// 2000 bytes in total
+
 	for i:=0 to 32 do begin
 		for y:=0 to 8 do begin
 			val:=zeropage1[y];
 			for x:=0 to 8 do begin
 				val2 := getbit(val,7-x);
-				if val2=0 then c:=$20 // blank
-				else c:=80;
+				if val2=0 
+					then c:=$20 // blank
+				else 
+					c:=79;
 				zeropage2[x]:=c;
 			end;
 			inczp(zeropage2,8);
 		end;
 		inczp(zeropage1,8);
 	end;
-
+	
 
 
 end;
 
 
+
+
+procedure InitSprites();
+begin
+	val:=0;
+	val2:=0;
+	k:=$C0;
+	for i:=0 to 6 do begin
+		setspriteloc(i, k,0);
+		spritex[i]:=val2 + 130;
+		spritey[i]:=170+val;
+		val2:=val2+12;
+		inc(k);
+		if (i=2) then begin
+			val:=21;
+			val2:=0;
+			k:=$C0+13;
+		end;
+		
+	end;
+	SPRITE_BITMASK:=%00111111;
+	for i:=0 to 6 do 
+		SPRITE_COLOR[i]:=RED;
+
+	poke(SPRITE_MULTICOLOR_REG1, 0, BLACK);
+	poke(SPRITE_MULTICOLOR_REG2, 0, BLACK);
+	SPRITE_MULTICOLOR:=$FF;
+
+
+end;
+
+
+
 begin
 	InitRandom();
-	HideborderY(0);
+//	HideborderY(0);
+	background:=BLACK;
 	// Set color background
-	SCREEN_BG_COL:=BLACK;
-	SCREEN_FG_COL:=BLACK;
+	SCREEN_BG_COL:=background;
+	SCREEN_FG_COL:=background;
 	// Set charmap location at $2000
-	VIC_DATA_LOC := $18;
+	VIC_DATA_LOC := $1A;
 	// Clear screen and color memory
 	ClearScreen(64, SCREEN_CHAR_LOC);
 	ClearScreen($20, ^$4400);
 	ClearScreen(64, ^$04A0);
 
-	ClearScreen(WHITE, SCREEN_COL_LOC);
+	ClearScreen(YELLOW, SCREEN_COL_LOC);
 
+	//setmemoryconfig(1,1,0);
+	//SetMemoryConfig(1,0,0);
+	copycharsetfromrom(charset);
+	SetMemoryConfig(1,@useKernal,0);
 	CreateCharmap();
 	@textpointer:=text;
+	initsid(SIDFILE_1_INIT);
 	@firetextpointer:=fireText;
+	sindiv := 8;
+
+	InitSprites();
+	UpdateSprites();
+
+	//moveto(10,1,$04);
+	//printstring("HOKUTO FORCE",0,40);
 
 	DisableCIAInterrupts();
-	SetMemoryConfig(1,1,0);
-	RasterIRQ(Raster1(),$00,1);
-
+	RasterIRQ(Raster1(),50,@useKernal);
 	EnableRasterIRQ();
 	enableirq();
 	Loop();

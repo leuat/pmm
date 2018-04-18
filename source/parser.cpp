@@ -327,6 +327,10 @@ Node *Parser::BinaryClause()
         // Logical clause AND OR
         Eat(TokenType::LPAREN);
         Node* a = BinaryClause();
+        if (m_currentToken.m_type==TokenType::RPAREN) {
+            Eat();
+            return a;
+        }
         Token logical = m_currentToken;
         Eat();
         Node* b = BinaryClause();
@@ -356,20 +360,7 @@ Node *Parser::Conditional(bool isWhileLoop)
     bool done=false;
     int linenum = m_currentToken.m_lineNumber;
 
-    bool hasParen = false;
-    if (m_currentToken.m_type==TokenType::LPAREN) {
-        Eat();
-        hasParen = true;
-    }
-
     Node* clause = BinaryClause();
-    if (hasParen) {
-        if (m_currentToken.m_type!=TokenType::RPAREN) {
-            ErrorHandler::e.Error("Expected right paranthesis after binary clause", linenum);
-
-        }
-        Eat();
-    }
 
     int forcePage = findPage();
 

@@ -89,6 +89,8 @@ public:
 
     void VerifyInitialized(QString method, QString initmethod);
 
+    void Jammer(Assembler *as);
+    void FLD(Assembler* as);
 
     // Initialize
 
@@ -98,6 +100,8 @@ public:
     void InitMoveto(Assembler *as);
     void InitEightBitMul(Assembler* as);
     void InitPrintString(Assembler* as);
+
+
 
 
     void ExecuteSym(SymbolTable* symTab) override {

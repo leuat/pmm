@@ -146,6 +146,17 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>());
 
 
+    builtInFunctions["jammer"] = BuiltInFunction(
+                "jammer",
+                QList<BuiltInFunction::Type>()
+                 << BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER);
+
+    builtInFunctions["fld"] = BuiltInFunction(
+                "fld",
+                QList<BuiltInFunction::Type>()
+                << BuiltInFunction::Type::INTEGER);
+
 
     builtInFunctions["moveto"] = BuiltInFunction(
                 "moveto",

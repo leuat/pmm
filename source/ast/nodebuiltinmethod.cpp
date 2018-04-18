@@ -27,6 +27,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="call") {
         Call(as);
     }
+    if (m_procName.toLower()=="fld")
+        FLD(as);
+
     if (m_procName.toLower()=="abs") {
         Abs(as);
     }
@@ -49,6 +52,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower() == "setspriteloc")
         SetSpriteLoc(as);
+
+    if (m_procName.toLower() == "jammer")
+        Jammer(as);
 
     if (m_procName.toLower()=="initsid") {
         InitSid(as);
@@ -1326,15 +1332,24 @@ void NodeBuiltinMethod::IncZp(Assembler *as)
     }
 
 
-    as->Term("lda ");
+/*    as->Term("lda ");
     m_params[1]->Build(as);
     as->Term();
     as->Asm("sta screen_x");
     as->Asm("lda "+ var->value);
-    //as->Asm("cpx #0");
-   // as->Asm("beq " + lbl);
     as->Asm("clc");
     as->Asm("adc screen_x");
+    as->Asm("bcc " + lbl);
+    as->Asm("inc "+ var->value + " +1");
+    as->Label(lbl);
+    as->Asm("sta "+ var->value);
+
+*/
+
+    m_params[1]->Build(as);
+    as->Term();
+    as->Asm("clc");
+    as->Asm("adc "+ var->value);
     as->Asm("bcc " + lbl);
     as->Asm("inc "+ var->value + " +1");
     as->Label(lbl);
@@ -2249,6 +2264,54 @@ void NodeBuiltinMethod::VerifyInitialized(QString method, QString initmethod)
     if (!m_isInitialized[method])
         ErrorHandler::e.Error("Please declare "+ initmethod+"() before using " + method+"();");
 
+}
+
+void NodeBuiltinMethod::Jammer(Assembler *as)
+{
+    as->Comment("Jammer");
+    QString lbl = as->NewLabel("jammer");
+    m_params[0]->Build(as);
+    as->Term();
+    //;sta     $7000
+    as->Asm("cmp $d012");
+
+    as->Asm("bcs "+lbl);
+    as->Asm("lda #$02");
+    as->Asm("sta     $0400");
+    m_params[1]->Build(as);
+    as->Term();
+    as->Asm("sta     $d020");
+    as->Asm("sta     $d021");
+
+    as->Asm("jmp     *");
+    as->Label(lbl);
+    as->PopLabel("jammer");
+}
+
+void NodeBuiltinMethod::FLD(Assembler *as)
+{
+    QString lbl = as->NewLabel("fld");
+    as->Comment("FLD effect");
+    m_params[0]->Build(as);
+    as->Term();
+    as->Asm("tax");
+
+    as->Label(lbl);
+    as->Asm("lda $d012 ; Wait for beginning of next line");
+    as->Asm("cmp $d012");
+    as->Asm("beq *-3");
+
+    as->Asm("clc ; Do one line of FLD");
+    as->Asm("lda $d011");
+    as->Asm("adc #1");
+    as->Asm("and #7");
+    as->Asm("ora #$18");
+    as->Asm("sta $d011");
+
+    as->Asm("dex ; Decrease counter");
+    as->Asm("bne " + lbl);
+
+    as->PopLabel("fld");
 }
 
 void NodeBuiltinMethod::InitJoystick(Assembler *as)
