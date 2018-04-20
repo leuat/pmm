@@ -211,6 +211,7 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     }
 
     if (m_procName.toLower() == "enableirq") {
+        as->Asm("asl $d019");
         as->Asm("cli");
     }
 
@@ -405,6 +406,9 @@ void NodeBuiltinMethod::MemCpy(Assembler* as)
     if (!m_params[1]->isPureNumeric()) {
         ErrorHandler::e.Error("Second parameter must be pure numeric", m_op.m_lineNumber);
     }
+
+    RequireAddress(m_params[0], "MemCpy", m_op.m_lineNumber);
+    RequireAddress(m_params[2], "MemCpy", m_op.m_lineNumber);
 
     QString ap1 = "";
     QString ap2 = "";

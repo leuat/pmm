@@ -12,6 +12,7 @@ public:
     enum Type{PASCAL, MOS6502};
     Assembler* m_assembler = nullptr;
     Parser* m_parser;
+    FatalErrorException recentError;
     Interpreter(Parser* p);
     Interpreter() {}
     void Parse();

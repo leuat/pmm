@@ -147,11 +147,16 @@ void Interpreter::HandleError(FatalErrorException fe, QString e)
     QString line = "on line: " + QString::number(linenr+1);
     if (file!="")
         msg+="In file : " + file + "\n";
+
+    fe.file=file;
+
     msg +="\nFatal error " + line;
     if (linenr<m_parser->m_lexer->m_lines.count())
         msg+="\nSource: " + m_parser->m_lexer->m_lines[linenr];
     msg+="\n\nMessage: ";
     Pmm::Data::d.lineNumber = linenr+1;
+
+    recentError = fe;
 
     ErrorHandler::e.CatchError(fe, e + msg);
 

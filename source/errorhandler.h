@@ -15,7 +15,9 @@ class FatalErrorException: public exception
 {
 public:
     QString message;
+    QString file = "";
     int linenr;
+    FatalErrorException() {}
     FatalErrorException(QString msg)
     {
         message = msg;

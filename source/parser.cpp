@@ -552,8 +552,8 @@ void Parser::PreprocessReplace()
         QString val = m_preprocessorDefines[k];
 //        qDebug() << "Replacing: @" + k << "  with " << val;
         m_lexer->m_text = m_lexer->m_text.replace("@" +k, val);
-    }
 
+    }
 }
 
 Node* Parser::Parse()
