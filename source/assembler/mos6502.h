@@ -65,13 +65,14 @@ public:
 
     void VarDeclHeader();
     void DeclareVariable(QString name, QString type, QString initval) override;
+    void DeclareString(QString name, QStringList initval) override;
 
     void BeginBlock() override;
     void EndBlock() override;
     void ApplyTerm() override;
     void Number(QString n) override;
     void Comment(QString s) override;
-    void String(QString s) override;
+    QString String(QStringList s) override;
     void AssignVariable(QString v) override;
     void EndAssignVariable(QString variable) override;
     void BinOP(TokenType::Type t) override;

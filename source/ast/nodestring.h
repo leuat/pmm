@@ -10,22 +10,22 @@
 
 class NodeString : public Node {
 public:
-    QString m_val;
-    NodeString(Token op, QString val) {
+    QStringList m_val;
+    NodeString(Token op, QStringList val) {
         m_op = op;
         m_val = val;
     }
     PVar  Execute(SymbolTable* symTab, uint lvl) override {
         Pmm::Data::d.Set(m_op.m_lineNumber, m_op.m_currentLineText);
         level = lvl +1;
-        return PVar(m_val);
+        return PVar();
     }
 
     QString Build(Assembler *as) override {
        Node::Build(as);
 
        as->String(m_val);
-       return m_val;
+       return "";
     }
 
     void ExecuteSym(SymbolTable* symTab) override {

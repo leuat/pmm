@@ -106,6 +106,11 @@ public:
             as->m_symTab->Lookup(v->value, m_op.m_lineNumber)->m_type="address";
         }
         else
+            if (t->m_op.m_type==TokenType::STRING) {
+                as->DeclareString(v->value, t->m_data);
+
+            }
+        else
             if (t->m_op.m_type==TokenType::INCBIN)
                 IncBin(as);
             else if (t->m_op.m_type==TokenType::INCSID)

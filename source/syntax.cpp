@@ -8,7 +8,11 @@ Syntax::Syntax()
 {
     SetupReservedWords();
     SetupBuiltinFunctions();
+    SetupKeys();
 }
+
+
+
 
 void Syntax::SetupReservedWords()
 {
@@ -152,6 +156,12 @@ void Syntax::SetupBuiltinFunctions()
                  << BuiltInFunction::Type::INTEGER
                 << BuiltInFunction::Type::INTEGER);
 
+    builtInFunctions["nmiirq"] = BuiltInFunction(
+                "nmiirq",
+                QList<BuiltInFunction::Type>()
+                << BuiltInFunction::Type::INTEGER);
+
+
     builtInFunctions["fld"] = BuiltInFunction(
                 "fld",
                 QList<BuiltInFunction::Type>()
@@ -286,6 +296,12 @@ void Syntax::SetupBuiltinFunctions()
                 );
     builtInFunctions["copyfullscreen"] = BuiltInFunction(
                 "copyfullscreen",
+                QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
+                );
+
+    builtInFunctions["copyfullscreenunrolled"] = BuiltInFunction(
+                "copyfullscreenunrolled",
                 QList<BuiltInFunction::Type>()<< BuiltInFunction::Type::INTEGER
                 << BuiltInFunction::Type::INTEGER
                 );
@@ -479,11 +495,28 @@ void Syntax::SetupBuiltinFunctions()
                 <<BuiltInFunction::Type::INTEGER
                 );
 
+    builtInFunctions["keypressed"] = BuiltInFunction(
+                "keypressed",
+                QList<BuiltInFunction::Type>()
+                <<BuiltInFunction::Type::INTEGER
+                );
+
     builtInFunctions["abs"] = BuiltInFunction(
                 "abs",
                 QList<BuiltInFunction::Type>()
                 <<BuiltInFunction::Type::INTEGER
                 );
+
+    builtInFunctions["return"] = BuiltInFunction(
+                "return",
+                QList<BuiltInFunction::Type>()
+                );
+
+    builtInFunctions["returninterrupt"] = BuiltInFunction(
+                "returninterrupt",
+                QList<BuiltInFunction::Type>()
+                );
+
 
     builtInFunctions["copyimagecolordata"] = BuiltInFunction(
                 "copyimagecolordata",
@@ -493,6 +526,66 @@ void Syntax::SetupBuiltinFunctions()
                 );
 
 
+
+}
+
+void Syntax::SetupKeys()
+{
+    int row[8] = {0b11111110,0b11111101,0b11111011,0b11110111,0b11101111,0b11011111,0b10111111,0b01111111};
+    int column[8] = {0b00000001,0b00000010,0b00000100,0b00001000,0b00010000,0b00100000,0b01000000,0b10000000};
+    m_c64keys.clear();
+    m_c64keys[0x01] = C64Key("A","KEY_A",0x01 , row[1], column[2]);
+    m_c64keys[0x02] = C64Key("B","KEY_B",0x02 , row[3], column[4]);
+    m_c64keys[0x03] = C64Key("C","KEY_C",0x03 , row[2], column[4]);
+    m_c64keys[0x04] = C64Key("D","KEY_D",0x04 , row[2], column[2]);
+    m_c64keys[0x05] = C64Key("E","KEY_E",0x05 , row[1], column[6]);
+    m_c64keys[0x06] = C64Key("F","KEY_F",0x06 , row[2], column[5]);
+    m_c64keys[0x07] = C64Key("G","KEY_G",0x07 , row[3], column[2]);
+    m_c64keys[0x08] = C64Key("H","KEY_H",0x08 , row[3], column[5]);
+    m_c64keys[0x09] = C64Key("I","KEY_I",0x09 , row[4], column[1]);
+    m_c64keys[0x0A] = C64Key("J","KEY_J",0x0A , row[4], column[2]);
+    m_c64keys[0x0B] = C64Key("K","KEY_K",0x0B , row[4], column[5]);
+    m_c64keys[0x0C] = C64Key("L","KEY_L",0x0C , row[5], column[2]);
+    m_c64keys[0x0D] = C64Key("M","KEY_M",0x0D , row[4], column[4]);
+    m_c64keys[0x0E] = C64Key("N","KEY_N",0x0E , row[4], column[7]);
+    m_c64keys[0x0F] = C64Key("O","KEY_O",0x0F , row[4], column[6]);
+    m_c64keys[0x10] = C64Key("P","KEY_P",0x10 , row[5], column[1]);
+    m_c64keys[0x11] = C64Key("Q","KEY_Q",0x11 , row[7], column[6]);
+    m_c64keys[0x12] = C64Key("R","KEY_R",0x12 , row[2], column[1]);
+    m_c64keys[0x13] = C64Key("S","KEY_S",0x13 , row[1], column[5]);
+    m_c64keys[0x14] = C64Key("T","KEY_T",0x14 , row[2], column[6]);
+    m_c64keys[0x15] = C64Key("U","KEY_U",0x15 , row[3], column[6]);
+    m_c64keys[0x16] = C64Key("V","KEY_V",0x16 , row[3], column[7]);
+    m_c64keys[0x17] = C64Key("W","KEY_W",0x17 , row[1], column[1]);
+    m_c64keys[0x18] = C64Key("X","KEY_X",0x18 , row[2], column[7]);
+    m_c64keys[0x19] = C64Key("Y","KEY_Y",0x19 , row[3], column[1]);
+    m_c64keys[0x1A] = C64Key("Z","KEY_Z",0x1A , row[1], column[4]);
+    m_c64keys[0x30] = C64Key("0","KEY_0",0x30 , row[4], column[3]);
+    m_c64keys[0x31] = C64Key("1","KEY_1",0x31 , row[7], column[0]);
+    m_c64keys[0x32] = C64Key("2","KEY_2",0x32 , row[7], column[3]);
+    m_c64keys[0x33] = C64Key("3","KEY_3",0x33 , row[1], column[0]);
+    m_c64keys[0x34] = C64Key("4","KEY_4",0x34 , row[1], column[3]);
+    m_c64keys[0x35] = C64Key("5","KEY_5",0x35 , row[2], column[0]);
+    m_c64keys[0x36] = C64Key("6","KEY_6",0x36 , row[2], column[3]);
+    m_c64keys[0x37] = C64Key("7","KEY_7",0x37 , row[3], column[0]);
+    m_c64keys[0x38] = C64Key("8","KEY_8",0x38 , row[3], column[3]);
+    m_c64keys[0x39] = C64Key("9","KEY_9",0x39 , row[4], column[0]);
+
+    m_c64keys[0xF1] = C64Key("F1","KEY_F1",0xF1 , row[0], column[4]);
+    m_c64keys[0xF3] = C64Key("F3","KEY_F3",0xF3 , row[0], column[5]);
+    m_c64keys[0xF5] = C64Key("F5","KEY_F5",0xF5 , row[0], column[6]);
+    m_c64keys[0xF7] = C64Key("F7","KEY_F7",0xF7 , row[0], column[3]);
+
+    m_c64keys[0x2b] = C64Key("+","KEY_PLUS",0x2b , row[5], column[0]);
+    m_c64keys[0x1c] = C64Key("£","KEY_POUND",0x1c , row[6], column[0]);
+    m_c64keys[0xF0] = C64Key("ENTER","KEY_ENTER",0xF0 , row[0], column[1]);
+    m_c64keys[0x2a] = C64Key("*","KEY_ASTERIX",0x2a , row[6], column[1]);
+    m_c64keys[0x3b] = C64Key(";","KEY_SEMI",0x3b , row[6], column[2]);
+    m_c64keys[0xEF] = C64Key("HOME","KEY_HOME",0xEF , row[6], column[3]);
+    m_c64keys[0x20] = C64Key("SPACE","KEY_SPACE",0x20 , row[7], column[4]);
+    m_c64keys[0xEE] = C64Key("COMMODORE","KEY_COMMODORE",0xEE , row[7], column[5]);
+    m_c64keys[0x3a] = C64Key(":","KEY_COLON",0x3a , row[5], column[5]);
+    m_c64keys[0x3d] = C64Key("=","KEY_EQUALS",0x3d , row[6], column[5]);
 
 }
 

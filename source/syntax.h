@@ -12,12 +12,32 @@
 
 
 
+class C64Key {
+public:
+    QString m_name;
+    QString m_key;
+    unsigned char m_value;
+    unsigned char m_row, m_column;
+    C64Key() {}
+    C64Key(QString name, QString key, int value, int row, int column) {
+        m_name = name;
+        m_key = key;
+        m_value = value;
+        m_row = row;
+        m_column = column;
+
+    }
+
+};
+
+
 
 class BuiltInFunction {
 public:
     enum Type {STRING, INTEGER, REAL};
     QString m_name;
     QList<Type> m_params;
+
     BuiltInFunction() {}
     bool m_initFunction = false;
 //    QVector<PVar> m_params;
@@ -38,6 +58,7 @@ public:
     Syntax();
     void SetupReservedWords();
     void SetupBuiltinFunctions();
+    void SetupKeys();
     QString puredigit = "0123456789^";
     QString digit = "^0123456789$%";
     QString digitAll = "^0123456789$%ABCDEFabcdef";
@@ -46,6 +67,9 @@ public:
     QString alnumString =alpha+digit+ " ;:æøå!#¤%&/()=.,-+*";
     uint lineNumber = 0;
     void SetupConstants();
+
+
+    QMap<unsigned char, C64Key> m_c64keys;
 
     static Syntax s;
 

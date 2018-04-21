@@ -82,12 +82,14 @@ void AsmMOS6502::DeclareVariable(QString name, QString type, QString initval)
         t = word;
     if (type.toLower()=="byte")
         t = byte;
-    if (type.toLower()=="string") {
-        Write(name +"\t" + t + "\t"+"\""+initval+ "\",0");
-        return;
-    }
     Write(name +"\t" + t + "\t"+initval);
 
+}
+
+void AsmMOS6502::DeclareString(QString name, QStringList initval)
+{
+    Write(name +"\t" + String(initval));
+    m_term="";
 }
 
 void AsmMOS6502::BeginBlock()
@@ -136,9 +138,26 @@ void AsmMOS6502::Comment(QString s)
     Asm("; "+ s) ;
 }
 
-void AsmMOS6502::String(QString s)
+QString AsmMOS6502::String(QStringList lst)
 {
-    m_term +="\"" + s.toUpper() + "\"";
+
+    QString res;
+    for (QString s:lst) {
+        bool ok=false;
+        uchar val = s.toInt(&ok);
+        if (!ok)
+            res=res+"\tdc.b\t" +"\"" + s + "\"\n";
+
+        else res=res + "\tdc.b\t"+QString::number(val) + "\n";
+
+/*        if (s!=lst.last())
+            res=res + "\n";
+*/
+
+    }
+    res=res + "\tdc.b\t0";
+    m_term +=res;
+    return res;
 }
 
 void AsmMOS6502::AssignVariable(QString v)
@@ -214,7 +233,7 @@ void AsmMOS6502::Writeln()
     Asm("INY");
     Asm("JMP "+l+"0");
     Label(l+"1");
-    m_term = ".byte ";
+    m_term = "";
 
 }
 

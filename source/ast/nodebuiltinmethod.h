@@ -17,6 +17,7 @@ public:
     NodeBuiltinMethod(QString m, QVector<Node*> params) {
         m_procName = m;
         m_params = params;
+        m_op.m_type = TokenType::BYTE;
     }
 
     void Delete() override {
@@ -66,6 +67,7 @@ public:
     void SetBank(Assembler* as);
     void CopyImageColorData(Assembler* as);
     void CopyHalfScreen(Assembler* as);
+    void CopyFullScreenUnrolled(Assembler* as);
     void CopyFullScreen(Assembler* as);
     void TransformColors(Assembler* as);
     void ToggleBit(Assembler* as);
@@ -79,6 +81,8 @@ public:
     void EnableRasterIRQ(Assembler* as);
     void StartIRQ(Assembler* as);
     void CloseIRQ(Assembler* as);
+    void DisableNMI(Assembler* as);
+    void KeyPressed(Assembler* as);
 
     QString BitShiftX(Assembler* as);
 
@@ -88,6 +92,8 @@ public:
     void SaveVar(Assembler* as, int paramNo);
 
     void VerifyInitialized(QString method, QString initmethod);
+
+
 
     void Jammer(Assembler *as);
     void FLD(Assembler* as);

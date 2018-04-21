@@ -25,6 +25,11 @@ void AsmPascal::DeclareVariable(QString name, QString type, QString initval)
     Write(name + " : " + type +";",1 + m_currentLvl);
 }
 
+void AsmPascal::DeclareString(QString name, QStringList InitVal)
+{
+
+}
+
 void AsmPascal::BeginBlock()
 {
 
@@ -54,9 +59,10 @@ void AsmPascal::Number(QString s)
     m_term+=s;
 }
 
-void AsmPascal::String(QString s)
+QString AsmPascal::String(QStringList s)
 {
-    m_term+="\"" + s + "\"";
+    return "";
+//    m_term+="\"" + s + "\"";
 }
 
 void AsmPascal::BinOP(TokenType::Type t)

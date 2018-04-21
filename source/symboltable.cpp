@@ -81,6 +81,11 @@ void SymbolTable::Initialize()
 
     m_constants["VIC_DATA_LOC"] = new Symbol("^$d018", "ADDRESS", 0xd018);
 
+    for (unsigned char key: Syntax::s.m_c64keys.keys()) {
+        C64Key k = Syntax::s.m_c64keys[key];
+        m_constants[k.m_key] = new Symbol(QString::number(k.m_value), "BYTE",  k.m_value);
+    }
+
 }
 
 void SymbolTable::InitBuiltins()

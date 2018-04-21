@@ -116,6 +116,7 @@ public:
     virtual void EndProgram() = 0;
     virtual void VarDeclHeader() = 0;
     virtual void DeclareVariable(QString name, QString type, QString initVal)=0;
+    virtual void DeclareString(QString name, QStringList initVal) {}
     virtual void DeclareArray(QString name, QString type, int count, QStringList lst, QString position) {}
     virtual void BeginBlock() = 0;
     virtual void EndBlock() = 0;
@@ -123,7 +124,7 @@ public:
     virtual void EndAssignVariable(QString var) {}
     virtual void ApplyTerm() = 0;
     virtual void Number(QString n) = 0;
-    virtual void String(QString s) = 0;
+    virtual QString  String(QStringList s) = 0;
     virtual void BinOP(TokenType::Type t)=0;
     virtual void Poke(bool start) = 0;
     virtual void Peek(bool start) {}

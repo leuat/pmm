@@ -33,13 +33,25 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="abs") {
         Abs(as);
     }
+    if (m_procName.toLower()=="nmiirq") {
+        DisableNMI(as);
+    }
 
     if (m_procName.toLower()=="setmemoryconfig") {
         SetMemoryConfig(as);
     }
+    if (m_procName.toLower()=="return") {
+        as->Asm("rts");
+    }
+    if (m_procName.toLower()=="returninterrupt") {
+        as->Asm("rti");
+    }
 
     if (m_procName.toLower()=="enablerasterirq") {
         EnableRasterIRQ(as);
+    }
+    if (m_procName.toLower()=="keypressed") {
+        KeyPressed(as);
     }
 
     if (m_procName.toLower()=="clearsound") {
@@ -137,6 +149,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower() == "copyfullscreen")
         CopyFullScreen(as);
+
+    if (m_procName.toLower() == "copyfullscreenuunrolled")
+        CopyFullScreenUnrolled(as);
 
     if (m_procName.toLower() =="setbitmapmode") {
         as->Comment("Bitmap mode ");
@@ -709,7 +724,8 @@ void NodeBuiltinMethod::PrintString(Assembler *as)
     if (str!=nullptr) {
         as->Asm("jmp " + lbl);
         varName = lbl2;
-        as->Label(varName + "\t.dc \"" + str->m_val+"\",0");
+        as->Label(varName + as->String(str->m_val));
+        as->m_term="";
     }
 
     if (str!=nullptr)
@@ -1250,7 +1266,83 @@ void NodeBuiltinMethod::CloseIRQ(Assembler *as)
     as->Asm("pla");
     as->Asm("tax");
     as->Asm("pla");
-    as->Asm("rti");
+   // as->Asm("rti");
+}
+
+void NodeBuiltinMethod::DisableNMI(Assembler *as)
+{
+    as->Comment("Hook NMI");
+
+    NodeProcedure* addr = (NodeProcedure*)dynamic_cast<NodeProcedure*>(m_params[0]);
+    if (addr==nullptr)
+        ErrorHandler::e.Error("First parameter must be interrupt procedure!", m_op.m_lineNumber);
+
+    QString name = addr->m_procedure->m_procName;
+
+    as->Asm("sei");
+    as->Asm("lda     #<"+name);
+    as->Asm("sta     $0318");
+    as->Asm("lda     #>"+name);
+    as->Asm("sta     $0319");
+
+    as->Asm("lda     #$00            ; Stop time A CIA2");
+    as->Asm("sta     $dd0e");
+
+    as->Asm("lda     #$00");
+    as->Asm("sta     $dd04           ; Set timer value #1 (Timer A CIA 2)");
+    as->Asm("lda     #$00");
+    as->Asm("sta     $dd05           ; Set timer value #2 (Timer A CIA 2)");
+
+    as->Asm("lda     #%10000001      ; Fill bit to 1 and enable NMI to occur from Timer A");
+    as->Asm("sta     $dd0d");
+
+    as->Asm("lda     #$01");
+    as->Asm("sta     $dd0e           ; Start timer A CIA (NMI will occur immediately)(*)");
+
+    as->Asm("cli");
+
+}
+
+void NodeBuiltinMethod::KeyPressed(Assembler *as)
+{
+    as->Comment("Keypressed test");
+
+    NodeNumber* num = dynamic_cast<NodeNumber*>(m_params[0]);
+    if (num==nullptr)
+        ErrorHandler::e.Error("KeyPressed requires key to be numeric! KEY_A etc");
+
+    if (!Syntax::s.m_c64keys.contains(num->m_val))
+        ErrorHandler::e.Error("KeyPressed: does not recognize character " + QString::number(num->m_val));
+
+    C64Key key = Syntax::s.m_c64keys[num->m_val];
+
+    QString lbl1 = as->NewLabel("keypressedA");
+    QString lbl2 = as->NewLabel("keypressedB");
+
+    as->PopLabel("keypressedA");
+    as->PopLabel("keypressedB");
+
+
+    as->Asm("lda #%11111111  ; CIA#1 port A = outputs ");
+    as->Asm("sta $dc02             ");
+
+    as->Asm("lda #%00000000  ; CIA#1 port B = inputs");
+    as->Asm("sta $dc03             ");
+
+    as->Asm("lda #%" + QString::number(key.m_row,2));
+    as->Asm("sta  $dc00");
+
+    as->Asm("lda $dc01");
+    as->Asm("and #%"+QString::number(key.m_column,2));
+    as->Asm("cmp #%"+QString::number(key.m_column,2));
+    as->Asm("bne "+lbl1);
+    as->Asm("lda #0");
+    as->Asm("jmp "+lbl2);
+as->Label(lbl1);
+    as->Asm("lda #1");
+as->Label(lbl2);
+    //sta key_ispressed
+
 }
 
 QString NodeBuiltinMethod::BitShiftX(Assembler *as)
@@ -2018,7 +2110,7 @@ void NodeBuiltinMethod::CopyHalfScreen(Assembler *as)
 
 }
 
-void NodeBuiltinMethod::CopyFullScreen(Assembler *as)
+void NodeBuiltinMethod::CopyFullScreenUnrolled(Assembler *as)
 {
     as->Comment("Copy screen unrolled 1000 bytes");
     RequireAddress(m_params[0],"CopyFullscreen", m_op.m_lineNumber);
@@ -2051,6 +2143,47 @@ void NodeBuiltinMethod::CopyFullScreen(Assembler *as)
     as->PopLabel("fullcopyloop");
     as->PopLabel("fullcopyloop2");
     as->PopLabel("fullcopydone");
+
+}
+
+void NodeBuiltinMethod::CopyFullScreen(Assembler *as)
+{
+
+    as->Comment("Copy full screen");
+    RequireAddress(m_params[0],"CopyFullscreen", m_op.m_lineNumber);
+    RequireAddress(m_params[1],"CopyFullscreen", m_op.m_lineNumber);
+
+    QString lbl = as->NewLabel("fullcopyloop");
+    QString lbl2 = as->NewLabel("fullcopyloop2");
+
+    as->Asm("ldx #0");
+    as->Label(lbl);
+    for (int i=0;i<3;i++) {
+//        QString shift = "" +QString::number(((24-i)*40)) +" -1 ";
+        QString shift = "$"+QString::number(0x100*i,16);
+        as->ClearTerm();
+        as->Term("lda ");
+        m_params[0]->Build(as);
+        as->Term(" + "+shift+",x", true);
+        as->Term("sta ");
+        m_params[1]->Build(as);
+        as->Term(" + "+shift+",x", true);
+    }
+    as->Asm("dex");
+    as->Asm("bne " + lbl);
+    as->Asm("ldx #232");
+    as->Label(lbl2);
+    QString shift = "$"+QString::number(0x100*3-1,16);
+    as->ClearTerm();
+    as->Term("lda ");
+    m_params[0]->Build(as);
+    as->Term(" + "+shift+",x", true);
+    as->Term("sta ");
+    m_params[1]->Build(as);
+    as->Term(" + "+shift+",x", true);
+
+    as->Asm("dex");
+    as->Asm("bne " + lbl2);
 
 }
 
@@ -2356,6 +2489,13 @@ void NodeBuiltinMethod::InitJoystick(Assembler *as)
     as->Asm("sta joystickleft");
     as->Asm("sta joystickright");
     as->Asm("sta joystickbutton");
+
+    as->Asm("lda #%11111111  ; CIA#1 port A = outputs ");
+    as->Asm("sta $dc03             ");
+
+    as->Asm("lda #%00000000  ; CIA#1 port B = inputs");
+    as->Asm("sta $dc02             ");
+
 
     // UP
     as->Asm("lda #%00000001 ; mask joystick up movement");

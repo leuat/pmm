@@ -25,6 +25,13 @@ public:
         m_position = position;
 
     }
+    NodeVarType(Token t, QStringList data) {
+        m_op = t;
+        value = t.m_value;
+        //m_arrayVarType = TokenType::STRING;
+        m_data = data;
+
+    }
     NodeVarType(Token t,  QString filename, QString position ) {
         m_op = t;
         value = t.m_value;

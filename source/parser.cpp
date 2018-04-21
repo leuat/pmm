@@ -203,7 +203,6 @@ Node *Parser::Variable()
         Token t = m_currentToken;
         if (m_currentToken.m_type==TokenType::STRING) {
            n = String();
-           Eat(m_currentToken.m_type);
            return n;
 
         }
@@ -708,8 +707,34 @@ Node *Parser::ForLoop()
 
 Node *Parser::String()
 {
-    m_currentToken.m_type = TokenType::STRING;
-    NodeString* node = new NodeString(m_currentToken, m_currentToken.m_value);
+
+    if (m_currentToken.m_type==TokenType::STRING) {
+        NodeString* node = new NodeString(m_currentToken,QStringList()<<m_currentToken.m_value);
+        Eat();
+        return node;
+    }
+    if (m_currentToken.m_type!=TokenType::LPAREN)
+        ErrorHandler::e.Error("String declaration must be single string or paranthesis with multi values.", m_currentToken.m_lineNumber);
+    Eat();
+    Token token(TokenType::STRING, m_currentToken.m_value);
+    //m_currentToken.m_type = TokenType::STRING;
+    QStringList lst;
+    bool done = false;
+//    lst<<m_currentToken.m_value;
+    while (m_currentToken.m_type!=TokenType::RPAREN) {
+        if (m_currentToken.m_value=="")
+            m_currentToken.m_value = QString::number(m_currentToken.m_intVal);
+
+        if (m_currentToken.m_value!="")
+            lst<<m_currentToken.m_value;
+        Eat();
+        if (m_currentToken.m_type==TokenType::COMMA)
+            Eat();
+    }
+    Eat(); // RParen
+//    qDebug() <<m_currentToken.getType();
+
+    NodeString* node = new NodeString(token, lst);
     return node;
 }
 
@@ -870,17 +895,27 @@ Node *Parser::TypeSpec()
 
     }
 
-    Eat(m_currentToken.m_type);
+    if (m_currentToken.m_type == TokenType::STRING) {
+        Eat();
+        QStringList initData;
+        if (m_currentToken.m_type == TokenType::EQUALS) {
+            Eat();
+            NodeString* str = (NodeString*)String();
+            initData = str->m_val;
+        }
+        return new NodeVarType(t,initData);
+    }
+
+    Eat();
     QString initVal = "";
     if (m_currentToken.m_type == TokenType::EQUALS) {
-        Eat(m_currentToken.m_type);
-//        qDebug() << m_currentToken.getType() << m_currentToken.m_value << m_currentToken.m_intVal;
+        Eat();
         initVal = m_currentToken.m_value;
         if (initVal=="")
             initVal = QString::number(m_currentToken.m_intVal);
         Eat(m_currentToken.m_type);
-    }
 
+    }
 
     return new NodeVarType(t,initVal);
 
@@ -899,7 +934,6 @@ Node *Parser::BuiltinFunction()
         while (m_currentToken.m_type!=TokenType::RPAREN) {
             if (m_currentToken.m_type==TokenType::STRING) {
                 paramList.append( String() );
-                Eat(TokenType::STRING);
             }
             else {
                 QString pname = m_currentToken.m_value;
