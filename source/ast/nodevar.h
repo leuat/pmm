@@ -94,6 +94,10 @@ public:
 
     }
 
+    virtual void AssignPointer(Assembler *as, QString memoryLocation) {
+
+    }
+
     bool LoadXYVarOrNum(Assembler* as, Node* node, bool isx) {
         NodeVar* var = dynamic_cast<NodeVar*>(node);
         NodeNumber* num = dynamic_cast<NodeNumber*>(node);

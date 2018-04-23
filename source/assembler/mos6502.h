@@ -45,6 +45,11 @@ public:
 
     QMap<QString, MOSOperandCycle> m_opCycles;
 
+    static QString m_defaultZeroPointers;
+
+    QVector<QString> m_zeroPointers;
+    int m_curZeroPointer=0;
+
     QVector<int> m_removeLines;
     bool endTerm() {
         if (m_term.split(" ").count()==2)
@@ -62,6 +67,7 @@ public:
     void EndProgram() override;
     void DeclareArray(QString name, QString type, int count, QStringList lst, QString pos) override;
     void InitMosOpCycles();
+    void InitZeroPointers(QStringList lst) override;
 
     void VarDeclHeader();
     void DeclareVariable(QString name, QString type, QString initval) override;
@@ -78,6 +84,13 @@ public:
     void BinOP(TokenType::Type t) override;
     void Poke(bool start) override;
     void Peek(bool start) override;
+
+    QString PushZeroPointer() override;
+    void PopZeroPointer() override;
+    void PopAllZeroPointers() { m_curZeroPointer=0;}
+    bool CheckZPAvailability();
+
+
 
     QString StoreInTempVar(QString name, QString type="byte") override;
 

@@ -64,7 +64,7 @@ void Parser::InitBuiltinFunctions()
     InitBuiltinFunction(QStringList()<< "moveto", "initmoveto");
     InitBuiltinFunction(QStringList()<< "printstring" << "printnumber", "initprintstring");
     InitBuiltinFunction(QStringList()<< "joystick" , "initjoystick");
-    InitBuiltinFunction(QStringList()<< "zeropage" << "inczp" , "initzeropage");
+//    InitBuiltinFunction(QStringList()<< "zeropage" << "inczp" , "initzeropage");
  }
 
 void Parser::InitBuiltinFunction(QStringList methodName, QString builtinFunctionName)
@@ -907,15 +907,22 @@ Node *Parser::TypeSpec()
     }
 
     Eat();
+    // Is regular single byte / pointer
+
     QString initVal = "";
     if (m_currentToken.m_type == TokenType::EQUALS) {
         Eat();
         initVal = m_currentToken.m_value;
-        if (initVal=="")
+
+        if (initVal=="") {
             initVal = QString::number(m_currentToken.m_intVal);
+        }
+
+
         Eat(m_currentToken.m_type);
 
     }
+   // qDebug() << "Type: " << t.m_value << " " << initVal;
 
     return new NodeVarType(t,initVal);
 

@@ -52,7 +52,7 @@ public:
     }
 
     virtual bool isAddress() { return false;}
-
+    virtual void AssignPointer(Assembler* as, QString memoryLocation) {}
 
     void RequireAddress(Node* n,QString name, int ln) {
         if (!n->isAddress())

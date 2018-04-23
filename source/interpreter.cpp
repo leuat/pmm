@@ -35,7 +35,7 @@ void Interpreter::Interpret()
 
 }
 
-bool Interpreter::Build(Interpreter::Type type, QString project_dir)
+bool Interpreter::Build(Interpreter::Type type, QString project_dir, QStringList zeropages)
 {
     if (m_tree==nullptr) {
         qDebug() << "Interpreter::Build : tree not parsed!";
@@ -48,6 +48,9 @@ bool Interpreter::Build(Interpreter::Type type, QString project_dir)
         m_assembler = new AsmMOS6502();
     if (type==PASCAL)
         m_assembler = new AsmPascal();
+
+
+    m_assembler->InitZeroPointers(zeropages);
 
     m_assembler->m_projectDir = project_dir;
 

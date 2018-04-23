@@ -69,6 +69,8 @@ public:
     QString m_projectDir;
 
 
+
+
     QStringList m_tempVars;
     int m_varDeclEndsLineNumber = 0;
     int m_totalOptimizedLines;
@@ -89,10 +91,16 @@ public:
     int CountCycles(QString s);
     virtual int CountInstructionCycle(QStringList s) {return 0;}
 
+    virtual QString PushZeroPointer() { return ""; }
+    virtual void PopZeroPointer() {}
+    virtual void PopAllZeroPointers() {}
+    virtual void InitZeroPointers(QStringList lst) {}
+
     void VarDeclEnds() {
         if (m_varDeclEndsLineNumber == 0) // Only assign if not previously
             m_varDeclEndsLineNumber = m_source.count();
     }
+    virtual bool CheckZPAvailability() {return false;}
 
     QString getLabel(QString s) {
         return s+m_labelStack[s].m_current;

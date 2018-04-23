@@ -9,6 +9,7 @@
 #include "source/ast/node.h"
 #include "source/ast/nodeproceduredecl.h"
 #include "source/ast/nodevar.h"
+#include "source/ast/nodeassign.h"
 
 class NodeProcedure : public Node {
 public:
@@ -46,9 +47,10 @@ public:
             + QString::number(m_parameters.count()) + ".", m_op.m_lineNumber);
 
         for (int i=0; i<m_parameters.count();i++) {
-            m_parameters[i]->LoadVariable(as);
+            // Assign all variables
             NodeVarDecl* vd = (NodeVarDecl*)m_procedure->m_paramDecl[i];
-            vd->m_varNode->StoreVariable(as);
+            NodeAssign* na = new NodeAssign(vd->m_varNode, m_parameters[i]->m_op, m_parameters[i]);
+            na->Build(as);
         }
 
         as->Asm("jsr " + m_procedure->m_procName);

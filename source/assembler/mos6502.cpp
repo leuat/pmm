@@ -1,10 +1,14 @@
 #include "mos6502.h"
 #include "source/syntax.h"
 
+QString AsmMOS6502::m_defaultZeroPointers = "$02, $04, $08, $16, $0B,$0D, $10, $12, $22,$24, $68";
+
+
 AsmMOS6502::AsmMOS6502() :Assembler()
 {
 //    m_stack["for"] = new Stack();
     InitMosOpCycles();
+
 }
 
 void AsmMOS6502::Program(QString programName)
@@ -77,11 +81,15 @@ void AsmMOS6502::VarDeclHeader()
 
 void AsmMOS6502::DeclareVariable(QString name, QString type, QString initval)
 {
-    QString t = byte;
+    QString t = "";
     if (type.toLower()=="integer")
         t = word;
     if (type.toLower()=="byte")
         t = byte;
+
+    if (t=="")
+        ErrorHandler::e.Error("Cannot declare variable of type: " + type);
+
     Write(name +"\t" + t + "\t"+initval);
 
 }
@@ -208,6 +216,28 @@ void AsmMOS6502::Peek(bool start)
         m_term = "lda ";
    else m_term = "sta ";
 
+}
+
+QString AsmMOS6502::PushZeroPointer()
+{
+    QString zp = m_zeroPointers[m_curZeroPointer];
+    m_curZeroPointer++;
+    return zp;
+}
+
+void AsmMOS6502::PopZeroPointer()
+{
+    if (m_curZeroPointer<=0)
+        ErrorHandler::e.Error("Zero pointer cannot be pushed below zero");
+
+    m_curZeroPointer--;
+}
+
+bool AsmMOS6502::CheckZPAvailability()
+{
+    if (m_curZeroPointer<m_zeroPointers.count())
+        return true;
+    return false;
 }
 
 QString AsmMOS6502::StoreInTempVar(QString name, QString type)
@@ -545,6 +575,8 @@ MOSOperation AsmMOS6502::GetOperand(QStringList s)
 
 int AsmMOS6502::CalculateCycles(MOSOperation op)
 {
+    if (op.operand.contains("\t"))
+        return 0;
     if (!m_opCycles.contains(op.operand)) {
         qDebug() << "Error: could not count operands for type:" << op.operand;
         return 0;
@@ -637,4 +669,21 @@ void AsmMOS6502::InitMosOpCycles()
 
 
 
+}
+
+
+
+void AsmMOS6502::InitZeroPointers(QStringList lst)
+{
+    m_zeroPointers.clear();
+    for (QString s: lst) {
+        QString test=s;
+        test = test.replace("$", "");
+        bool ok = true;
+//        int testVal = test.toInt(&ok);
+  //      if (!ok)
+    //        qDebug() << "NOT OK for " << s << " " << test;
+        if (s!="" && ok)
+            m_zeroPointers.append(s);
+    }
 }

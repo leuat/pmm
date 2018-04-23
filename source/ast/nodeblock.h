@@ -50,6 +50,17 @@ public:
 
     }
 
+    void PopZeroPointers(Assembler* as) {
+        for (Node* n: m_decl) {
+            NodeVarDecl* nv = dynamic_cast<NodeVarDecl*>(n);
+            if (nv!=nullptr) {
+                for (int i=0;i<nv->m_pushedPointers;i++)
+                    as->PopZeroPointer();
+            }
+        }
+
+    }
+
    QString Build(Assembler* as) {
        //as->VarDeclHeader();
        Node::Build(as);
@@ -98,6 +109,9 @@ public:
         as->PopCounter(m_op.m_lineNumber-1);
         as->PopBlock(m_currentLineNumber);
 
+        PopZeroPointers(as);
+
+//        as->PopAllZeroPointers();
 
 //        qDebug() << "ln:" << m_currentLineNumber;
         //qDebug() << "Adding at linenumber: " << m_op.m_lineNumber << "  cycles " << m_cycleCounter;

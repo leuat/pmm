@@ -17,6 +17,8 @@ public:
     Node* m_typeNode;
     SidFile sid;
 
+    int m_pushedPointers = 0;
+
     NodeVarDecl(Node* varNode, Node* typeNode) {
         m_varNode = varNode;
         m_typeNode = typeNode;
@@ -93,6 +95,24 @@ public:
 
     }
 
+    void DeclarePointer(Assembler*  as) {
+
+        if (!as->CheckZPAvailability())
+            ErrorHandler::e.Error("Could not allocate more free pointers! Please free some up, or declare more in the settings page. ", m_op.m_lineNumber);
+
+        NodeVarType* t = (NodeVarType*)m_typeNode;
+        QString initVal = t->initVal;
+
+        if (initVal=="") {
+            initVal = as->PushZeroPointer();
+            m_pushedPointers++;
+        }
+
+        NodeVar* v = (NodeVar*)m_varNode;
+        as->Label(v->value + "\t= " + initVal);
+
+    }
+
     QString Build(Assembler* as) {
         Node::Build(as);
 
@@ -104,19 +124,27 @@ public:
             as->DeclareArray(v->value, t->m_arrayVarType.m_value, t->m_op.m_intVal, t->m_data, t->m_position);
             //qDebug() << "IS: " << TokenType::types[as->m_symTab->Lookup(v->value)->getTokenType()];
             as->m_symTab->Lookup(v->value, m_op.m_lineNumber)->m_type="address";
+            return "";
         }
-        else
-            if (t->m_op.m_type==TokenType::STRING) {
-                as->DeclareString(v->value, t->m_data);
+        if (t->m_op.m_type==TokenType::STRING) {
+            as->DeclareString(v->value, t->m_data);
+            return "";
+        }
+        if (t->m_op.m_type==TokenType::INCBIN) {
+            IncBin(as);
+            return "";
+        }
+        if (t->m_op.m_type==TokenType::INCSID) {
+            IncSid(as);
+            return "";
+        }
+        if (t->m_op.m_type==TokenType::POINTER) {
+            DeclarePointer(as);
+            return "";
+        }
 
-            }
-        else
-            if (t->m_op.m_type==TokenType::INCBIN)
-                IncBin(as);
-            else if (t->m_op.m_type==TokenType::INCSID)
-                IncSid(as);
-            else
-                as->DeclareVariable(v->value, t->value, t->initVal);
+
+        as->DeclareVariable(v->value, t->value, t->initVal);
         return "";
     }
 

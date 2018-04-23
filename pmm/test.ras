@@ -2,72 +2,43 @@ program Tutorial6;
 var
 	x,a, i,k: byte;
 	
-	colors1 : array[8] of byte = (0,1,2,3,4,5,6,7);
+	colors1 : array[8] of byte = (0,6,14,7,0,6,14,7);
 	colors2 : array[8] of byte = (0,1,5,3,7,5,9,2);
 	
+	d:pointer = $01;
+
 	b:byte;
 	
 	
+procedure Test( cols, cols2: pointer ; index: byte);
+begin
+
+	SCREEN_BG_COL:=cols[i];
 	
-procedure Rend();
-begin
-moveto(6, 24, $D8);
-//zeropage1 := screenmemory;
-end;
+end;	
 
-
-procedure kake2();
+procedure Test2( cols3, cols4: pointer ; index5: byte);
 begin
+
+	SCREEN_BG_COL:=cols[i];
 	
-	k:=10;
-end;
+end;	
 
-procedure kake();
-begin
-	
-	k:=10;
-end;
 
 begin
-	while 1<>2 do begin
-		
-		for k:=0 to 255 do
-			a:=k;
-		
-		if k:=0 then k:=1;
-		if k:=0 then k:=1;
-		while k=1 do begin
-			if k=0 then begin
-				a:=b;
-			end;
-			if k:=0 then k:=1;
-			
+	i:=0;
+	k:=7;
+	while 1=1 do begin
+		waitforraster(1);
+		dec(k);
+		if k>128 then begin
+			k:=15;
+			i:=(i+1)&7;
 			
 		end;
-		
-		
-		poke(SCREEN_BG_COL, 0, a);
-		PlaySound(SID_CHANNEL1,
-		15,  // Volume
-		k,  // Hi byte frequency
-		0*16+0,  // Attack voice 1
-		5*16 + 9,   // Sustain = 16*15 + release=6
-		1 +SID_TRI,  // Waveform
-		SID_TRI);  // waveform
-		a:=a+1;
-		
-		
-		for i:=0 to 128 do begin
-			k:=k+1;
-			k:=k+1;
-		end;
-		if k=1 then
-			k:=2;
-		
-		waitforraster(255);
-		waitforraster(255);
-		k:=k+1;
-		
+		asm(";crash");
+		Test(colors1, i, i);
+		waitforraster(200);
 	end;
 end.
 
