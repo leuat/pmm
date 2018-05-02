@@ -181,6 +181,7 @@ Node *Parser::Variable()
         if (s->m_type=="INTEGER") m_currentToken.m_type=TokenType::INTEGER;
         if (s->m_type=="BYTE") m_currentToken.m_type=TokenType::BYTE;
         if (s->m_type=="STRING") m_currentToken.m_type=TokenType::STRING;
+        if (s->m_type=="CSTRING") m_currentToken.m_type=TokenType::CSTRING;
 
         Token t = m_currentToken;
         Eat(m_currentToken.m_type);
@@ -201,7 +202,7 @@ Node *Parser::Variable()
     }
     else {
         Token t = m_currentToken;
-        if (m_currentToken.m_type==TokenType::STRING) {
+        if (m_currentToken.m_type==TokenType::STRING || m_currentToken.m_type==TokenType::CSTRING) {
            n = String();
            return n;
 
@@ -708,19 +709,21 @@ Node *Parser::ForLoop()
 Node *Parser::String()
 {
 
-    if (m_currentToken.m_type==TokenType::STRING) {
-        NodeString* node = new NodeString(m_currentToken,QStringList()<<m_currentToken.m_value);
+    if (m_currentToken.m_type==TokenType::STRING || m_currentToken.m_type==TokenType::CSTRING) {
+        NodeString* node = new NodeString(m_currentToken,QStringList()<<m_currentToken.m_value,m_currentToken.m_type==TokenType::CSTRING);
         Eat();
         return node;
     }
     if (m_currentToken.m_type!=TokenType::LPAREN)
         ErrorHandler::e.Error("String declaration must be single string or paranthesis with multi values.", m_currentToken.m_lineNumber);
+
     Eat();
     Token token(TokenType::STRING, m_currentToken.m_value);
     //m_currentToken.m_type = TokenType::STRING;
     QStringList lst;
     bool done = false;
 //    lst<<m_currentToken.m_value;
+    int max=0;
     while (m_currentToken.m_type!=TokenType::RPAREN) {
         if (m_currentToken.m_value=="")
             m_currentToken.m_value = QString::number(m_currentToken.m_intVal);
@@ -730,11 +733,13 @@ Node *Parser::String()
         Eat();
         if (m_currentToken.m_type==TokenType::COMMA)
             Eat();
+        if (max++>10000)
+            ErrorHandler::e.Error("String error!", token.m_lineNumber);
     }
     Eat(); // RParen
 //    qDebug() <<m_currentToken.getType();
 
-    NodeString* node = new NodeString(token, lst);
+    NodeString* node = new NodeString(token, lst, token.m_type==TokenType::CSTRING);
     return node;
 }
 
@@ -895,7 +900,7 @@ Node *Parser::TypeSpec()
 
     }
 
-    if (m_currentToken.m_type == TokenType::STRING) {
+    if (m_currentToken.m_type == TokenType::STRING || m_currentToken.m_type==TokenType::CSTRING) {
         Eat();
         QStringList initData;
         if (m_currentToken.m_type == TokenType::EQUALS) {

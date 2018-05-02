@@ -37,6 +37,7 @@ void Syntax::SetupReservedWords()
     reservedWords.append(Token(TokenType::BYTE,"BYTE"));
     reservedWords.append(Token(TokenType::INCBIN,"INCBIN"));
     reservedWords.append(Token(TokenType::STRING,"STRING"));
+    reservedWords.append(Token(TokenType::CSTRING,"CSTRING"));
     reservedWords.append(Token(TokenType::ASM,"ASM"));
     reservedWords.append(Token(TokenType::INCSID,"INCSID"));
     reservedWords.append(Token(TokenType::INTERRUPT,"INTERRUPT"));
@@ -116,6 +117,9 @@ void Syntax::SetupBuiltinFunctions()
 
 
 
+    builtInFunctions["wait"] = (BuiltInFunction(
+    "wait",  QList<BuiltInFunction::Type>() << BuiltInFunction::Type::INTEGER, true));
+
     builtInFunctions["initrandom"] = (BuiltInFunction(
                                 "initrandom",  QList<BuiltInFunction::Type>(), true));
 
@@ -132,6 +136,7 @@ void Syntax::SetupBuiltinFunctions()
     builtInFunctions["initmoveto"] = BuiltInFunction(
                 "initmoveto",
                 QList<BuiltInFunction::Type>());
+
 
     builtInFunctions["initeightbitmul"] = BuiltInFunction(
                 "initeightbitmul",
@@ -293,6 +298,7 @@ void Syntax::SetupBuiltinFunctions()
                 << BuiltInFunction::Type::INTEGER
                 << BuiltInFunction::Type::INTEGER
                 << BuiltInFunction::Type::INTEGER
+                << BuiltInFunction::Type::INTEGER
                 );
     builtInFunctions["copyfullscreen"] = BuiltInFunction(
                 "copyfullscreen",
@@ -415,10 +421,6 @@ void Syntax::SetupBuiltinFunctions()
                 QList<BuiltInFunction::Type>()
                 );
 */
-    builtInFunctions["kernalinterrupt"] = BuiltInFunction(
-                "kernalinterrupt",
-                QList<BuiltInFunction::Type>()
-                );
 
     builtInFunctions["loop"] = BuiltInFunction(
                 "loop",

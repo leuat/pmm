@@ -8,6 +8,75 @@ AsmMOS6502::AsmMOS6502() :Assembler()
 {
 //    m_stack["for"] = new Stack();
     InitMosOpCycles();
+    InitCStrings();
+}
+
+void AsmMOS6502::InitCStrings()
+{
+    m_cstr.clear();
+    m_cstr[" "] = CStringItem("32", 32,32);
+    m_cstr["!"] = CStringItem("!", 33,33);
+    m_cstr[""""] = CStringItem("""", 34,34);
+    m_cstr["#"] = CStringItem("#", 35,35);
+    m_cstr["$"] = CStringItem("$", 36,36);
+    m_cstr["%"] = CStringItem("%", 37,37);
+    m_cstr["&"] = CStringItem("&", 38,38);
+    m_cstr["'"] = CStringItem("'",39 ,39);
+    m_cstr["("] = CStringItem("(",40 ,40);
+    m_cstr[")"] = CStringItem(")",41 ,41);
+    m_cstr["*"] = CStringItem("*", 42,42);
+    m_cstr["+"] = CStringItem("+", 43,43);
+    m_cstr[","] = CStringItem(",", 44,44);
+    m_cstr["-"] = CStringItem("-", 45,45);
+    m_cstr["."] = CStringItem(".",46 ,46);
+    m_cstr["/"] = CStringItem("/", 47,47);
+    m_cstr["0"] = CStringItem("0", 48,48);
+    m_cstr["1"] = CStringItem("1", 49,49);
+    m_cstr["2"] = CStringItem("2", 50,50);
+    m_cstr["3"] = CStringItem("3", 51,51);
+    m_cstr["4"] = CStringItem("4", 52,52);
+    m_cstr["5"] = CStringItem("5", 53,53);
+    m_cstr["6"] = CStringItem("6", 54,54);
+    m_cstr["7"] = CStringItem("7", 55,55);
+    m_cstr["8"] = CStringItem("8", 56,56);
+    m_cstr["9"] = CStringItem("9", 57,57);
+    m_cstr[":"] = CStringItem(":", 58,58);
+    m_cstr[";"] = CStringItem(";", 59,59);
+    m_cstr["<"] = CStringItem("<", 60,60);
+    m_cstr["="] = CStringItem("=", 61,61);
+    m_cstr[">"] = CStringItem(">", 62,62);
+    m_cstr["?"] = CStringItem("?", 63,63);
+    m_cstr["@"] = CStringItem("@", 64,64 -64);
+    m_cstr["A"] = CStringItem("A", 65,65-64);
+    m_cstr["B"] = CStringItem("B", 66,66-64);
+    m_cstr["C"] = CStringItem("C", 67,67-64);
+    m_cstr["D"] = CStringItem("D", 68,68-64);
+    m_cstr["E"] = CStringItem("E", 69,69-64);
+    m_cstr["F"] = CStringItem("F", 70,70-64);
+    m_cstr["G"] = CStringItem("G", 71,71-64);
+    m_cstr["H"] = CStringItem("H", 72,72-64);
+    m_cstr["I"] = CStringItem("I", 73,73-64);
+    m_cstr["J"] = CStringItem("J", 74,74-64);
+    m_cstr["K"] = CStringItem("K", 75,75-64);
+    m_cstr["L"] = CStringItem("L", 76,76-64);
+    m_cstr["M"] = CStringItem("M", 77,77-64);
+    m_cstr["N"] = CStringItem("N", 78,78-64);
+    m_cstr["O"] = CStringItem("O", 79,79-64);
+    m_cstr["P"] = CStringItem("P", 80,80-64);
+    m_cstr["Q"] = CStringItem("Q", 81,81-64);
+    m_cstr["R"] = CStringItem("R", 82,82-64);
+    m_cstr["S"] = CStringItem("S", 83,83-64);
+    m_cstr["T"] = CStringItem("T", 84,84-64);
+    m_cstr["U"] = CStringItem("U", 85,85-64);
+    m_cstr["V"] = CStringItem("V", 86,86-64);
+    m_cstr["W"] = CStringItem("W", 87,87-64);
+    m_cstr["X"] = CStringItem("X", 88,88-64);
+    m_cstr["Y"] = CStringItem("Y", 89,89-64);
+    m_cstr["Z"] = CStringItem("Z", 90,90-64);
+    m_cstr["["] = CStringItem("",91, 91-64);
+    m_cstr["£"] = CStringItem("",92,92-64);
+    m_cstr["]"] = CStringItem("",93,93-64);
+//    m_cstr[""] = CStringItem("", ,);
 
 }
 
@@ -100,6 +169,66 @@ void AsmMOS6502::DeclareString(QString name, QStringList initval)
     m_term="";
 }
 
+void AsmMOS6502::DeclareCString(QString name, QStringList initVal)
+{
+    Write(name + "\t");
+    bool done=false;
+    int curIdx=0;
+    int curLin = 0;
+    int curOut = 0;
+    QString s ="\tdc.b\t";
+    if (initVal.count()==0) {
+        Write(s);
+        return;
+    }
+    qDebug() << initVal.count();
+    QString curStr = initVal[curLin];
+    while (!done) {
+
+        // First check if current is a pure number
+
+/*        if (curIdx==0) {
+            QString cc = curStr[curIdx];
+            if (cc.count()<=3 && Syntax::s.isDigitHex(cc)) {
+                s+=cc + ", ";
+                curIdx = cc.length();
+            }
+
+        }*/
+        if (curIdx<curStr.length()) {
+            QString c = curStr[curIdx].toUpper();
+            qDebug() << c;
+            if (m_cstr.contains(c)) {
+                uchar sc = m_cstr[c].m_screenCode;
+                s+="$"+QString::number(sc,16);
+                if (curOut++<8)
+                    s+=", ";
+                else {
+                    curOut=0;
+                    Write(s);
+                    s="\tdc.b\t";
+                }
+            }
+        }
+        curIdx++;
+        if (curIdx>=curStr.length()) {
+            curIdx=0;
+            curLin++;
+            qDebug() << curLin;
+            if (curLin<initVal.count()) {
+                curStr=initVal[curLin];
+                qDebug() << curStr;
+            }
+            else done=true;
+        }
+
+
+    }
+    if (curOut!=0)
+        Write(s + "0");
+    else Write("\tdc.b\t0 ");
+}
+
 void AsmMOS6502::BeginBlock()
 {
     Nl();
@@ -150,20 +279,22 @@ QString AsmMOS6502::String(QStringList lst)
 {
 
     QString res;
+    QString mark = "dc.b";
+
     for (QString s:lst) {
         bool ok=false;
         uchar val = s.toInt(&ok);
         if (!ok)
-            res=res+"\tdc.b\t" +"\"" + s + "\"\n";
+            res=res+"\t"+mark+"\t" +"\"" + s + "\"\n";
 
-        else res=res + "\tdc.b\t"+QString::number(val) + "\n";
+        else res=res + "\t"+mark+"\t"+QString::number(val) + "\n";
 
 /*        if (s!=lst.last())
             res=res + "\n";
 */
 
     }
-    res=res + "\tdc.b\t0";
+    res=res + "\t"+mark+"\t0";
     m_term +=res;
     return res;
 }

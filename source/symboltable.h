@@ -27,6 +27,8 @@ public:
             return TokenType::BYTE;
         if (m_type.toLower()=="string")
             return TokenType::STRING;
+        if (m_type.toLower()=="cstring")
+            return TokenType::CSTRING;
         return TokenType::NADA;
     }
     Symbol(QString name, QString type="") {

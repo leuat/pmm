@@ -130,6 +130,10 @@ public:
             as->DeclareString(v->value, t->m_data);
             return "";
         }
+        if (t->m_op.m_type==TokenType::CSTRING) {
+            as->DeclareCString(v->value, t->m_data);
+            return "";
+        }
         if (t->m_op.m_type==TokenType::INCBIN) {
             IncBin(as);
             return "";

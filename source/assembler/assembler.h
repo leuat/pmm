@@ -125,6 +125,7 @@ public:
     virtual void VarDeclHeader() = 0;
     virtual void DeclareVariable(QString name, QString type, QString initVal)=0;
     virtual void DeclareString(QString name, QStringList initVal) {}
+    virtual void DeclareCString(QString name, QStringList initVal) {}
     virtual void DeclareArray(QString name, QString type, int count, QStringList lst, QString position) {}
     virtual void BeginBlock() = 0;
     virtual void EndBlock() = 0;

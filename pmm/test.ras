@@ -1,7 +1,7 @@
 program Tutorial6;
 var
 	x,a, i,k: byte;
-	
+	p : byte;
 	colors1 : array[8] of byte = (0,6,14,7,0,6,14,7);
 	colors2 : array[8] of byte = (0,1,5,3,7,5,9,2);
 	
@@ -9,7 +9,9 @@ var
 
 	b:byte;
 	
-	
+	text: cstring =("HALLA", " BALLA", " C", " DA", WTF);	
+
+
 procedure Test( cols, cols2: pointer ; index: byte);
 begin
 
@@ -28,68 +30,27 @@ end;
 begin
 	i:=0;
 	k:=7;
+
+	SPRITE_BITMASK:=$FF;
+	for i:=0 to 8 do begin
+		p:=i*30 + 50;
+		spritepos(p, 100, i);
+		SPRITE_COLOR[i]:=1;
+	end;
+
+	p:=text[0];
+	i:=0;
+	moveto(0, 12, $04);
+	asm(";crassh");
+	while p<>0 do begin
+		screenmemory[i]:=p;
+		inc(i);
+		p:=text[i];
+	end;
+
 	while 1=1 do begin
 		waitforraster(1);
-		dec(k);
-		if k>128 then begin
-			k:=15;
-			i:=(i+1)&7;
-			
-		end;
-		asm(";crash");
-		Test(colors1, i, i);
 		waitforraster(200);
 	end;
 end.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

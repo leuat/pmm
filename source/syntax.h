@@ -84,6 +84,11 @@ public:
         return digit.contains(s);
 
     }
+    bool isDigitHex(QString s) {
+        // Check if HEX
+        return digitAll.contains(s);
+
+    }
     bool isAlnum(QString s) {
         return alnum.contains(s.toLower());
     }

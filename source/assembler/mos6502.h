@@ -3,6 +3,21 @@
 
 #include "source/assembler/assembler.h"
 
+class CStringItem {
+public:
+    uchar m_pscii, m_screenCode;
+    QString m_char;
+    CStringItem(QString ch, uchar pscii, uchar screenCode) {
+        m_char=ch;
+        m_pscii = pscii;
+        m_screenCode = screenCode;
+    }
+    CStringItem() {
+
+    }
+};
+
+
 
 class MOSOperandCycle {
 public:
@@ -46,6 +61,8 @@ public:
     QMap<QString, MOSOperandCycle> m_opCycles;
 
     static QString m_defaultZeroPointers;
+    QMap<QString, CStringItem> m_cstr;
+
 
     QVector<QString> m_zeroPointers;
     int m_curZeroPointer=0;
@@ -63,6 +80,10 @@ public:
     //int m_lblIdx = 0;
     QMap<QString, int> m_lblIdx;
 
+
+    void InitCStrings();
+
+
     void Program(QString name) override;
     void EndProgram() override;
     void DeclareArray(QString name, QString type, int count, QStringList lst, QString pos) override;
@@ -72,6 +93,7 @@ public:
     void VarDeclHeader();
     void DeclareVariable(QString name, QString type, QString initval) override;
     void DeclareString(QString name, QStringList initval) override;
+    void DeclareCString(QString name, QStringList initval) override;
 
     void BeginBlock() override;
     void EndBlock() override;

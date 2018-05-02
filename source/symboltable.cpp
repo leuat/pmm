@@ -95,6 +95,7 @@ void SymbolTable::InitBuiltins()
     Define(new BuiltInTypeSymbol("REAL",""));
     Define(new BuiltInTypeSymbol("BYTE",""));
     Define(new BuiltInTypeSymbol("STRING",""));
+    Define(new BuiltInTypeSymbol("CSTRING",""));
     Define(new BuiltInTypeSymbol("POINTER",""));
     Define(new BuiltInTypeSymbol("ARRAY",""));
     Define(new BuiltInTypeSymbol("INCBIN",""));

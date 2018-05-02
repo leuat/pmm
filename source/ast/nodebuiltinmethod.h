@@ -83,6 +83,7 @@ public:
     void CloseIRQ(Assembler* as);
     void DisableNMI(Assembler* as);
     void KeyPressed(Assembler* as);
+    void Wait(Assembler* as);
 
     QString BitShiftX(Assembler* as);
 

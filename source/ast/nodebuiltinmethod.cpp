@@ -173,6 +173,9 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
     if (m_procName.toLower()=="inc")
         IncDec(as, "inc");
 
+    if (m_procName.toLower()=="wait")
+        Wait(as);
+
     if (m_procName.toLower()=="dec")
         IncDec(as, "dec");
 
@@ -862,6 +865,7 @@ void NodeBuiltinMethod::SetSpritePos(Assembler *as)
         uchar v = 1 << (uchar)spriteNum->m_val;
         as->Asm("ldx #" +QString::number((int)spriteNum->m_val*2) );
         LoadVar(as, 0);
+        //as->Asm("tax");
         as->Asm("sta $D000,x");
         m_params[0]->Build(as);
         as->Term("+1",true);
@@ -1345,6 +1349,16 @@ as->Label(lbl2);
 
 }
 
+void NodeBuiltinMethod::Wait(Assembler *as)
+{
+    as->Comment("Wait");
+    LoadVar(as,0,"","ldx ");
+
+    as->Asm("dex");
+    as->Asm("bne *-1");
+
+}
+
 QString NodeBuiltinMethod::BitShiftX(Assembler *as)
 {
     QString lblshiftbit = as->NewLabel("shiftbit");
@@ -1460,6 +1474,7 @@ void NodeBuiltinMethod::IncZp(Assembler *as)
 
 void NodeBuiltinMethod::IncScreenX(Assembler *as)
 {
+    ErrorHandler::e.Error("incscreenx is deprecated. Please use inczp(screenmemory, val) instead", m_op.m_lineNumber);
     as->m_labelStack["incscreenx"].push();
     QString lbl = as->getLabel("incscreenx");
 
@@ -2077,7 +2092,14 @@ void NodeBuiltinMethod::CopyHalfScreen(Assembler *as)
     if (inverted==nullptr)
         ErrorHandler::e.Error("CopyImageColorData : parameter 4 must be a constant number!");
 
-    as->Asm("ldx #40");
+    NodeNumber *invertedx = dynamic_cast<NodeNumber*>(m_params[4]);
+    if (invertedx==nullptr)
+        ErrorHandler::e.Error("CopyImageColorData : parameter 5 must be a constant number!");
+
+    if (invertedx->m_val==1)
+        as->Asm("ldx #40");
+    else
+        as->Asm("ldx #00");
     as->Label(lbl);
 
 
@@ -2099,7 +2121,12 @@ void NodeBuiltinMethod::CopyHalfScreen(Assembler *as)
         as->Term(" + "+shift+",x", true);
     }
     // Afterwards, copy last 25 bytes
-    as->Asm("dex");
+    if (invertedx->m_val==1)
+        as->Asm("dex");
+    else {
+        as->Asm("inx");
+        as->Asm("cpx #40");
+    }
     as->Asm("bne "+lbl);
 
     // Param 0: from
