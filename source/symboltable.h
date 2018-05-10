@@ -15,6 +15,7 @@ public:
     QString m_type;
     PVar* m_value = nullptr;
     TokenType::Type getTokenType() {
+        //qDebug() << "gettokentype: " <<m_name <<" : "<<m_type;
         if (m_type.toLower()=="integer")
             return TokenType::INTEGER;
         if (m_type.toLower()=="float")
@@ -131,21 +132,29 @@ public:
 
     Symbol* Lookup(QString name, int lineNumber, bool isAddress=false) {
 //        name = name.toUpper();
-
         if (m_constants.contains(name.toUpper())) {
             return m_constants[name.toUpper()];
         }
         // Create address on the fly
-         if (isAddress || name.startsWith("$")) {
-            Symbol* s = new Symbol(name.toUpper(), "address");
-            m_symbols[name.toUpper()] = s;
+
+        if (name.startsWith("$")) name=name.toUpper();
+        qDebug() <<name << " exists: " <<m_symbols.contains(name) ;
+
+         if ((isAddress || name.startsWith("$")) && !m_symbols.contains(name) ) {
+            qDebug() << "Creating new symbol:" << name;
+            Symbol* s = new Symbol(name, "address");
+            m_symbols[name] = s;
             return s;
         }
+
 
         if (!m_symbols.contains(name)) {
             ErrorHandler::e.Error("Could not find variable '" + name + "'.", lineNumber);
             return nullptr;
         }
+        //qDebug() << name << " " << m_symbols[name]->m_type;
+        qDebug() << "FOUND "<< name;
+
         return m_symbols[name];
     }
     Symbol* LookupVariables(QString name, int lineNumber) {

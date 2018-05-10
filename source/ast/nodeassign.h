@@ -73,6 +73,9 @@ public:
         if (bVar==nullptr && !m_right->isPureNumeric())
             ErrorHandler::e.Error("Error assigning pointer: right-hand must be variable or number", m_op.m_lineNumber);
 
+
+
+
         if (bVar!=nullptr) {
 
             if (bVar->getType(as)!=TokenType::POINTER) {
@@ -204,12 +207,16 @@ public:
     }
 
     QString AssignVariable(Assembler* as) {
+
         NodeVar* v = (NodeVar*)dynamic_cast<const NodeVar*>(m_left);
+//        qDebug() << "AssignVariable: " <<v->value << " : " << TokenType::getType( v->getType(as));
+
         NodeNumber* num = (NodeNumber*)dynamic_cast<const NodeNumber*>(m_left);
         if (v==nullptr && num == nullptr)
            ErrorHandler::e.Error("Left value not variable or memory address! ");
         if (num!=nullptr && num->getType(as)!=TokenType::ADDRESS)
            ErrorHandler::e.Error("Left value must be either variable or memory address");
+
 
 
         if (num!=nullptr) {
@@ -226,6 +233,7 @@ public:
   //          ErrorHandler::e.Error("Could not find variable :" + v->value,m_op.m_lineNumber);
 
         TokenType::Type t = s->getTokenType();
+        //qDebug() << TokenType::getType(m_left->getType(as)) << " " << v->m_expr;
 
         if (m_left->getType(as)==TokenType::POINTER && v->m_expr==nullptr) {
             AssignPointer(as);

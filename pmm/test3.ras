@@ -1,15 +1,36 @@
 program test3;
 var
-	index, b,i : byte;
+	i, time : byte;
 	c:array[8] of byte;
+	
+	P: pointer;
+
+@define memPos "$2000"
 
 
+procedure Raster();
+begin
+	inc(time);
+	i:=sine[time]/16;
+	P:=$0400-10;
+	inczp(P,i);
+	
+	memcpy(^@memPos, 0, P,200);
+	
+
+end;
 
 begin
 	asm(";crash");
-	for b:=1 to 3  do 
-	for i:=0 to 3 do begin
-		writeln(i,0);
+	P:=$1200;
 
-	end;
+	SCREEN_BG_COL:=BLACK;
+	clearscreen($20, $4400);
+	memcpy(^$0400, 0, ^@memPos,200);
+	clearscreen($20, $0400);
+	while 1<>2 do
+		Raster();
+
+
+
 end.

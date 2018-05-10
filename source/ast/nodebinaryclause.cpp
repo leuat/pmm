@@ -10,7 +10,7 @@ void NodeBinaryClause::BuildToCmp(Assembler *as)
     QString b="";
 
     NodeVar* varb = dynamic_cast<NodeVar*>(m_right);
-    if (varb!=nullptr)
+    if (varb!=nullptr && varb->m_expr==nullptr)
         b = varb->value;
 
     NodeNumber* numb = dynamic_cast<NodeNumber*>(m_right);

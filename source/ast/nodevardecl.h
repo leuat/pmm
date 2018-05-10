@@ -120,6 +120,8 @@ public:
 
         NodeVar* v = (NodeVar*)m_varNode;
         NodeVarType* t = (NodeVarType*)m_typeNode;
+
+
         if (t->m_op.m_type==TokenType::ARRAY) {
             as->DeclareArray(v->value, t->m_arrayVarType.m_value, t->m_op.m_intVal, t->m_data, t->m_position);
             //qDebug() << "IS: " << TokenType::types[as->m_symTab->Lookup(v->value)->getTokenType()];
@@ -168,6 +170,7 @@ public:
          //       ErrorHandler::e.Error("Variable '" + varName +"' is already defined!",m_op.m_lineNumber);
 
 
+
         Symbol* typeSymbol = symTab->Lookup(typeName, m_op.m_lineNumber);
 //        if (typeSymbol==nullptr)
   //          ErrorHandler::e.Error("Could not find type symbol :" + typeName,m_op.m_lineNumber);
@@ -179,6 +182,7 @@ public:
 
         Symbol* varSymbol = new VarSymbol(varName, typeSymbol->m_name);
         symTab->Define(varSymbol);
+       // qDebug() << "Nodevardecl:ExecuteSym " << varName << " " << varSymbol->m_type;
 
     }
 
