@@ -5,6 +5,8 @@ var
 	
 	P: pointer;
 
+	b:incbin("charsets/intro.bin", "$2000");
+
 @define memPos "$2000"
 
 
@@ -20,16 +22,22 @@ begin
 
 end;
 
+procedure test();
+begin
+
+end;
+
 begin
 	asm(";crash");
 	P:=$1200;
-
+//	h:=10;
 	SCREEN_BG_COL:=BLACK;
 	clearscreen($20, $4400);
 	memcpy(^$0400, 0, ^@memPos,200);
 	clearscreen($20, $0400);
-	while 1<>2 do
+	while 1<>2 do begin
 		Raster();
+	end;
 
 
 

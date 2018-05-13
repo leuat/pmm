@@ -138,9 +138,10 @@ public:
         // Create address on the fly
 
         if (name.startsWith("$")) name=name.toUpper();
-        qDebug() <<name << " exists: " <<m_symbols.contains(name) ;
+//        qDebug() <<name << " exists: " <<m_symbols.contains(name) ;
 
-         if ((isAddress || name.startsWith("$")) && !m_symbols.contains(name) ) {
+        // if ((isAddress || name.startsWith("$")) && !m_symbols.contains(name) ) {
+             if ((name.startsWith("$")) && !m_symbols.contains(name) ) {
             qDebug() << "Creating new symbol:" << name;
             Symbol* s = new Symbol(name, "address");
             m_symbols[name] = s;
@@ -153,7 +154,7 @@ public:
             return nullptr;
         }
         //qDebug() << name << " " << m_symbols[name]->m_type;
-        qDebug() << "FOUND "<< name;
+//        qDebug() << "FOUND "<< name;
 
         return m_symbols[name];
     }

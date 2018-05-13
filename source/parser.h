@@ -79,7 +79,7 @@ public:
 
     Node* Conditional(bool isWhileLoop=false);
 //    QVector<Node*> Procedure();
-    QVector<Node*> Declarations();
+    QVector<Node*> Declarations(bool isMain);
     QVector<Node*> VariableDeclarations();
     Node* TypeSpec();
     Node* BuiltinFunction();

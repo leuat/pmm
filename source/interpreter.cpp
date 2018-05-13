@@ -61,12 +61,12 @@ bool Interpreter::Build(Interpreter::Type type, QString project_dir, QStringList
             HandleError(e,"Error during build");
             return false;
          }
-        try {
+ /*       try {
            // m_tree->ExecuteSym(m_assembler->m_symTab);
         } catch (FatalErrorException e) {
             HandleError(e,"Error during symbolic check");
             return false;
-    }
+    }*/
     m_assembler->Connect();
     m_assembler->Optimise();
     CleanupCycleLinenumbers();
@@ -154,13 +154,12 @@ void Interpreter::HandleError(FatalErrorException fe, QString e)
     fe.file=file;
 
     msg +="\nFatal error " + line;
-    if (linenr<m_parser->m_lexer->m_lines.count())
+    if (linenr<m_parser->m_lexer->m_lines.count() && linenr>=0)
         msg+="\nSource: " + m_parser->m_lexer->m_lines[linenr];
     msg+="\n\nMessage: ";
     Pmm::Data::d.lineNumber = linenr+1;
 
     recentError = fe;
-
     ErrorHandler::e.CatchError(fe, e + msg);
 
 }

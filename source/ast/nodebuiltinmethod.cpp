@@ -108,11 +108,18 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
 
     if (m_procName.toLower() =="setmulticolormode") {
         as->Comment("Multicolor mode");
-        as->Asm("lda #$18");
+        as->Asm("lda #16"); // 0000 0000
+        as->Asm("ora $d016");
+        as->Asm("sta $d016");
+    }
+    if (m_procName.toLower() =="setregularcolormode") {
+        as->Comment("Regularcolor mode");
+        as->Asm("lda $d016");
+        as->Asm("and #%11101111");
         as->Asm("sta $d016");
 
-
     }
+
     if (m_procName.toLower()=="hidebordery") {
         as->Comment("Hide y border");
         as->Asm("lda $d011");
@@ -159,13 +166,6 @@ QString NodeBuiltinMethod::Build(Assembler *as) {
         as->Asm("sta $d011");
     }
 
-    if (m_procName.toLower() =="setregularcolormode") {
-        as->Comment("Regularcolor mode");
-        as->Asm("lda $d016");
-        as->Asm("and #%11101111");
-        as->Asm("sta $d016");
-
-    }
 
     if (m_procName.toLower()=="waitnoraster")
         WaitNoRasterLines(as);
@@ -1194,10 +1194,10 @@ void NodeBuiltinMethod::IncDec(Assembler *as, QString cmd)
 
     }
     if (n==nullptr && v==nullptr)
-        ErrorHandler::e.Error("Inc / Dec requires an address / variable");
+        ErrorHandler::e.Error("Inc / Dec requires an address / variable", m_op.m_lineNumber);
 
     if (n!=nullptr && n->getType(as)!=TokenType::ADDRESS)
-        ErrorHandler::e.Error("Inc / Dec requires an address / variable");
+        ErrorHandler::e.Error("Inc / Dec requires an address / variable", m_op.m_lineNumber);
 
     as->ClearTerm();
     as->Term(cmd + " ");

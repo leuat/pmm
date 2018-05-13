@@ -636,7 +636,7 @@ Node *Parser::Block(bool useOwnSymTab)
 */
     if (m_currentToken.m_type==TokenType::PROCEDURE || m_currentToken.m_type==TokenType::INTERRUPT)
         return nullptr;
-    return new NodeBlock(m_currentToken, Declarations(), CompoundStatement(), useOwnSymTab);
+    return new NodeBlock(m_currentToken, Declarations(useOwnSymTab), CompoundStatement(), useOwnSymTab);
 }
 
 QVector<Node *> Parser::Parameters()
@@ -744,7 +744,7 @@ Node *Parser::String()
 }
 
 
-QVector<Node*> Parser::Declarations()
+QVector<Node*> Parser::Declarations(bool isMain)
 {
     QVector<Node*> decl;
     if (m_currentToken.m_type==TokenType::VAR) {
@@ -756,12 +756,33 @@ QVector<Node*> Parser::Declarations()
             Eat(TokenType::SEMI);
         }
     }
-    while (m_currentToken.m_type==TokenType::PROCEDURE || m_currentToken.m_type==TokenType::INTERRUPT) {
 
+/*
+    while (m_currentToken.m_type==TokenType::ID || m_currentToken.m_type==TokenType::PROCEDURE ||
+           m_currentToken.m_type==TokenType::INTERRUPT || m_currentToken.m_type == TokenType::VAR) {
+
+
+    if (m_currentToken.m_type==TokenType::VAR) {
+        Eat(TokenType::VAR);
+        continue;
+    }
+
+    if (m_currentToken.m_type==TokenType::ID) {
+            QVector<Node*> ns = VariableDeclarations();
+            for (Node* n: ns)
+                decl.append(n);
+            Eat(TokenType::SEMI);
+            continue;
+     }
+
+
+*/
+    while (m_currentToken.m_type==TokenType::PROCEDURE || m_currentToken.m_type==TokenType::INTERRUPT) {
         bool isInterrupt= (m_currentToken.m_type==TokenType::PROCEDURE)?false:true;
         Token tok = m_currentToken;
         Eat(m_currentToken.m_type);
         QString procName = m_currentToken.m_value;
+        //qDebug() << tok.m_value  << " : " << procName;
         Eat(TokenType::ID);
         //exit(1);
         QVector<Node*> paramDecl;
@@ -801,6 +822,10 @@ QVector<Node*> Parser::Declarations()
         }
 
     }
+//    }
+   // qDebug() << "Finally:" << m_currentToken.getType();
+    if (m_currentToken.m_type!=TokenType::BEGIN && isMain)
+        ErrorHandler::e.Error("After declarations, BEGIN is expected", m_currentToken.m_lineNumber);
 
     return decl;
 }
