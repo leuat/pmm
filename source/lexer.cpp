@@ -2,6 +2,8 @@
 #include <QDebug>
 
 #include <iostream>
+#include <QFile>
+
 using namespace std;
 
 int Lexer::getLineNumber(QString find)

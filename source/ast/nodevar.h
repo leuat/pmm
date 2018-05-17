@@ -59,7 +59,7 @@ public:
     bool DataEquals(Node *other) override {
         NodeVar* var = dynamic_cast<NodeVar*>(other);
         if (var==nullptr)
-            return nullptr;
+            return false;
         return var->value==value;
     }
     bool isWord(Assembler* as) override {
