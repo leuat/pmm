@@ -538,7 +538,7 @@ public:
         if (!isPureNumeric())
             return 0;
         int res = numValue();
-        qDebug() << QString::number(res, 16);
+        //qDebug() << QString::number(res, 16);
         return "$" + QString::number(res, 16);
     }
 

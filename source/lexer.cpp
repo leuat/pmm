@@ -111,10 +111,10 @@ QString Lexer::loadTextFile(QString filename)
     QTextStream in(&file);
     QString text ="";
     while(!in.atEnd()) {
-        text+= in.readLine() + "\n ";
+        text+= in.readLine() + "\n";
 
     }
-    text = text.remove("\t");
+//    text = text.remove("\t");
 //    qDebug() << text;
     return text;
 }

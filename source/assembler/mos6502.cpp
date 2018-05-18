@@ -553,7 +553,8 @@ void AsmMOS6502::OptimisePassLdx(QString x)
                     //qDebug() << "curop:" << op;
                     // Changex in x
                     if (op==("ld"+x) || op==("ta"+x) || op=="jmp" || op=="rts" || op=="jsr" ||
-                            op==("in" +x) || op==("de"+x) || op.length()!=3) {
+                            op==("in" +x) || op==("de"+x)|| op.length()!=3 ) {
+//                        op==("in" +x) || op==("de"+x)|| op==("sta")|| op.length()!=3 ) {
                         //qDebug() << "Done because: " << l1;
                         done = true;
                     }

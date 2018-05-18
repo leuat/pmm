@@ -142,7 +142,7 @@ public:
 
         // if ((isAddress || name.startsWith("$")) && !m_symbols.contains(name) ) {
              if ((name.startsWith("$")) && !m_symbols.contains(name) ) {
-            qDebug() << "Creating new symbol:" << name;
+//            qDebug() << "Creating new symbol:" << name;
             Symbol* s = new Symbol(name, "address");
             m_symbols[name] = s;
             return s;
