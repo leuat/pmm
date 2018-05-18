@@ -3,7 +3,7 @@
 
 #include "node.h"
 #include "source/symboltable.h"
-#include "nodeVar.h"
+#include "nodevar.h"
 
 class NodeVarArray : public Node
 {

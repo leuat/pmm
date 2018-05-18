@@ -7,8 +7,8 @@
 #include "source/symboltable.h"
 #include "source/errorhandler.h"
 #include "source/ast/node.h"
-#include "source/ast/nodeVar.h"
-#include "source/ast/nodenumber.h".h"
+#include "source/ast/nodevar.h"
+#include "source/ast/nodenumber.h"
 
 class NodeBinOP : public Node {
 public:
