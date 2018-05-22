@@ -10,9 +10,34 @@
 #include "source/errorhandler.h"
 #include "source/symboltable.h"
 
+class MemoryBlock {
+  public:
+    int m_start, m_end;
+    enum Type {CODE, DATA, MUSIC, USER};
+    Type m_type;
+    QString m_name;
+    MemoryBlock() {}
+    MemoryBlock(int start, int end, Type type, QString name){
+        m_start=start;
+        m_end=end;
+        m_type=type;
+        m_name=name;
+    }
+
+    QString Type() {
+        if (m_type==CODE) return "code";
+        if (m_type==DATA) return "data";
+        if (m_type==MUSIC) return "music";
+        return "user";
+    }
+};
+
+
+
 class Stack {
 public:
     QVector<QString> m_vars;
+
     QString m_current;
     void push(QString s) {
         m_vars.push_back(s);
@@ -30,7 +55,6 @@ class LabelStack {
 public:
     QVector<QString> m_vars;
     QString m_current;
-
     QMap<QString, bool> sNumbersUsed;
 
     void push() {
@@ -67,9 +91,7 @@ public:
     QMap<QString, LabelStack> m_labelStack;
     SymbolTable* m_symTab;
     QString m_projectDir;
-
-
-
+    QVector<MemoryBlock> blocks;
 
     QStringList m_tempVars;
     int m_varDeclEndsLineNumber = 0;

@@ -146,6 +146,13 @@ void Parser::HandlePreprocessorInParsing()
         Eat();
         return;
     }
+    if (m_currentToken.m_value=="userdata") {
+        Eat();
+        Eat();
+        Eat();
+        Eat();
+        return;
+    }
     if (m_currentToken.m_value=="include") {
         Eat();
         Eat();
@@ -535,6 +542,18 @@ void Parser::Preprocess()
                     val = QString::number(m_currentToken.m_intVal);
 
                 m_preprocessorDefines[key] = val;
+            }
+            else if (m_currentToken.m_value.toLower() =="userdata") {
+                Eat(TokenType::PREPROCESSOR);
+                QString from = m_currentToken.m_value;
+                Eat();
+                QString to = m_currentToken.m_value;
+                Eat();
+                QString name = m_currentToken.m_value;
+                bool ok;
+                m_userBlocks.append(MemoryBlock(from.remove("$").toInt(&ok,16), to.remove("$").toInt(&ok, 16),
+                                                MemoryBlock::USER, name));
+
             }
         }
 

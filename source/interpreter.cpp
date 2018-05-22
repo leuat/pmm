@@ -67,6 +67,11 @@ bool Interpreter::Build(Interpreter::Type type, QString project_dir, QStringList
             HandleError(e,"Error during symbolic check");
             return false;
     }*/
+
+    for (MemoryBlock& mb:m_parser->m_userBlocks)
+        m_assembler->blocks.append(mb);
+
+    m_assembler->Label("EndSymbol");
     m_assembler->Connect();
     m_assembler->Optimise();
     CleanupCycleLinenumbers();

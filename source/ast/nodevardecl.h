@@ -44,6 +44,16 @@ public:
 //        as->Appendix(v->value,0);
         as->Appendix("incbin \"" + as->m_projectDir + sid.m_outFile + "\"",1);
 
+        int size=0;
+        QFile f(as->m_projectDir + sid.m_outFile);
+        if (f.open(QIODevice::ReadOnly)){
+            size = f.size();  //when file does open.
+            f.close();
+        }
+
+        as->blocks.append(MemoryBlock(sid.m_loadAddress,sid.m_loadAddress+size, MemoryBlock::MUSIC, sid.m_fileName));
+
+
     }
 
     void IncBin(Assembler* as) {
@@ -53,6 +63,13 @@ public:
         if (!QFile::exists(filename))
             ErrorHandler::e.Error("Could not locate binary file for inclusion :" +filename);
 
+
+        int size=0;
+        QFile f(filename);
+        if (f.open(QIODevice::ReadOnly)){
+            size = f.size();  //when file does open.
+            f.close();
+        }
 
 
         if (t->m_position=="") {
@@ -64,6 +81,15 @@ public:
             as->Appendix("org " +t->m_position,1);
             as->Appendix(v->value,0);
             as->Appendix("incbin \"" + filename + "\"",1);
+            bool ok;
+            int start=0;
+            if (t->m_position.startsWith("$")) {
+               start = t->m_position.remove("$").toInt(&ok, 16);
+            }
+            else start = t->m_position.toInt();
+
+            as->blocks.append(MemoryBlock(start,start+size, MemoryBlock::DATA,t->m_filename));
+
         }
     }
 

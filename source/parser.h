@@ -44,6 +44,7 @@ public:
     ~Parser() {
         Delete();
     }
+    QVector<MemoryBlock> m_userBlocks;
 
     void Delete();
 

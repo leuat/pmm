@@ -85,10 +85,12 @@ void AsmMOS6502::Program(QString programName)
     Asm("processor 6502");
     Nl();
     Asm("ORG $0801");
-    Asm(".byte    $0E, $08, $0A, $00, $9E, $20, $28,  $32, $33");
-    Asm(".byte    $30, $34, $29, $00, $00, $00");
+/*    Asm(".byte    $0E, $08, $0A, $00, $9E,   $20, $28,  $32, $33"); //  ( 2,3
+    Asm(".byte    $30, $34, $29, $00, $00, $00");   // 0, 4, )*/
+    Asm(".byte    $0E, $08, $0A, $00, $9E, $20, $28, $32, $30"); //  ( 2,0
+    Asm(".byte    $36, $34, $29, $00, $00, $00");   // 6, 4, )*/
     Nl();
-    Asm("ORG $0900");
+    Asm("ORG $0810");
     Nl();
     Label(programName);
 }
